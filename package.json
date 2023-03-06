@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "name": "match-uploader",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/gafirst/match-uploader",
+  "author": "gafirst",
+  "license": "GPL-3.0"
+}
