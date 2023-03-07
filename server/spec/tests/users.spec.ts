@@ -10,7 +10,6 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { USER_NOT_FOUND_ERR } from '@src/services/UserService';
 import FullPaths from '@src/routes/constants/FullPaths';
 
-import login from '../support/login';
 import { TReqBody } from 'spec/support/types';
 
 
@@ -34,14 +33,12 @@ const {
 
 // Dummy users for GET req
 const DummyGetAllUsers = [
-  new User('Sean Maxwell', 'sean.maxwell@gmail.com'),
-  new User('John Smith', 'john.smith@gmail.com'),
-  new User('Gordan Freeman', 'gordan.freeman@gmail.com'),
+  new User('George Burdell', 'nobody@example.com'),
 ] as const;
 
 // Dummy update user
 const DummyUserData = {
-  user: new User('Gordan Freeman', 'gordan.freeman@gmail.com'),
+  user: new User('George Burdell 2', 'still_nobody@example.com'),
 } as const;
 
 
@@ -49,28 +46,22 @@ const DummyUserData = {
 
 describe('UserRouter', () => {
 
-  let agent: SuperTest<Test>,
-    jwtCookie: string;
+  let agent: SuperTest<Test>
 
   // Run before all tests
   beforeAll((done) => {
     agent = supertest.agent(app);
-    login(agent, (cookie: string) => {
-      jwtCookie = cookie;
-      done();
-    });
   });
 
   // ** Get all users ** //
   describe(`"GET:${Get}"`, () => {
 
-    const callApi = () => 
+    const callApi = () =>
       agent
         .get(Get)
-        .set('Cookie', jwtCookie);
 
     // Success
-    it('should return a JSON object with all the users and a status code ' + 
+    it('should return a JSON object with all the users and a status code ' +
     `of "${OK}" if the request was successful.`, (done) => {
       // Add spy
       spyOn(UserRepo, 'getAll').and.resolveTo([...DummyGetAllUsers]);
@@ -90,14 +81,13 @@ describe('UserRouter', () => {
   // Test add user
   describe(`"POST:${Add}"`, () => {
 
-    const callApi = (reqBody: TReqBody) => 
+    const callApi = (reqBody: TReqBody) =>
       agent
         .post(Add)
-        .set('Cookie', jwtCookie)
         .type('form').send(reqBody);
 
     // Test add user success
-    it(`should return a status code of "${CREATED}" if the request was ` + 
+    it(`should return a status code of "${CREATED}" if the request was ` +
     'successful.', (done) => {
       // Spy
       spyOn(UserRepo, 'add').and.resolveTo();
@@ -111,8 +101,8 @@ describe('UserRouter', () => {
     });
 
     // Missing param
-    it('should return a JSON object with an error message of ' + 
-    `"${ValidatorErr}" and a status code of "${BAD_REQUEST}" if the user ` + 
+    it('should return a JSON object with an error message of ' +
+    `"${ValidatorErr}" and a status code of "${BAD_REQUEST}" if the user ` +
     'param was missing.', (done) => {
       // Call api
       callApi({})
@@ -127,14 +117,13 @@ describe('UserRouter', () => {
   // ** Update users ** //
   describe(`"PUT:${Update}"`, () => {
 
-    const callApi = (reqBody: TReqBody) => 
+    const callApi = (reqBody: TReqBody) =>
       agent
         .put(Update)
-        .set('Cookie', jwtCookie)
         .type('form').send(reqBody);
 
     // Success
-    it(`should return a status code of "${OK}" if the request was successful.`, 
+    it(`should return a status code of "${OK}" if the request was successful.`,
       (done) => {
         // Setup spies
         spyOn(UserRepo, 'update').and.resolveTo();
@@ -150,7 +139,7 @@ describe('UserRouter', () => {
 
     // Param missing
     it('should return a JSON object with an error message of ' +
-    `"${ValidatorErr}" and a status code of "${BAD_REQUEST}" if the user ` + 
+    `"${ValidatorErr}" and a status code of "${BAD_REQUEST}" if the user ` +
     'param was missing.', (done) => {
       // Call api
       callApi({})
@@ -162,8 +151,8 @@ describe('UserRouter', () => {
     });
 
     // User not found
-    it('should return a JSON object with the error message of ' + 
-    `"${USER_NOT_FOUND_ERR}" and a status code of "${NOT_FOUND}" if the id ` + 
+    it('should return a JSON object with the error message of ' +
+    `"${USER_NOT_FOUND_ERR}" and a status code of "${NOT_FOUND}" if the id ` +
     'was not found.', (done) => {
       // Call api
       callApi(DummyUserData)
@@ -178,13 +167,12 @@ describe('UserRouter', () => {
   // ** Delete user ** //
   describe(`"DELETE:${Delete}"`, () => {
 
-    const callApi = (id: number) => 
+    const callApi = (id: number) =>
       agent
         .delete(insertUrlParams(Delete, { id }))
-        .set('Cookie', jwtCookie);
 
     // Success
-    it(`should return a status code of "${OK}" if the request was successful.`, 
+    it(`should return a status code of "${OK}" if the request was successful.`,
       (done) => {
         // Setup spies
         spyOn(UserRepo, 'delete').and.resolveTo();
@@ -199,8 +187,8 @@ describe('UserRouter', () => {
       });
 
     // User not found
-    it('should return a JSON object with the error message of ' + 
-    `"${USER_NOT_FOUND_ERR}" and a status code of "${NOT_FOUND}" if the id ` + 
+    it('should return a JSON object with the error message of ' +
+    `"${USER_NOT_FOUND_ERR}" and a status code of "${NOT_FOUND}" if the id ` +
     'was not found.', (done) => {
       callApi(-1)
         .end((_: Error, res: Response) => {
@@ -211,7 +199,7 @@ describe('UserRouter', () => {
     });
 
     // Invalid param
-    it(`should return a status code of "${BAD_REQUEST}" and return an error ` + 
+    it(`should return a status code of "${BAD_REQUEST}" and return an error ` +
     `message of "${ValidatorErr}" if the id was not a valid number`, (done) => {
       callApi('horse' as unknown as number)
         .end((_: Error, res: Response) => {
