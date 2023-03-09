@@ -9,7 +9,6 @@ async function locateFile(folder: string, match: string): Promise<string | undef
   // GITHUB COPILOT WAS QUITE INCOMPETENT AND I HAD TO MANUALLY DO THIS -K
   for (const file of files) {
     if (file.isDirectory()) {
-      console.log('checking: ' + file.name)
       all.push(locateFile(`${folder}/${file.name}`, match))
     } else if (file.name === match) {
       return `${folder}/${file.name}`
