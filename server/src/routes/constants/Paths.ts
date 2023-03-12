@@ -1,28 +1,18 @@
 /**
- * Express router paths go here.
+ * Express router paths
  */
 
-import { Immutable } from '@src/other/types';
+import { Immutable } from '@src/util/Immutable';
 
 
 const Paths = {
-  Base: '/api',
-  Auth: {
-    Base: '/auth',
-    Login: '/login',
-    Logout: '/logout',
-  },
-  Users: {
-    Base: '/users',
-    Get: '/all',
-    Add: '/add',
-    Update: '/update',
-    Delete: '/delete/:id',
+  Base: '/api/v1',
+  Settings: {
+    Base: '/settings', // Note that base paths *must* start with a /
+    List: '/',
+    Update: '/:name',
   },
 };
-
-
-// **** Export **** //
 
 export type TPaths = Immutable<typeof Paths>;
 export default Paths as TPaths;

@@ -24,7 +24,7 @@ if (result2.error) {
   throw result2.error;
 }
 
-// Setup command line options. 
+// Setup command line options.
 const args = parse<IArgs>({
   testFile: {
     type: String,
@@ -69,9 +69,9 @@ if (args.testFile) {
   if (!!execResp) {
     const info = await execResp;
     if (info.overallStatus === 'passed') {
-      logger.info('All tests have passed :)');
+      logger.info('All tested passed');
     } else {
-      logger.err('At least one test has failed :(');
+      logger.err('One or more tests failed');
     }
   }
 })();

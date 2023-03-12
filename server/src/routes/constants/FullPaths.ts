@@ -1,10 +1,4 @@
-
-/**
- * Convert paths to full paths.
- */
-
 import Paths, { TPaths } from './Paths';
-
 
 interface IPathObj {
   Base: string;
@@ -12,7 +6,7 @@ interface IPathObj {
 }
 
 /**
- * The recursive function.
+ * Convert paths to full paths.
  */
 function getFullPaths(
   parent: IPathObj,
