@@ -1,11 +1,11 @@
 <template>
-  <v-app>
-    <v-main>
-      <HelloWorld />
-    </v-main>
-  </v-app>
+  <MainLayout style="overflow: hidden" />
 </template>
 
 <script setup lang="ts">
-  import HelloWorld from '@/components/HelloWorld.vue'
+import MainLayout from "@/layouts/default/Main.vue";
 </script>
+
+<style>
+  @import "style/global.css";
+</style>
