@@ -23,7 +23,7 @@
 
 
 <script lang="ts" setup>
-import {ref, watch} from "vue";
+import {ref} from "vue";
 
 enum State {
   LOADING,
@@ -36,7 +36,7 @@ interface IProps {
   onSubmit: Function;
   name: string;
   label: string;
-  initialValue: string;
+  initialValue: string|undefined;
 }
 
 const props = defineProps<IProps>();

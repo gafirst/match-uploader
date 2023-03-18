@@ -10,7 +10,6 @@ interface IGenericErrorProps {
 }
 
 defineProps<IGenericErrorProps>();
-
 </script>
 
 <style scoped>
