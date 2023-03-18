@@ -2,8 +2,7 @@ import {NextFunction, Router} from "express";
 import Paths from "@src/routes/constants/Paths";
 import {IReq, IRes} from "@src/routes/types/types";
 import {getSettings, setSetting} from "@src/services/SettingsService";
-import jetValidator from "jet-validator";
-import {body, check, matchedData, param, validationResult} from "express-validator";
+import {body, matchedData, param, validationResult} from "express-validator";
 
 export const settingsRouter = Router();
 
