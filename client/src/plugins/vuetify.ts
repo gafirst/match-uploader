@@ -9,18 +9,31 @@ import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 
 // Composables
-import { createVuetify } from 'vuetify'
+import {createVuetify, ThemeDefinition} from 'vuetify'
+import {md3} from "vuetify/blueprints";
+
+const light: ThemeDefinition = {
+  dark: false,
+  colors: {
+    background: '#FFFFFF',
+    surface: '#FFFFFF',
+    primary: '#1867C0',
+    'primary-darken-1': '#1457a3',
+    secondary: '#5CBBF6',
+    'secondary-darken-1': '#169ef3',
+    error: '#B00020',
+    info: '#2196F3',
+    success: '#4CAF50',
+    warning: '#FB8C00',
+  }
+}
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
+  blueprint: md3,
   theme: {
     themes: {
-      light: {
-        colors: {
-          primary: '#1867C0',
-          secondary: '#5CBBF6',
-        },
-      },
-    },
+      light
+    }
   },
-})
+});
