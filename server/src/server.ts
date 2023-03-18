@@ -11,14 +11,14 @@ import logger from 'jet-logger';
 
 import 'express-async-errors';
 
-import BaseRouter from '@src/routes/api';
+import apiRouter from '@src/routes/api';
 import Paths from '@src/routes/constants/Paths';
 
 import EnvVars from '@src/constants/EnvVars';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 
-import { NodeEnvs } from '@src/constants/misc';
-import { RouteError } from '@src/other/classes';
+import { NodeEnvs } from '@src/constants/NodeEnvs';
+import { RouteError } from '@src/util/http';
 
 
 // **** Variables **** //
@@ -44,7 +44,7 @@ if (EnvVars.NodeEnv === NodeEnvs.Production) {
 }
 
 // Add APIs, must be after middleware
-app.use(Paths.Base, BaseRouter);
+app.use(Paths.Base, apiRouter);
 
 // Add error handler
 app.use((
@@ -64,9 +64,6 @@ app.use((
   return res.status(status).json({ error: err.message });
 });
 
-
-// ** Front-End Content ** //
-
 // Set views directory (html)
 const viewsDir = path.join(__dirname, 'views');
 app.set('views', viewsDir);
@@ -74,15 +71,6 @@ app.set('views', viewsDir);
 // Set static directory (js and css).
 const staticDir = path.join(__dirname, 'public');
 app.use(express.static(staticDir));
-
-app.get('/', (_: Request, res: Response) => {
-  res.sendFile('users.html', { root: viewsDir });
-});
-
-app.get('/users', (req: Request, res: Response) => {
-    res.sendFile('users.html', {root: viewsDir});
-});
-
 
 // **** Export default **** //
 

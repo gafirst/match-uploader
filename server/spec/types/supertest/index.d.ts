@@ -1,4 +1,3 @@
-import { IUser } from '@src/models/User';
 import 'supertest';
 
 
@@ -8,7 +7,6 @@ declare module 'supertest' {
     headers: Record<string, string[]>;
     body: {
       error: string;
-      users: IUser[];
     };
   }
 }
