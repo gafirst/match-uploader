@@ -30,7 +30,6 @@ import AutosavingTextInput from "@/components/form/AutosavingTextInput.vue";
 import {onMounted, ref} from "vue";
 import {ISettings} from "@/types/ISettings";
 
-// TODO(evan10s): use a custom hook for this?
 const loading = ref(true);
 const error = ref("");
 const settings = ref<ISettings|null>(null);
