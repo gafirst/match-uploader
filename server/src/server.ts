@@ -19,7 +19,6 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 
 import { NodeEnvs } from '@src/constants/NodeEnvs';
 import { RouteError } from '@src/util/http';
-import serveStatic from "serve-static";
 
 
 // **** Variables **** //
