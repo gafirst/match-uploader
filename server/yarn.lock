@@ -1336,13 +1336,6 @@ jet-logger@^1.3.1:
   dependencies:
     colors "1.3.0"
 
-jet-validator@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/jet-validator/-/jet-validator-1.0.4.tgz#eaff416541787e33f5d67e08f3db547405a57e6a"
-  integrity sha512-q8hpjneX9kchgMK4Dl3sju12XA0gZy+LNAdslQefZqrhEWlJ1LnIYKLql3IIozY5VtSi43hHqKndkqT7zNFeWg==
-  dependencies:
-    express "^4.18.2"
-
 js-sdsl@^4.1.4:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/js-sdsl/-/js-sdsl-4.3.0.tgz#aeefe32a451f7af88425b11fdb5f58c90ae1d711"

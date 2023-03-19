@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'ClearSans';
+    src: url(./fonts/ClearSans-Regular-webfont.woff);
+    font-weight: normal;
+    font-style: normal;
+}
+
+html {
+    overflow: hidden !important; /* FIXME(evan): this might break everything */
+}
+
+body {
+    font-family: ClearSans, sans-serif !important;
+}

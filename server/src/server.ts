@@ -1,7 +1,3 @@
-/**
- * Setup express server.
- */
-
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import path from 'path';
@@ -20,13 +16,7 @@ import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { NodeEnvs } from '@src/constants/NodeEnvs';
 import { RouteError } from '@src/util/http';
 
-
-// **** Variables **** //
-
 const app = express();
-
-
-// **** Setup **** //
 
 // Basic middleware
 app.use(express.json());
@@ -46,6 +36,12 @@ if (EnvVars.NodeEnv === NodeEnvs.Production) {
 // Add APIs, must be after middleware
 app.use(Paths.Base, apiRouter);
 
+// Serve frontend
+app.use(express.static(path.join(__dirname, "../../client/dist")));
+app.get("*", (request, response) => {
+  response.sendFile(path.join(__dirname, "../../client/dist", "index.html"));
+});
+
 // Add error handler
 app.use((
   err: Error,
@@ -63,15 +59,5 @@ app.use((
   }
   return res.status(status).json({ error: err.message });
 });
-
-// Set views directory (html)
-const viewsDir = path.join(__dirname, 'views');
-app.set('views', viewsDir);
-
-// Set static directory (js and css).
-const staticDir = path.join(__dirname, 'public');
-app.use(express.static(staticDir));
-
-// **** Export default **** //
 
 export default app;
