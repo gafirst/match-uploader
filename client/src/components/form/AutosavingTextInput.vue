@@ -1,5 +1,5 @@
 <template>
-  <v-text-field
+  <VTextField
     variant="underlined"
     :disabled="state === State.LOADING"
     v-model="inputValue"
@@ -10,15 +10,15 @@
     @blur="submit()"
   >
     <template v-if="state === State.SUCCESS" v-slot:append>
-      <v-icon color="success">mdi-check</v-icon>
+      <VIcon color="success">mdi-check</VIcon>
     </template>
     <template v-else-if="state === State.LOADING" v-slot:append>
-      <v-progress-circular indeterminate></v-progress-circular>
+      <VProgressCircular indeterminate></VProgressCircular>
     </template>
     <template v-else-if="state === State.ERROR" v-slot:append>
-      <v-icon color="error" class="mr-1">mdi-alert-circle-outline</v-icon>
+      <VIcon color="error" class="mr-1">mdi-alert-circle-outline</VIcon>
     </template>
-  </v-text-field>
+  </VTextField>
 </template>
 
 

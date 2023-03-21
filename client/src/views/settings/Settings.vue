@@ -1,27 +1,31 @@
 <template>
     <h1>Settings</h1>
-    <v-row>
-      <v-col>
-        <v-progress-circular indeterminate v-if="loading" />
-        <v-form v-else @submit.prevent class="settings-form mt-4">
-          <autosaving-text-input :on-submit="submit"
+    <VRow>
+      <VCol md="6">
+        <h2>General</h2>
+        <VProgressCircular indeterminate v-if="loading" />
+        <VForm v-else @submit.prevent class="mt-4">
+          <AutosavingTextInput :on-submit="submit"
                                  :initial-value="settings?.eventName"
                                  name="eventName"
                                  label="Event name"
           />
-          <autosaving-text-input :on-submit="submit"
+          <AutosavingTextInput :on-submit="submit"
                                  :initial-value="settings?.eventTbaCode"
                                  name="eventTbaCode"
                                  label="Event TBA code"
           />
-          <autosaving-text-input :on-submit="submit"
+          <AutosavingTextInput :on-submit="submit"
                                  :initial-value="settings?.videoSearchDirectory"
                                  name="videoSearchDirectory"
                                  label="Video search directory"
           />
-        </v-form>
-      </v-col>
-    </v-row>
+        </VForm>
+
+        <h2>YouTube</h2>
+        <YouTubeAuth />
+      </VCol>
+    </VRow>
 
 </template>
 
@@ -29,6 +33,7 @@
 import AutosavingTextInput from "@/components/form/AutosavingTextInput.vue";
 import {onMounted, ref} from "vue";
 import {ISettings} from "@/types/ISettings";
+import YouTubeAuth from "@/components/youtube/YouTubeAuth.vue";
 
 const loading = ref(true);
 const error = ref("");
@@ -68,10 +73,6 @@ async function submit(settingName: string, value: string) {
 </script>
 
 <style scoped>
-.settings-form {
-  max-width: 300px;
-}
-
 i {
   opacity: 1 !important;
 }

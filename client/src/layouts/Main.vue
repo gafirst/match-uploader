@@ -1,13 +1,13 @@
 <template>
-  <v-app>
-    <v-app-bar color="primary" title="Match Uploader"></v-app-bar>
-    <nav-drawer />
-    <v-main>
-      <v-container>
-        <router-view/>
-      </v-container>
-    </v-main>
-  </v-app>
+  <VApp>
+    <VAppBar color="primary" title="Match Uploader"></VAppBar>
+    <NavDrawer />
+    <VMain>
+      <VContainer>
+        <RouterView />
+      </VContainer>
+    </VMain>
+  </VApp>
 </template>
 
 <script lang="ts" setup>

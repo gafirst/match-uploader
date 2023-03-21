@@ -25,6 +25,7 @@ const light: ThemeDefinition = {
     info: '#2196F3',
     success: '#4CAF50',
     warning: '#FB8C00',
+    inactive: '#E0E0E0',
   }
 }
 

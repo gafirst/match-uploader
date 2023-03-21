@@ -21,7 +21,15 @@ const routes: RouteRecordRaw[] = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue'),
+    component: () => import(/* webpackChunkName: "settings" */ '@/views/settings/Settings.vue'),
+  },
+  {
+    path: '/settings/youtube',
+    name: 'Settings_YouTube',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "settings_youtube" */ '@/views/settings/YouTubeConnection.vue'),
   },
   {
     path: '/:pathMatch(.*)*',
@@ -29,7 +37,7 @@ const routes: RouteRecordRaw[] = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "settings" */ '@/views/NotFound.vue'),
+    component: () => import(/* webpackChunkName: "not_found" */ '@/views/NotFound.vue'),
   },
 ]
 
