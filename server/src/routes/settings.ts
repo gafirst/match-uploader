@@ -6,7 +6,6 @@ import {body, matchedData, param, validationResult} from "express-validator";
 
 export const settingsRouter = Router();
 
-
 settingsRouter.get(
 	Paths.Settings.List,
 	listSettings,

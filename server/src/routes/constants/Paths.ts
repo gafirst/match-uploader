@@ -5,12 +5,20 @@
 import { Immutable } from '@src/util/Immutable';
 
 
+// Start all paths with a /, even if empty
 const Paths = {
   Base: '/api/v1',
   Settings: {
-    Base: '/settings', // Note that base paths *must* start with a /
+    Base: '/settings',
     List: '/',
     Update: '/:name',
+  },
+  YouTube: {
+    Base: '/youtube',
+    Auth: {
+      Base: '/auth',
+      Status: '/status',
+    },
   },
 };
 

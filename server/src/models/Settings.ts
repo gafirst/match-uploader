@@ -1,3 +1,7 @@
+export interface IJsonSettings {
+	[key: string]: any
+}
+
 export interface ISettings {
 	eventName: string,
 	eventTbaCode: string,
