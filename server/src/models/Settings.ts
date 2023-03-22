@@ -6,6 +6,8 @@ export interface ISettings {
 	eventName: string,
 	eventTbaCode: string,
 	videoSearchDirectory: string,
+	googleClientId: string,
+	googleClientSecret: string,
 }
 
 export interface ISetting {
