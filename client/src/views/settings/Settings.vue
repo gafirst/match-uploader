@@ -1,31 +1,69 @@
 <template>
-    <h1>Settings</h1>
-    <VRow>
-      <VCol md="6">
+  <h1>Settings</h1>
+  <VRow>
+    <VCol md="6">
+      <VProgressCircular indeterminate v-if="loading"/>
+      <VAlert v-else-if="!!error"
+              color="error"
+      >
+        {{ error }}
+      </VAlert>
+      <div v-else>
         <h2>General</h2>
-        <VProgressCircular indeterminate v-if="loading" />
-        <VForm v-else @submit.prevent class="mt-4">
+        <VForm @submit.prevent class="mt-4">
           <AutosavingTextInput :on-submit="submit"
-                                 :initial-value="settings?.eventName"
-                                 name="eventName"
-                                 label="Event name"
+                               :initial-value="settings?.eventName"
+                               name="eventName"
+                               label="Event name"
           />
           <AutosavingTextInput :on-submit="submit"
-                                 :initial-value="settings?.eventTbaCode"
-                                 name="eventTbaCode"
-                                 label="Event TBA code"
+                               :initial-value="settings?.eventTbaCode"
+                               name="eventTbaCode"
+                               label="Event TBA code"
           />
           <AutosavingTextInput :on-submit="submit"
-                                 :initial-value="settings?.videoSearchDirectory"
-                                 name="videoSearchDirectory"
-                                 label="Video search directory"
+                               :initial-value="settings?.videoSearchDirectory"
+                               name="videoSearchDirectory"
+                               label="Video search directory"
           />
         </VForm>
 
         <h2>YouTube</h2>
-        <YouTubeAuth />
-      </VCol>
-    </VRow>
+        <h3>OAuth2 client details</h3>
+        <VAlert class="mb-3">In your Google Cloud project, create an OAuth2 web client.<br />
+          <br />
+          Be sure to add <code>http://localhost:3000/auth/google/callback</code> as an authorized redirect.
+        </VAlert>
+        <AutosavingTextInput :on-submit="submit"
+                             :initial-value="settings?.googleClientId"
+                             name="googleClientId"
+                             label="OAuth2 client ID"
+        />
+        <AutosavingTextInput :on-submit="submit"
+                             :initial-value="settings?.googleClientSecret"
+                             name="googleClientSecret"
+                             label="OAuth2 client secret"
+        />
+        <h3>Authentication status <VBtn>Refresh</VBtn></h3>
+        <VList>
+          <VListItem prepend-icon="mdi-close"
+                     class="text-error"
+          >OAuth2 client info provided</VListItem>
+          <VListItem prepend-icon="mdi-close"
+                     class="text-error"
+          >Access token stored</VListItem>
+          <VListItem prepend-icon="mdi-close"
+                     class="text-error"
+          >Refresh token stored</VListItem>
+          <VListItem prepend-icon="mdi-close"
+                     class="text-error"
+          >Last successful authentication: never</VListItem>
+        </VList>
+
+      </div>
+
+    </VCol>
+  </VRow>
 
 </template>
 
@@ -37,7 +75,7 @@ import YouTubeAuth from "@/components/youtube/YouTubeAuth.vue";
 
 const loading = ref(true);
 const error = ref("");
-const settings = ref<ISettings|null>(null);
+const settings = ref<ISettings | null>(null);
 
 onMounted(async () => {
   const result = await fetch("/api/v1/settings");
