@@ -47,7 +47,7 @@ const lastSubmittedValue = ref(props.initialValue);
 const error = ref("");
 
 async function submit() {
-  if (inputValue.value === lastSubmittedValue.value) {
+  if (state.value !== State.ERROR && !error && inputValue.value === lastSubmittedValue.value) {
     return;
   }
 
@@ -58,6 +58,7 @@ async function submit() {
 
   if (typeof returnValue === "boolean" && returnValue) {
     state.value = State.SUCCESS;
+    error.value = "";
   } else {
     state.value = State.ERROR;
 
