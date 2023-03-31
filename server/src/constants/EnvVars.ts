@@ -8,6 +8,10 @@
 export default {
   NodeEnv: (process.env.NODE_ENV ?? ''),
   Port: (process.env.PORT ?? 0),
+  SettingsLocations: {
+    SettingsFile: (process.env.SETTINGS_FILE_LOCATION) ?? './settings/settings.json',
+    SecretsFile: (process.env.SECRETS_FILE_LOCATION) ?? './settings/secrets.json',
+  },
   CookieProps: {
     Key: 'ExpressGeneratorTs',
     Secret: (process.env.COOKIE_SECRET ?? ''),

@@ -1,5 +1,6 @@
 export interface IYouTubeAuthStatus {
-  clientInfo: boolean,
-  authFlow: boolean,
-  tokensStored: boolean,
+  clientIdProvided: boolean,
+  clientSecretProvided: boolean,
+  accessTokenStored: boolean,
+  refreshTokenStored: boolean,
 }

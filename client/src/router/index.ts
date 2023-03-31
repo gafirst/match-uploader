@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "settings_youtube" */ '@/views/settings/YouTubeConnection.vue'),
+    component: () => import(/* webpackChunkName: "settings_youtube" */ '@/components/youtube/YouTubeConnectionInfo.vue'),
   },
   {
     path: '/:pathMatch(.*)*',

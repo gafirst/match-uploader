@@ -1,7 +1,7 @@
 import {NextFunction, Router} from "express";
 import Paths from "@src/routes/constants/Paths";
 import {IReq, IRes} from "@src/routes/types/types";
-import {getSettings, setSetting} from "@src/services/SettingsService";
+import {getSettings, setSecret, setSetting} from "@src/services/SettingsService";
 import {body, matchedData, param, validationResult} from "express-validator";
 
 export const settingsRouter = Router();
@@ -19,6 +19,9 @@ settingsRouter.post(
 	Paths.Settings.Update,
 	param("name", "Setting name to be updated is required and must be a string").isString(),
 	body("value", "New setting value is required and must be a string").isString().trim(),
+	body("settingType", "Type must be 'setting' or 'secret' to indicate desired storage location")
+		.isIn(["setting", "secret"])
+		.trim(),
 	updateSetting,
 )
 
@@ -32,9 +35,13 @@ async function updateSetting(req: IReq<{ value: string }>, res: IRes) {
 			});
 	}
 
-	const {name, value} = matchedData(req);
+	const {name, value, settingType} = matchedData(req);
 
-	await setSetting(name, value);
+	if (settingType === "secret") {
+		await setSecret(name, value);
+	} else {
+		await setSetting(name, value);
+	}
 
 	return res.json({
 		ok: true,

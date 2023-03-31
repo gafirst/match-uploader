@@ -7,10 +7,21 @@ export interface ISettings {
 	eventTbaCode: string,
 	videoSearchDirectory: string,
 	googleClientId: string,
-	googleClientSecret: string,
+	googleRedirectUri: string,
+	googleAuthStatus: string,
 }
 
-export interface ISetting {
-	name: string,
-	value: string,
+export type SettingsKey = keyof ISettings;
+
+export interface ISecretSettings {
+	googleClientSecret: string,
+	googleAccessToken: string,
+	googleRefreshToken: string,
+	[key: string]: string,
+}
+
+export type SecretSettingsKey = keyof ISecretSettings;
+
+export type ISecretSettingsHidden = {
+	[key in keyof ISecretSettings]: boolean;
 }

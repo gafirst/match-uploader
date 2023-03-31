@@ -15,10 +15,9 @@ const Paths = {
   },
   YouTube: {
     Base: '/youtube',
-    Auth: {
-      Base: '/auth',
-      Status: '/status',
-    },
+    AuthStart: '/auth',
+    AuthStatus: '/auth/status',
+    AuthCallback: '/auth/callback',
   },
 };
 

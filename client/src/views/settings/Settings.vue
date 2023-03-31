@@ -15,51 +15,50 @@
                                :initial-value="settings?.eventName"
                                name="eventName"
                                label="Event name"
+                               input-type="text"
+                               setting-type="setting"
           />
           <AutosavingTextInput :on-submit="submit"
                                :initial-value="settings?.eventTbaCode"
                                name="eventTbaCode"
                                label="Event TBA code"
+                               input-type="text"
+                               setting-type="setting"
           />
           <AutosavingTextInput :on-submit="submit"
                                :initial-value="settings?.videoSearchDirectory"
                                name="videoSearchDirectory"
                                label="Video search directory"
+                               input-type="text"
+                               setting-type="setting"
           />
         </VForm>
 
         <h2>YouTube</h2>
-        <h3>OAuth2 client details</h3>
+
+        <h3 class="mb-2">OAuth2 client details</h3>
         <VAlert class="mb-3">In your Google Cloud project, create an OAuth2 web client.<br />
           <br />
-          Be sure to add <code>http://localhost:3000/auth/google/callback</code> as an authorized redirect.
+          Be sure to add <code>http://localhost:3000/auth/youtube/callback</code> as an authorized redirect.
         </VAlert>
         <AutosavingTextInput :on-submit="submit"
                              :initial-value="settings?.googleClientId"
                              name="googleClientId"
                              label="OAuth2 client ID"
+                             input-type="text"
+                             setting-type="setting"
         />
+
         <AutosavingTextInput :on-submit="submit"
-                             :initial-value="settings?.googleClientSecret"
+                             initial-value=""
                              name="googleClientSecret"
                              label="OAuth2 client secret"
+                             help-text="Current value hidden"
+                             input-type="password"
+                             setting-type="secret"
+                             class="mb-3"
         />
-        <h3>Authentication status <VBtn>Refresh</VBtn></h3>
-        <VList>
-          <VListItem prepend-icon="mdi-close"
-                     class="text-error"
-          >OAuth2 client info provided</VListItem>
-          <VListItem prepend-icon="mdi-close"
-                     class="text-error"
-          >Access token stored</VListItem>
-          <VListItem prepend-icon="mdi-close"
-                     class="text-error"
-          >Refresh token stored</VListItem>
-          <VListItem prepend-icon="mdi-close"
-                     class="text-error"
-          >Last successful authentication: never</VListItem>
-        </VList>
-
+        <YouTubeConnectionInfo :google-auth-status="settings?.googleAuthStatus" />
       </div>
 
     </VCol>
@@ -70,32 +69,34 @@
 <script lang="ts" setup>
 import AutosavingTextInput from "@/components/form/AutosavingTextInput.vue";
 import {onMounted, ref} from "vue";
-import {ISettings} from "@/types/ISettings";
+import {ISettings, SettingType} from "@/types/ISettings";
 import YouTubeAuth from "@/components/youtube/YouTubeAuth.vue";
+import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vue";
 
 const loading = ref(true);
 const error = ref("");
 const settings = ref<ISettings | null>(null);
 
 onMounted(async () => {
-  const result = await fetch("/api/v1/settings");
+  const settingsResult = await fetch("/api/v1/settings");
 
-  if (!result.ok) {
+  if (!settingsResult.ok) {
     loading.value = false;
-    error.value = `Unable to load settings: ${result.status} ${result.statusText}`
+    error.value = `Unable to load settings: ${settingsResult.status} ${settingsResult.statusText}`
     return;
   }
 
-  settings.value = await result.json();
+  settings.value = await settingsResult.json();
   loading.value = false;
 })
 
-async function submit(settingName: string, value: string) {
+async function submit(settingName: string, value: string, settingType: SettingType) {
   console.log(value);
   const submitResult = await fetch(`/api/v1/settings/${settingName}`, {
     method: "POST",
     body: JSON.stringify({
       value,
+      settingType,
     }),
     headers: {
       "Content-Type": "application/json",
