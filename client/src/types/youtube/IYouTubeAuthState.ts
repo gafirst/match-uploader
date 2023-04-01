@@ -1,4 +1,4 @@
-export interface IYouTubeAuthStatus {
+export interface IYouTubeAuthState {
   clientIdProvided: boolean,
   clientSecretProvided: boolean,
   accessTokenStored: boolean,

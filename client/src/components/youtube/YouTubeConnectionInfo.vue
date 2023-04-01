@@ -1,6 +1,6 @@
 <template>
   <h3>Authentication status <VChip v-if="googleAuthStatus" :color="youtubeAuthSuccessState">{{ googleAuthStatus }}</VChip></h3>
-  <VProgressCircular indeterminate v-if="loading"/>
+  <VProgressCircular indeterminate v-if="!youTubeAuthState"/>
   <VAlert v-else-if="!!error"
           color="error"
   >
@@ -8,14 +8,23 @@
   </VAlert>
   <div v-else>
     <VList>
-      <TaskListItem :complete="youtubeAuthStatus?.clientIdProvided ?? false">OAuth2 client ID provided</TaskListItem>
-      <TaskListItem :complete="youtubeAuthStatus?.clientSecretProvided ?? false">OAuth2 client secret provided</TaskListItem>
-      <TaskListItem :complete="youtubeAuthStatus?.accessTokenStored ?? false">Access token stored</TaskListItem>
-      <TaskListItem :complete="youtubeAuthStatus?.refreshTokenStored ?? false">Refresh token stored</TaskListItem>
+      <TaskListItem :complete="youTubeAuthState?.clientIdProvided">OAuth2 client ID provided</TaskListItem>
+      <TaskListItem :complete="youTubeAuthState?.clientSecretProvided">OAuth2 client secret provided</TaskListItem>
+      <TaskListItem :complete="youTubeAuthState?.accessTokenStored">Access token stored</TaskListItem>
+      <TaskListItem :complete="youTubeAuthState?.refreshTokenStored">Refresh token stored</TaskListItem>
     </VList>
-    <h4>Manage YouTube authentication</h4>
-    <VBtn v-if="youtubeAuthStatus?.clientIdProvided && youtubeAuthStatus?.clientSecretProvided" href="/api/v1/youtube/auth">Sign in to YouTube</VBtn><br />
-    <VBtn class="mb-2" @click="refreshData" variant="outlined">Refresh current status</VBtn>
+    <h4 class="mb-3">Manage YouTube authentication</h4>
+    <VBtn class="mb-3"
+          v-if="showYouTubeSignInBtn" href="/api/v1/youtube/auth">Sign in to YouTube
+    </VBtn>
+    <br v-if="showYouTubeSignInBtn" />
+    <ResetYouTubeConnection class="mb-3"
+      v-if="showResetYouTubeConnectionBtn"
+                            @reset-completed="emit('triggerRefresh')"
+    >
+      Reset YouTube connection
+    </ResetYouTubeConnection>
+    <br />
   </div>
 
 </template>
@@ -23,36 +32,20 @@
 <script lang="ts" setup>
 
 import {computed, onMounted, ref} from "vue";
-import {IYouTubeAuthStatus} from "@/types/youtube/IYouTubeAuthStatus";
+import {IYouTubeAuthState} from "@/types/youtube/IYouTubeAuthState";
 import TaskListItem from "@/components/util/TaskListItem.vue";
+import ResetYouTubeConnection from "@/components/youtube/ResetYouTubeConnection.vue";
 
 const loading = ref(true);
 const error = ref("");
-const youtubeAuthStatus = ref<IYouTubeAuthStatus | null>(null);
 
 interface IProps {
   googleAuthStatus?: string;
+  youTubeAuthState: IYouTubeAuthState | null,
 }
 
 const props = defineProps<IProps>();
-
-onMounted(async () => {
-  loading.value = true;
-  await refreshData();
-})
-
-async function refreshData() {
-  const result = await fetch("/api/v1/youtube/auth/status");
-
-  if (!result.ok) {
-    loading.value = false;
-    error.value = `Unable to load auth status: ${result.status} ${result.statusText}`
-    return;
-  }
-
-  youtubeAuthStatus.value = await result.json();
-  loading.value = false;
-}
+const emit = defineEmits(['triggerRefresh'])
 
 const youtubeAuthSuccessState = computed(() => {
   let authStatus = props.googleAuthStatus;
@@ -74,6 +67,17 @@ const youtubeAuthSuccessState = computed(() => {
 
   return "";
 })
+
+const showYouTubeSignInBtn = computed(() => {
+  return !props.youTubeAuthState?.accessTokenStored;
+});
+
+const showResetYouTubeConnectionBtn = computed(() => {
+  return props.youTubeAuthState?.accessTokenStored
+    || props.youTubeAuthState?.refreshTokenStored
+    || props.youTubeAuthState?.clientIdProvided
+    || props.youTubeAuthState?.clientSecretProvided;
+});
 
 </script>
 

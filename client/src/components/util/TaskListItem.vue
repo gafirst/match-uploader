@@ -7,7 +7,7 @@
 
 <script lang="ts" setup>
 interface IProps {
-  complete?: boolean;
+  complete?: boolean | null;
 }
 
 const props = defineProps<IProps>();

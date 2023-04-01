@@ -1,7 +1,7 @@
 <template>
   <VTextField
     variant="underlined"
-    :disabled="state === State.LOADING"
+    :disabled="state === State.LOADING || !!disabled"
     v-model="inputValue"
     :label="label"
     persistent-hint
@@ -42,9 +42,11 @@ interface IProps {
   inputType: "text"|"password";
   settingType: SettingType;
   helpText?: string;
+  disabled?: boolean;
 }
 
 const props = defineProps<IProps>();
+const emit = defineEmits(['savedValueUpdated'])
 
 const state = ref<State>(State.READY)
 const inputValue = ref(props.initialValue);
@@ -75,6 +77,7 @@ async function submit() {
   if (typeof returnValue === "boolean" && returnValue) {
     state.value = State.SUCCESS;
     error.value = "";
+    emit("savedValueUpdated");
   } else {
     state.value = State.ERROR;
 
@@ -95,7 +98,6 @@ const calculatedInputType = computed(() => {
 })
 
 function togglePlaintext() {
-  console.log("hi");
   showPlainText.value = !showPlainText.value
 }
 

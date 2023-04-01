@@ -1,1 +1,1 @@
-{"eventName":"PCH District Carrollton Event","eventTbaCode":"2023gagwi","videoSearchDirectory":"./videos","googleClientId":"76018112433-78r0j2766g2j88dmvpqn6v3c07hphn0i.apps.googleusercontent.com","googleRedirectUri":"http://localhost:3000/api/v1/youtube/auth/callback","googleAuthStatus":"YouTube connection successful"}
+{"eventName":"PCH District Macon Event","eventTbaCode":"2023gamac","videoSearchDirectory":"./videos","googleClientId":"","googleRedirectUri":"http://localhost:3000/api/v1/youtube/auth/callback","googleAuthStatus":"Not started"}

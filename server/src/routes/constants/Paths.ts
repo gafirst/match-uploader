@@ -18,6 +18,7 @@ const Paths = {
     AuthStart: '/auth',
     AuthStatus: '/auth/status',
     AuthCallback: '/auth/callback',
+    AuthReset: '/auth/reset',
   },
 };
 
