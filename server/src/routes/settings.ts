@@ -1,4 +1,4 @@
-import {NextFunction, Router} from "express";
+import {Router} from "express";
 import Paths from "@src/routes/constants/Paths";
 import {IReq, IRes} from "@src/routes/types/types";
 import {getSettings, setSecret, setSetting} from "@src/services/SettingsService";

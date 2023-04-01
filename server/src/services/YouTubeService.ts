@@ -1,7 +1,5 @@
 import { auth } from "@googleapis/youtube";
 import {getSecrets, getSettings} from "@src/services/SettingsService";
-import Paths from "@src/routes/constants/Paths";
-import FullPaths from "@src/routes/constants/FullPaths";
 import logger from "jet-logger";
 import { Credentials } from "google-auth-library";
 
@@ -38,7 +36,6 @@ export async function oauth2AuthCodeExchange(code: string): Promise<Credentials>
 	const client = await getGoogleOAuth2Client();
 
 	const { tokens } = await client.getToken(code);
-	logger.info("tokens")
-	logger.info(tokens)
+
 	return tokens;
 }
