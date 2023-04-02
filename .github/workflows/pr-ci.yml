@@ -25,9 +25,15 @@ jobs:
     - name: lint
       uses: borales/actions-yarn@v4
       with:
-        cmd: lint
+        cmd: lint:ci
         dir: server
-        
+    - name: Annotate eslint results
+      uses: ataylorme/eslint-annotate-action@v2
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        report-json: "server/eslint_report.json"
+        check-name: "eslint / client"
+
   client_ci:
     runs-on: ubuntu-latest
     steps:
@@ -48,7 +54,13 @@ jobs:
       with:
         cmd: lint
         dir: client
-        
+    - name: Annotate eslint results
+      uses: ataylorme/eslint-annotate-action@v2
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        report-json: "client/eslint_report.json"
+        check-name: "eslint / client"
+
   build_client:
     runs-on: ubuntu-latest
     steps:
