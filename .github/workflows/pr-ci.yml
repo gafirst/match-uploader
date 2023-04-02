@@ -1,4 +1,4 @@
-name: pr / ci
+name: ci
 
 on:
   pull_request:
@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Use Node.js 16.x
       uses: actions/setup-node@v3
       with:
@@ -21,11 +23,14 @@ jobs:
         cmd: install --frozen-lockfile
         dir: server
     - name: Run ESLint
-      uses: ninosaurus/eslint-check@v5
-      with:
-        eslint-config-path: "./server/.eslintrc.json"
-        custom-directory: "./server"
-        repo-token: ${{secrets.GITHUB_TOKEN}}
+      uses: github/super-linter@v4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BRANCH: main
+        IGNORE_GITIGNORED_FILES: true
+        LINTER_RULES_PATH: server
+        JAVASCRIPT_ES_CONFIG_FILE: server/.eslintrc.yml
+        FILTER_REGEX_INCLUDE: .*server/src/.*\.ts
         
   client_ci:
     runs-on: ubuntu-latest
@@ -42,12 +47,6 @@ jobs:
       with:
         cmd: install --frozen-lockfile
         dir: client
-    - name: Run ESLint
-      uses: ninosaurus/eslint-check@v5
-      with:
-        eslint-config-path: "./client/.eslintrc.json"
-        custom-directory: "./client"
-        repo-token: ${{secrets.GITHUB_TOKEN}}
         
   build_client:
     runs-on: ubuntu-latest
