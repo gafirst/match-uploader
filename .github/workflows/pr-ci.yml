@@ -53,7 +53,7 @@ jobs:
     - name: lint
       uses: borales/actions-yarn@v4
       with:
-        cmd: lint
+        cmd: lint:ci
         dir: client
       continue-on-error: true
     - name: Annotate eslint results
