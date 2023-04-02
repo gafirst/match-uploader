@@ -27,6 +27,7 @@ jobs:
       with:
         cmd: lint:ci
         dir: server
+      continue-on-error: true
     - name: Annotate eslint results
       uses: ataylorme/eslint-annotate-action@v2
       with:
@@ -54,6 +55,7 @@ jobs:
       with:
         cmd: lint
         dir: client
+      continue-on-error: true
     - name: Annotate eslint results
       uses: ataylorme/eslint-annotate-action@v2
       with:
