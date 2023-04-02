@@ -1,0 +1,71 @@
+name: pr / ci
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  server_ci:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'yarn'
+        cache-dependency-path: '**/yarn.lock'
+    - name: yarn install
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: install --frozen-lockfile
+        dir: server
+    - name: Run ESLint
+      uses: ninosaurus/eslint-check@v5
+      with:
+        eslint-config-path: "./server/.eslintrc.json"
+        custom-directory: "./server"
+        repo-token: ${{secrets.GITHUB_TOKEN}}
+        
+  client_ci:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'yarn'
+        cache-dependency-path: '**/yarn.lock'
+    - name: yarn install
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: install --frozen-lockfile
+        dir: client
+    - name: Run ESLint
+      uses: ninosaurus/eslint-check@v5
+      with:
+        eslint-config-path: "./client/.eslintrc.json"
+        custom-directory: "./client"
+        repo-token: ${{secrets.GITHUB_TOKEN}}
+        
+  build_client:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'yarn'
+        cache-dependency-path: '**/yarn.lock'
+    - name: yarn install
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: install --frozen-lockfile
+        dir: client
+    - name: build
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: build
+        dir: client
