@@ -23,7 +23,7 @@ jobs:
         cmd: install --frozen-lockfile
         dir: server
     - name: Run ESLint
-      uses: github/super-linter@v4
+      uses: github/super-linter/slim@v4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BRANCH: main
