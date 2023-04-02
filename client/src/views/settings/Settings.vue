@@ -44,7 +44,7 @@
                 v-if="!youTubeAuthState?.accessTokenStored"
         >In your Google Cloud project, create an OAuth2 web client.<br />
           <br />
-          Be sure to add <code>http://localhost:3000/auth/youtube/callback</code> as an authorized redirect.
+          Be sure to add <code>http://localhost:3000/api/v1/youtube/auth/callback</code> as an authorized redirect.
         </VAlert>
         <VAlert class="mb-3"
                 v-if="youTubeAuthState?.accessTokenStored"

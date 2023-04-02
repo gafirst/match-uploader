@@ -1,1 +1,1 @@
-{"eventName":"PCH District Macon Event","eventTbaCode":"2023gamac","videoSearchDirectory":"./videos","googleClientId":"","googleRedirectUri":"http://localhost:3000/api/v1/youtube/auth/callback","googleAuthStatus":"Not started"}
+{"eventName":"PCH District Macon Event","eventTbaCode":"2023gamac","videoSearchDirectory":"./videos","googleClientId":"76018112433-92cd31rd08uh3hh00c2uem46maaf1a3q.apps.googleusercontent.com","googleRedirectUri":"http://localhost:3000/api/v1/youtube/auth/callback","googleAuthStatus":"YouTube connection failed: Error: invalid_client"}

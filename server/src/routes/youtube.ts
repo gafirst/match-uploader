@@ -64,11 +64,7 @@ async function handleYouTubeOAuth2Callback(req: IReq, res: IRes) {
 				logger.warn("OAuth2 code exchange: no refresh_token was received. Google only sends the refresh token on the first authorization attempt.")
 			}
 		} catch (codeExchangeError) {
-			if (codeExchangeError == "invalid_client") {
-				await setSetting("googleAuthStatus", `YouTube connection failed: invalid_client received (double-check your client secret)`);
-			} else {
-				await setSetting("googleAuthStatus", `YouTube connection failed: ${codeExchangeError}`);
-			}
+			await setSetting("googleAuthStatus", `YouTube connection failed: ${codeExchangeError}`);
 		}
 	} else if (error) {
 		await setSetting("googleAuthStatus", `YouTube connection failed: ${error}`)

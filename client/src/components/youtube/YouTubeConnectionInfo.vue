@@ -13,11 +13,19 @@
       <TaskListItem :complete="youTubeAuthState?.accessTokenStored">Access token stored</TaskListItem>
       <TaskListItem :complete="youTubeAuthState?.refreshTokenStored">Refresh token stored</TaskListItem>
     </VList>
-    <h4 class="mb-3">Manage YouTube authentication</h4>
+    <h4 class="mb-3"
+        v-if="showYouTubeSignInBtn || showYouTubeRetryBtn || showResetYouTubeConnectionBtn"
+    >
+      Manage YouTube authentication
+    </h4>
     <VBtn class="mb-3"
           v-if="showYouTubeSignInBtn" href="/api/v1/youtube/auth">Sign in to YouTube
     </VBtn>
     <br v-if="showYouTubeSignInBtn" />
+    <VBtn class="mb-3"
+          v-if="showYouTubeRetryBtn" href="/api/v1/youtube/auth">Retry YouTube connection
+    </VBtn>
+    <br v-if="showYouTubeRetryBtn" />
     <ResetYouTubeConnection class="mb-3"
       v-if="showResetYouTubeConnectionBtn"
                             @reset-completed="emit('triggerRefresh')"
@@ -69,7 +77,15 @@ const youtubeAuthSuccessState = computed(() => {
 })
 
 const showYouTubeSignInBtn = computed(() => {
-  return !props.youTubeAuthState?.accessTokenStored;
+  return props.youTubeAuthState?.clientIdProvided
+  && props.youTubeAuthState?.clientSecretProvided
+  && !props.youTubeAuthState?.accessTokenStored;
+});
+
+const showYouTubeRetryBtn = computed(() => {
+  return props.youTubeAuthState?.clientIdProvided
+    && props.youTubeAuthState?.clientSecretProvided
+    && props.youTubeAuthState?.accessTokenStored;
 });
 
 const showResetYouTubeConnectionBtn = computed(() => {
@@ -82,7 +98,4 @@ const showResetYouTubeConnectionBtn = computed(() => {
 </script>
 
 <style scoped>
-.visibility-hidden {
-  visibility: hidden;
-}
 </style>
