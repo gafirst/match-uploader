@@ -33,7 +33,7 @@ jobs:
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         report-json: "server/eslint_report.json"
-        check-name: "eslint / client"
+        check-name: "eslint / server"
 
   client_ci:
     runs-on: ubuntu-latest
