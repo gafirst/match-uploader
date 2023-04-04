@@ -1,5 +1,5 @@
 import * as settingsRepo from '@src/repos/SettingsRepo'
-import mock from 'mock-fs'
+import mockFs from 'mock-fs'
 
 const exampleSettings = {
   'eventName': 'Example Event',
@@ -10,14 +10,14 @@ const exampleSettings = {
 
 describe('opening settings correctly', () => {
   it('should throw an error if there is no example file', async () => {
-    mock({ settings: {} })
+    mockFs({ settings: {} })
     const settings = settingsRepo.readSettingsJson()
     await expectAsync(settings).toBeRejectedWithError()
-    mock.restore()
+    mockFs.restore()
   })
 
   it('should parse file not found', async () => {
-    mock({
+    mockFs({
       'settings': {
         'settings.example.json': JSON.stringify(exampleSettings)
       }
@@ -25,11 +25,11 @@ describe('opening settings correctly', () => {
 
     const settings = await settingsRepo.readSettingsJson()
     expect(settings).toEqual(exampleSettings)
-    mock.restore()
+    mockFs.restore()
   })
 
   it('should parse settings file found', async () => {
-    mock({
+    mockFs({
       'settings': {
         'settings.example.json': JSON.stringify(exampleSettings),
         'settings.json': JSON.stringify({
@@ -41,7 +41,7 @@ describe('opening settings correctly', () => {
 
     const settings = await settingsRepo.readSettingsJson()
     expect(settings).toEqual({ ...exampleSettings, 'eventName': 'not example event' })
-    mock.restore()
+    mockFs.restore()
   })
 
 })
