@@ -26,7 +26,7 @@ const light: ThemeDefinition = {
     success: "#4CAF50",
     warning: "#FB8C00",
     inactive: "#E0E0E0",
-  }
+  },
 }
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
@@ -34,7 +34,7 @@ export default createVuetify({
   blueprint: md3,
   theme: {
     themes: {
-      light
-    }
+      light,
+    },
   },
 });

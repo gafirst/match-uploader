@@ -27,7 +27,7 @@ const navItems = ref<INavItem[]>([
   {
     title: "Matches",
     to: "/matches",
-    icon: "mdi-format-list-numbered"
+    icon: "mdi-format-list-numbered",
   },
   {
     title: "Settings",
@@ -38,7 +38,7 @@ const navItems = ref<INavItem[]>([
     title: "Logs",
     to: "/logs",
     icon: "mdi-code-json",
-  }
+  },
 ])
 </script>
 

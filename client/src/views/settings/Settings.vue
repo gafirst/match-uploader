@@ -142,7 +142,7 @@ async function submit(settingName: string, value: string, settingType: SettingTy
     }),
     headers: {
       "Content-Type": "application/json",
-    }
+    },
   })
 
   if (!submitResult.ok) {

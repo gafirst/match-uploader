@@ -14,7 +14,7 @@ module.exports = {
     "@vue/eslint-config-typescript",
   ],
   rules: {
-    "comma-dangle": ["error", "only-multiline"],
+    "comma-dangle": ["error", "always-multiline"],
     "comma-style": ["error", "last"],
     "quotes": ["error", "double"],
     "vue/component-name-in-template-casing": ["error", "PascalCase"],
@@ -24,7 +24,7 @@ module.exports = {
     "vue/html-self-closing": ["error", {
       "html": {
         "void": "always",
-      }
+      },
     }],
     "vue/max-len": ["error", {
       "code": 120,

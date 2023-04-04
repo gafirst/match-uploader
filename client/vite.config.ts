@@ -9,7 +9,7 @@ import { fileURLToPath, URL } from "node:url"
 export default defineConfig({
   plugins: [
     vue({
-      template: { transformAssetUrls }
+      template: { transformAssetUrls },
     }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
     vuetify({
@@ -19,7 +19,7 @@ export default defineConfig({
   define: { "process.env": {} },
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url))
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
     extensions: [
       ".js",
@@ -35,6 +35,6 @@ export default defineConfig({
     port: 3001,
     proxy: {
       "/api": "http://localhost:3000",
-    }
+    },
   },
 })
