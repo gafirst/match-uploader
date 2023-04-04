@@ -8,7 +8,12 @@
 *.sln
 *.sw?
 
+# Environment dependent files
 **/node_modules
 dist/
 **/**/*.log
 *.env
+server/settings/settings.json
+
+# MacOS folder attributes file
+.DS_Store
