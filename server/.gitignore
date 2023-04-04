@@ -8,7 +8,10 @@
 *.sln
 *.sw?
 
+# Environment dependent files
 **/node_modules
 dist/
 **/**/*.log
 *.env
+
+settings.json
