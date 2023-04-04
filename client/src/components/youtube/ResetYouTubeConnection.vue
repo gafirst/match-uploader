@@ -1,7 +1,7 @@
 <template>
-  <VBtn @click="resetYouTubeConnection"
-        :color="btnColor"
+  <VBtn :color="btnColor"
         :prepend-icon="btnIcon"
+        @click="resetYouTubeConnection"
   >
     {{ btnText }}
   </VBtn>
@@ -26,14 +26,14 @@ async function resetYouTubeConnection() {
   const result = await fetch("/api/v1/youtube/auth/reset");
 
   if (!result.ok) {
-    error.value = `YouTube connection reset failed`
+    error.value = "YouTube connection reset failed"
   } else {
     success.value = true;
   }
 
   loading.value = false;
   confirm.value = false;
-  emit('resetCompleted')
+  emit("resetCompleted")
 }
 
 const btnColor = computed(() => {
@@ -48,6 +48,8 @@ const btnColor = computed(() => {
   if (confirm.value) {
     return "warning";
   }
+
+  return "";
 });
 
 const btnIcon = computed(() => {

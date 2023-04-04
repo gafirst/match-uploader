@@ -1,23 +1,27 @@
 <template>
-  <VTextField
-    variant="underlined"
-    :disabled="state === State.LOADING || !!disabled"
-    v-model="inputValue"
-    :label="label"
-    persistent-hint
-    :hint="!!error ? error: (helpText || '')"
-    :error="!!error"
-    :type="calculatedInputType"
-    @blur="submit()"
+  <VTextField v-model="inputValue"
+              variant="underlined"
+              :disabled="state === State.LOADING || !!disabled"
+              :label="label"
+              persistent-hint
+              :hint="!!error ? error: (helpText || '')"
+              :error="!!error"
+              :type="calculatedInputType"
+              @blur="submit()"
   >
     <template v-if="inputType === 'password'" v-slot:append-inner>
-      <VIcon @click="togglePlaintext" v-if="showPlainText">mdi-eye-off</VIcon>
-      <VIcon @click="togglePlaintext" v-else>mdi-eye</VIcon>
+      <VIcon v-if="showPlainText" @click="togglePlaintext">mdi-eye-off</VIcon>
+      <VIcon v-else @click="togglePlaintext">mdi-eye</VIcon>
     </template>
     <template v-if="state !== State.READY" v-slot:append>
-      <VIcon v-if="state === State.ERROR" color="error" class="mr-1">mdi-alert-circle-outline</VIcon>
-      <VIcon color="success" v-if="state === State.SUCCESS">mdi-check</VIcon>
-      <VProgressCircular indeterminate v-if="state===State.LOADING"></VProgressCircular>
+      <VIcon v-if="state === State.ERROR"
+             color="error"
+             class="mr-1"
+      >
+        mdi-alert-circle-outline
+      </VIcon>
+      <VIcon v-if="state === State.SUCCESS" color="success">mdi-check</VIcon>
+      <VProgressCircular v-if="state===State.LOADING" indeterminate />
     </template>
   </VTextField>
 </template>
@@ -46,7 +50,7 @@ interface IProps {
 }
 
 const props = defineProps<IProps>();
-const emit = defineEmits(['savedValueUpdated'])
+const emit = defineEmits(["savedValueUpdated"])
 
 const state = ref<State>(State.READY)
 const inputValue = ref(props.initialValue);

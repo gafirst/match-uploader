@@ -1,6 +1,6 @@
 <template>
   <VApp>
-    <VAppBar color="primary" title="Match Uploader"></VAppBar>
+    <VAppBar color="primary" title="Match Uploader" />
     <NavDrawer />
     <VMain>
       <VContainer>

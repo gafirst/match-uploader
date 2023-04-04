@@ -1,14 +1,15 @@
 <template>
   <VNavigationDrawer permanent
-                       app
-                       location="left">
+                     app
+                     location="left"
+  >
     <VList>
       <VListItem v-for="item in navItems"
-                   :key="item.title"
-                   :title="item.title"
-                   :to="item.to"
-                   :prepend-icon="item.icon">
-      </VListItem>
+                 :key="item.title"
+                 :title="item.title"
+                 :to="item.to"
+                 :prepend-icon="item.icon"
+      />
     </VList>
   </VNavigationDrawer>
 </template>

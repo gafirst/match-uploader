@@ -2,7 +2,7 @@
   <h1>Settings</h1>
   <VRow>
     <VCol md="6">
-      <VProgressCircular indeterminate v-if="loading"/>
+      <VProgressCircular v-if="loading" indeterminate />
       <VAlert v-else-if="!!error"
               color="error"
       >
@@ -10,50 +10,52 @@
       </VAlert>
       <div v-else>
         <h2>General</h2>
-        <VForm @submit.prevent class="mt-4">
-          <AutosavingTextInput :on-submit="submit"
+        <VForm class="mt-4" @submit.prevent>
+          <AutosavingTextInput :key="`eventName-${dataRefreshKey}`"
+                               :on-submit="submit"
                                :initial-value="settings?.eventName"
                                name="eventName"
                                label="Event name"
                                input-type="text"
                                setting-type="setting"
-                               :key="`eventName-${dataRefreshKey}`"
           />
-          <AutosavingTextInput :on-submit="submit"
+          <AutosavingTextInput :key="`eventTbaCode-${dataRefreshKey}`"
+                               :on-submit="submit"
                                :initial-value="settings?.eventTbaCode"
                                name="eventTbaCode"
                                label="Event TBA code"
                                input-type="text"
                                setting-type="setting"
-                               :key="`eventTbaCode-${dataRefreshKey}`"
           />
-          <AutosavingTextInput :on-submit="submit"
+          <AutosavingTextInput :key="`videoSearchDirectory-${dataRefreshKey}`"
+                               :on-submit="submit"
                                :initial-value="settings?.videoSearchDirectory"
                                name="videoSearchDirectory"
                                label="Video search directory"
                                input-type="text"
                                setting-type="setting"
-                               :key="`videoSearchDirectory-${dataRefreshKey}`"
           />
         </VForm>
 
         <h2>YouTube</h2>
 
         <h3 class="mb-2">OAuth2 client details</h3>
-        <VAlert class="mb-3"
-                v-if="!youTubeAuthState?.accessTokenStored"
-        >In your Google Cloud project, create an OAuth2 web client.<br />
+        <VAlert v-if="!youTubeAuthState?.accessTokenStored"
+                class="mb-3"
+        >
+          In your Google Cloud project, create an OAuth2 web client.<br />
           <br />
           Be sure to add <code>http://localhost:3000/api/v1/youtube/auth/callback</code> as an authorized redirect.
         </VAlert>
-        <VAlert class="mb-3"
-                v-if="youTubeAuthState?.accessTokenStored"
+        <VAlert v-if="youTubeAuthState?.accessTokenStored"
+                class="mb-3"
                 color="info"
         >
           You already have an active YouTube connection. Please use the Reset YouTube Connection button below to
           adjust your YouTube OAuth2 client details.
         </VAlert>
-        <AutosavingTextInput :on-submit="submit"
+        <AutosavingTextInput :key="`googleClientId-${dataRefreshKey}`"
+                             :on-submit="submit"
                              :initial-value="settings?.googleClientId"
                              name="googleClientId"
                              label="OAuth2 client ID"
@@ -61,10 +63,10 @@
                              input-type="text"
                              setting-type="setting"
                              @saved-value-updated="refreshData"
-                             :key="`googleClientId-${dataRefreshKey}`"
         />
 
-        <AutosavingTextInput :on-submit="submit"
+        <AutosavingTextInput :key="`googleClientSecret-${dataRefreshKey}`"
+                             :on-submit="submit"
                              initial-value=""
                              name="googleClientSecret"
                              label="OAuth2 client secret"
@@ -74,23 +76,19 @@
                              :disabled="youTubeAuthState?.accessTokenStored"
                              class="mb-3"
                              @saved-value-updated="refreshData"
-                             :key="`googleClientSecret-${dataRefreshKey}`"
         />
         <YouTubeConnectionInfo :google-auth-status="settings?.googleAuthStatus"
-                               :youTubeAuthState="youTubeAuthState"
+                               :you-tube-auth-state="youTubeAuthState"
                                @trigger-refresh="refreshData"
-
         />
       </div>
-
     </VCol>
   </VRow>
-
 </template>
 
 <script lang="ts" setup>
 import AutosavingTextInput from "@/components/form/AutosavingTextInput.vue";
-import {computed, onMounted, ref} from "vue";
+import {onMounted, ref} from "vue";
 import {ISettings, SettingType} from "@/types/ISettings";
 import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vue";
 import {IYouTubeAuthState} from "@/types/youtube/IYouTubeAuthState";
