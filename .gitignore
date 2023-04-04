@@ -112,3 +112,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# eslint
+eslint_report.json
