@@ -4,37 +4,48 @@
     "@typescript-eslint"
   ],
   "extends": [
-    "eslint:recommended",
+    "standard-with-typescript",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:node/recommended"
+    "plugin:node/recommended",
+    "../.eslint/.eslintrc.js"
   ],
   "parserOptions": {
     "project": "./tsconfig.json"
   },
   "rules": {
-    "@typescript-eslint/explicit-member-accessibility": "warn",
-    "@typescript-eslint/no-misused-promises": 0,
-    "@typescript-eslint/no-floating-promises": 0,
-    "max-len": [
-      "warn",
-      {
-        "code": 80
-      }
-    ],
-    "comma-dangle": ["warn", "always-multiline"],
-    "no-console": 1,
-    "no-extra-boolean-cast": 0,
-    "semi": 1,
-    "indent": ["warn", 2],
-    "quotes": ["warn", "single"],
-    "node/no-process-env": 1,
+    "no-console": "error",
+    "node/no-process-env": "error",
     "node/no-unsupported-features/es-syntax": [
       "error",
       { "ignores" : ["modules"] }
     ],
-    "node/no-missing-import": 0,
-    "node/no-unpublished-import": 0
+    "space-before-function-paren": ["error", {
+      "anonymous": "always",
+      "named": "never",
+      "asyncArrow": "always"
+    }],
+    "@typescript-eslint/comma-dangle": "off", // covered by eslint's comma-dangle rule
+    "@typescript-eslint/explicit-member-accessibility": "off",
+    "@typescript-eslint/key-spacing": "off",
+    "@typescript-eslint/naming-convention": "off",
+    "@typescript-eslint/no-confusing-void-expression": "off",
+    "@typescript-eslint/quotes": "off", // covered eslint's quotes rule
+    "@typescript-eslint/promise-function-async": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
+    "@typescript-eslint/semi": "off", // covered by eslint's semi rule
+    "@typescript-eslint/space-before-function-paren": "off",
+    "@typescript-eslint/strict-boolean-expressions": "off",
+    "@typescript-eslint/member-delimiter-style": "off", // they suggest using a prettier instead
+    "@typescript-eslint/indent": "off",  // they suggest using a prettier instead
+    "@typescript-eslint/object-curly-spacing": "off", // TODO: Migrate this in a separate PR
+    "no-multiple-empty-lines": "off", // TODO: Migrate this in a separate PR
+    "quotes": "off", // TODO: Migrate this in a separate PR
+    "@typescript-eslint/no-misused-promises": "off",
+    "no-extra-boolean-cast": "off",
+
+    "node/no-missing-import": "off",
+    "node/no-unpublished-import": "off"
   },
   "settings": {
     "node": {

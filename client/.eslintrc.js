@@ -12,12 +12,14 @@ module.exports = {
     "plugin:vue/recommended",
     "eslint:recommended",
     "@vue/eslint-config-typescript",
+    "../.eslint/.eslintrc.js",
   ],
   rules: {
     "comma-dangle": ["error", "always-multiline"],
     "comma-style": ["error", "last"],
     "quotes": ["error", "double"],
     "vue/component-name-in-template-casing": ["error", "PascalCase"],
+
     "vue/first-attribute-linebreak": ["error", {
       multiline: "beside",
     }],
@@ -37,4 +39,4 @@ module.exports = {
     "vue/singleline-html-element-content-newline": "off",
     "vue/v-slot-style": "off",
   },
-}
+};

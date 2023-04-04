@@ -21,10 +21,6 @@ Run a single unit-test.
 
 Run all unit-tests without hot-reloading.
 
-### `npm run lint`
-
-Check for linting errors.
-
 ### `npm run build`
 
 Build the project for production.
@@ -36,6 +32,22 @@ Run the production build (Must be built first).
 ### `npm start -- --env="name of env file" (default is production).`
 
 Run production build with a different env file.
+
+## Linting
+## Linting
+```
+# lint
+yarn lint
+
+# lint tests
+yarn lint:tests
+
+# lint and fix fixable problems
+yarn lint:fix
+
+# lint (without fixing problems) and output JSON report
+yarn lint:ci
+```
 
 
 ## Additional Notes
