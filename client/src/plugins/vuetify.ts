@@ -5,11 +5,11 @@
  */
 
 // Styles
-import "@mdi/font/css/materialdesignicons.css"
-import "vuetify/styles"
+import "@mdi/font/css/materialdesignicons.css";
+import "vuetify/styles";
 
 // Composables
-import {createVuetify, ThemeDefinition} from "vuetify"
+import {createVuetify, ThemeDefinition} from "vuetify";
 import {md3} from "vuetify/blueprints";
 
 const light: ThemeDefinition = {
@@ -27,7 +27,7 @@ const light: ThemeDefinition = {
     warning: "#FB8C00",
     inactive: "#E0E0E0",
   },
-}
+};
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({

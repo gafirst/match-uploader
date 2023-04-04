@@ -1,5 +1,5 @@
 // Composables
-import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router"
+import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -40,11 +40,11 @@ const routes: RouteRecordRaw[] = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "not_found" */ "@/views/NotFound.vue"),
   },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
-})
+});
 
-export default router
+export default router;

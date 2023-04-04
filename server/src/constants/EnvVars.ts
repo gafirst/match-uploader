@@ -26,7 +26,7 @@ export default {
     },
   },
   Jwt: {
-    Secret: (process.env.JWT_SECRET ??  ''),
+    Secret: (process.env.JWT_SECRET ?? ''),
     Exp: (process.env.COOKIE_EXP ?? ''), // exp at the same time as the cookie
   },
 } as const;

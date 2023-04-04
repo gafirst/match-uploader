@@ -61,7 +61,7 @@ interface IProps {
 }
 
 const props = defineProps<IProps>();
-const emit = defineEmits(["triggerRefresh"])
+const emit = defineEmits(["triggerRefresh"]);
 
 const youtubeAuthSuccessState = computed(() => {
   let authStatus = props.googleAuthStatus;
@@ -78,11 +78,11 @@ const youtubeAuthSuccessState = computed(() => {
   }
 
   if (authStatus === "OAuth2 flow started") {
-    return "warning"
+    return "warning";
   }
 
   return "";
-})
+});
 
 const showYouTubeSignInBtn = computed(() => {
   return props.youTubeAuthState?.clientIdProvided && props.youTubeAuthState?.clientSecretProvided

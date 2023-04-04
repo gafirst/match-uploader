@@ -39,7 +39,7 @@ const navItems = ref<INavItem[]>([
     to: "/logs",
     icon: "mdi-code-json",
   },
-])
+]);
 </script>
 
 <style scoped>

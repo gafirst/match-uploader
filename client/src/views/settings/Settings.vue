@@ -101,7 +101,7 @@ const dataRefreshKey = ref(1);
 
 function handleApiError(result: Response, message: string) {
   if (!result.ok) {
-    error.value = `API error (${result.status} ${result.statusText}): ${message}`
+    error.value = `API error (${result.status} ${result.statusText}): ${message}`;
     return true;
   }
 
@@ -112,7 +112,7 @@ async function refreshData() {
   const [settingsResult, youtubeAuthStatusResult] = await Promise.all([
     fetch("/api/v1/settings"),
     fetch("/api/v1/youtube/auth/status"),
-  ])
+  ]);
 
   if (handleApiError(settingsResult, "Unable to load settings")
     || handleApiError(youtubeAuthStatusResult, "Unable to load YouTube auth status")
@@ -123,7 +123,7 @@ async function refreshData() {
   [settings.value, youTubeAuthState.value] = await Promise.all([
     settingsResult.json(),
     youtubeAuthStatusResult.json(),
-  ])
+  ]);
 
   loading.value = false;
   dataRefreshKey.value++;
@@ -131,7 +131,7 @@ async function refreshData() {
 
 onMounted(async () => {
   await refreshData();
-})
+});
 
 async function submit(settingName: string, value: string, settingType: SettingType) {
   const submitResult = await fetch(`/api/v1/settings/${settingName}`, {
@@ -143,7 +143,7 @@ async function submit(settingName: string, value: string, settingType: SettingTy
     headers: {
       "Content-Type": "application/json",
     },
-  })
+  });
 
   if (!submitResult.ok) {
     return `Save error: ${submitResult.status} ${submitResult.statusText}`;

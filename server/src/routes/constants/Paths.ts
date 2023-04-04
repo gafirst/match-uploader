@@ -2,7 +2,7 @@
  * Express router paths
  */
 
-import { Immutable } from '@src/util/Immutable';
+import { type Immutable } from '@src/util/Immutable';
 
 
 // Start all paths with a /, even if empty

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
 import Paths from './constants/Paths';
-import {settingsRouter} from "@src/routes/settings";
-import {youTubeRouter} from "@src/routes/youtube";
+import {settingsRouter} from '@src/routes/settings';
+import {youTubeRouter} from '@src/routes/youtube';
 
 const apiRouter = Router();
 

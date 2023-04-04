@@ -31,12 +31,14 @@
 import {computed, ref} from "vue";
 import {SettingType} from "@/types/ISettings";
 
+/* eslint-disable */
 enum State {
   LOADING,
   READY,
   SUCCESS,
   ERROR,
 }
+/* eslint-enable */
 
 interface IProps {
   onSubmit: Function;
@@ -50,9 +52,9 @@ interface IProps {
 }
 
 const props = defineProps<IProps>();
-const emit = defineEmits(["savedValueUpdated"])
+const emit = defineEmits(["savedValueUpdated"]);
 
-const state = ref<State>(State.READY)
+const state = ref<State>(State.READY);
 const inputValue = ref(props.initialValue);
 const lastSubmittedValue = ref(props.initialValue);
 const error = ref("");
@@ -88,7 +90,7 @@ async function submit() {
     if (typeof returnValue === "string") {
       error.value = returnValue;
     } else {
-      error.value = "Save error"
+      error.value = "Save error";
     }
   }
 }
@@ -99,10 +101,10 @@ const calculatedInputType = computed(() => {
   }
 
   return "text";
-})
+});
 
 function togglePlaintext() {
-  showPlainText.value = !showPlainText.value
+  showPlainText.value = !showPlainText.value;
 }
 
 </script>
