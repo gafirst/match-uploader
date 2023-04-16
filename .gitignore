@@ -115,3 +115,6 @@ dist
 
 # eslint
 eslint_report.json
+
+# MacOS folder attributes file
+.DS_Store
