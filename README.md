@@ -10,7 +10,5 @@ Install some baseline dependencies:
   - nodejs (v16+)
   - yarn
 
-- Copy `server/settings/settings.example.json` to `server/settings/settings.json`
-- Copy `server/settings/secrets.example.json` to `server/settings/secrets.json`
 - To run the server: `cd server && yarn run dev`
 - In a separate terminal, run the client: `cd client && yarn run dev`
