@@ -15,10 +15,10 @@ export async function getSettings(): Promise<ISettings> {
 export async function setSetting(key: SettingsKey, value: string): Promise<void> {
   const currentSettings = await getSettings();
 
-  return await writeSettingsJson<ISettings>({
+  return await writeSettingsJson<ISettings>(EnvVars.SettingsLocations.SettingsFile, {
     ...currentSettings,
     [key]: value,
-  }, EnvVars.SettingsLocations.SettingsFile);
+  });
 }
 
 export async function getSecrets(): Promise<ISecretSettings> {
@@ -46,8 +46,8 @@ export async function getObfuscatedSecrets(): Promise<ISecretSettingsHidden> {
 export async function setSecret(key: SecretSettingsKey, value: string): Promise<void> {
   const currentSecrets = await getSecrets();
 
-  return await writeSettingsJson<ISecretSettings>({
+  return await writeSettingsJson<ISecretSettings>(EnvVars.SettingsLocations.SecretsFile, {
     ...currentSecrets,
     [key]: value,
-  }, EnvVars.SettingsLocations.SecretsFile);
+  });
 }

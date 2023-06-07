@@ -47,6 +47,7 @@
     "node/no-missing-import": "off",
     "node/no-unpublished-import": "off"
   },
+  "ignorePatterns": ["**/.eslintrc.*", "src/public/"],
   "settings": {
     "node": {
       "tryExtensions": [".js", ".json", ".node", ".ts"]
