@@ -9,7 +9,10 @@ import {readSettingsJson, writeSettingsJson} from '@src/repos/JsonStorageRepo';
 import EnvVars from '@src/constants/EnvVars';
 
 export async function getSettings(): Promise<ISettings> {
-  return await readSettingsJson<ISettings>(EnvVars.SettingsLocations.SettingsFile);
+  return await readSettingsJson<ISettings>(
+      EnvVars.SettingsLocations.SettingsFile,
+      EnvVars.SettingsLocations.SettingsTemplateFile,
+  );
 }
 
 export async function setSetting(key: SettingsKey, value: string): Promise<void> {
@@ -22,7 +25,10 @@ export async function setSetting(key: SettingsKey, value: string): Promise<void>
 }
 
 export async function getSecrets(): Promise<ISecretSettings> {
-  return await readSettingsJson<ISecretSettings>(EnvVars.SettingsLocations.SecretsFile);
+  return await readSettingsJson<ISecretSettings>(
+      EnvVars.SettingsLocations.SecretsFile,
+      EnvVars.SettingsLocations.SecretsTemplateFile,
+  );
 }
 
 export async function getObfuscatedSecrets(): Promise<ISecretSettingsHidden> {

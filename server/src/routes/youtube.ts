@@ -2,7 +2,7 @@ import {Router} from 'express';
 import {type IReq, type IRes} from '@src/routes/types/types';
 import {getSecrets, getSettings, setSecret, setSetting} from '@src/services/SettingsService';
 import Paths from '@src/routes/constants/Paths';
-import {getOAuth2AuthUrl, oauth2AuthCodeExchange} from '@src/services/YouTubeService';
+import {getGoogleOAuth2RedirectUri, getOAuth2AuthUrl, oauth2AuthCodeExchange} from '@src/services/YouTubeService';
 import logger from 'jet-logger';
 
 export const youTubeRouter = Router();
@@ -31,7 +31,18 @@ youTubeRouter.get(
 async function startYouTubeOAuth2Flow(req: IReq, res: IRes): Promise<void> {
   await setSetting('googleAuthStatus', 'OAuth2 flow started');
 
-  res.redirect(await getOAuth2AuthUrl());
+  res.redirect(await getOAuth2AuthUrl(req.protocol));
+}
+
+youTubeRouter.get(
+    Paths.YouTube.AuthRedirectUri,
+    returnYouTubeOAuth2RedirectUri,
+);
+
+function returnYouTubeOAuth2RedirectUri(req: IReq, res: IRes): void {
+  res.json({
+    redirectUri: getGoogleOAuth2RedirectUri(req.protocol),
+  });
 }
 
 youTubeRouter.get(
@@ -48,7 +59,7 @@ async function handleYouTubeOAuth2Callback(req: IReq, res: IRes): Promise<void> 
     logger.info('OAuth2 completed successfully');
 
     try {
-      const { access_token, refresh_token } = await oauth2AuthCodeExchange(code as string);
+      const { access_token, refresh_token } = await oauth2AuthCodeExchange(code as string, req.protocol);
       if (access_token) {
         await setSecret('googleAccessToken', access_token);
         await setSetting('googleAuthStatus', 'YouTube connection successful');

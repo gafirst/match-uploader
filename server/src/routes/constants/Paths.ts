@@ -19,6 +19,7 @@ const Paths = {
     AuthStatus: '/auth/status',
     AuthCallback: '/auth/callback',
     AuthReset: '/auth/reset',
+    AuthRedirectUri: '/auth/meta/redirectUri',
   },
 };
 

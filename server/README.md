@@ -52,4 +52,11 @@ yarn lint:ci
 
 ## Additional Notes
 
-- If `npm run dev` gives you issues with bcrypt on MacOS you may need to run: `npm rebuild bcrypt --build-from-source`. 
+- If `npm run dev` gives you issues with bcrypt on MacOS, you may need to run: `npm rebuild bcrypt --build-from-source`.
+
+### Google/YouTube OAuth2
+
+- Ensure the `HOST` environment is correctly set to, well, the host when accessing endpoints/resources hosted by the
+  server. This is probably the domain name + port (e.g., `localhost:3000`, `example.com`). If you access the frontend
+  when it is hosted by the server (i.e., not running the frontend locally using Vite!), then you can confirm this value
+  by typing `window.location.host` in your browser's console.

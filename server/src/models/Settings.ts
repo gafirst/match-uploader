@@ -3,7 +3,6 @@ export interface ISettings {
     eventTbaCode: string,
     videoSearchDirectory: string,
     googleClientId: string,
-    googleRedirectUri: string,
     googleAuthStatus: string,
 }
 

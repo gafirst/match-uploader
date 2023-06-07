@@ -2,7 +2,7 @@
   <h1>Settings</h1>
   <VRow>
     <VCol md="6">
-      <VProgressCircular v-if="loading" indeterminate />
+      <VProgressCircular v-if="loading" indeterminate/>
       <VAlert v-else-if="!!error"
               color="error"
       >
@@ -43,9 +43,24 @@
         <VAlert v-if="!youTubeAuthState?.accessTokenStored"
                 class="mb-3"
         >
-          In your Google Cloud project, create an OAuth2 web client.<br />
-          <br />
-          Be sure to add <code>http://localhost:3000/api/v1/youtube/auth/callback</code> as an authorized redirect.
+          In your Google Cloud project, create an OAuth2 web client.<br/>
+          <br/>
+          <div v-if="youTubeOAuth2RedirectUri">
+            Make sure to add the following as an authorized redirect URI:
+            <VTextField :value="youTubeOAuth2RedirectUri"
+                        variant="underlined"
+                        readonly
+                        @focus="$event.target.select()"
+            >
+              <template v-slot:append>
+                <VBtn :color="youTubeOAuth2RedirectCopyBtnColor"
+                      @click="copyYouTubeOAuth2RedirectUri"
+                >
+                  {{ youTubeOAuth2RedirectCopyBtnText }}
+                </VBtn>
+              </template>
+            </VTextField>
+          </div>
         </VAlert>
         <VAlert v-if="youTubeAuthState?.accessTokenStored"
                 class="mb-3"
@@ -88,18 +103,45 @@
 
 <script lang="ts" setup>
 import AutosavingTextInput from "@/components/form/AutosavingTextInput.vue";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {ISettings, SettingType} from "@/types/ISettings";
 import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vue";
 import {IYouTubeAuthState} from "@/types/youtube/IYouTubeAuthState";
+import {IYouTubeRedirectUriResponse} from "@/types/youtube/IYouTubeRedirectUriResponse";
 
 const loading = ref(true);
 const error = ref("");
 const settings = ref<ISettings | null>(null);
 const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
 const dataRefreshKey = ref(1);
+const youTubeOAuth2RedirectUriCopied = ref(false);
+const youTubeOAuth2RedirectUri = ref<string | null>(null);
+
+const youTubeOAuth2RedirectCopyBtnText = computed((): string => {
+  if (youTubeOAuth2RedirectUriCopied.value) {
+    return "Copied";
+  }
+
+  return "Copy";
+});
+
+const youTubeOAuth2RedirectCopyBtnColor = computed((): string => {
+  if (youTubeOAuth2RedirectUriCopied.value) {
+    return "success";
+  }
+
+  return "primary";
+});
+
+function copyYouTubeOAuth2RedirectUri() {
+  if (youTubeOAuth2RedirectUri.value) {
+    navigator.clipboard.writeText(youTubeOAuth2RedirectUri.value); // https://stackoverflow.com/a/61503961
+    youTubeOAuth2RedirectUriCopied.value = true;
+  }
+}
 
 function handleApiError(result: Response, message: string) {
+  console.log(result.ok);
   if (!result.ok) {
     error.value = `API error (${result.status} ${result.statusText}): ${message}`;
     return true;
@@ -109,14 +151,17 @@ function handleApiError(result: Response, message: string) {
 }
 
 async function refreshData() {
-  const [settingsResult, youtubeAuthStatusResult] = await Promise.all([
+  const [settingsResult, youtubeAuthStatusResult, youTubeOAuth2RedirectUriResult] = await Promise.all([
     fetch("/api/v1/settings"),
     fetch("/api/v1/youtube/auth/status"),
+    fetch("/api/v1/youtube/auth/meta/redirectUri"),
   ]);
 
   if (handleApiError(settingsResult, "Unable to load settings")
     || handleApiError(youtubeAuthStatusResult, "Unable to load YouTube auth status")
+    || handleApiError(youTubeOAuth2RedirectUriResult, "Unable to obtain YouTube OAuth2 redirect URI from server")
   ) {
+    loading.value = false;
     return;
   }
 
@@ -124,6 +169,10 @@ async function refreshData() {
     settingsResult.json(),
     youtubeAuthStatusResult.json(),
   ]);
+
+  youTubeOAuth2RedirectUri.value = (
+    (await youTubeOAuth2RedirectUriResult.json()) as IYouTubeRedirectUriResponse
+  ).redirectUri;
 
   loading.value = false;
   dataRefreshKey.value++;

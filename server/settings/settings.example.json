@@ -1,1 +1,1 @@
-{"eventName":"PCH District Macon Event","eventTbaCode":"2023gamac","videoSearchDirectory":"./videos","googleClientId":"","googleRedirectUri":"http://localhost:3000/api/v1/youtube/auth/callback","googleAuthStatus":"Not started"}
+{"eventName":"Demo Event","eventTbaCode":"","videoSearchDirectory":"./videos","googleClientId":"","googleAuthStatus":"Not started"}
