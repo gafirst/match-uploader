@@ -1,4 +1,4 @@
-import Paths, { TPaths } from './Paths';
+import Paths, { type TPaths } from './Paths';
 
 interface IPathObj {
   Base: string;
@@ -12,9 +12,9 @@ function getFullPaths(
   parent: IPathObj,
   baseUrl: string,
 ): IPathObj {
-  const url = (baseUrl + parent.Base),
-    keys = Object.keys(parent),
-    retVal: IPathObj = { Base: url };
+  const url = (baseUrl + parent.Base);
+    const keys = Object.keys(parent);
+    const retVal: IPathObj = { Base: url };
   // Iterate keys
   for (const key of keys) {
     const pval = parent[key];

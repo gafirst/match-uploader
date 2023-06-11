@@ -4,10 +4,20 @@
 
 /* eslint-disable node/no-process-env */
 
+if (!process.env.HOST) {
+  throw Error("HOST environment variable must be set");
+}
 
 export default {
   NodeEnv: (process.env.NODE_ENV ?? ''),
+  Host: (process.env.HOST),
   Port: (process.env.PORT ?? 0),
+  SettingsLocations: {
+    SettingsFile: (process.env.SETTINGS_FILE_LOCATION) ?? './settings/settings.json',
+    SettingsTemplateFile: (process.env.SETTINGS_TEMPLATE_FILE_LOCATION) ?? './settings/settings.example.json',
+    SecretsFile: (process.env.SECRETS_FILE_LOCATION) ?? './settings/secrets.json',
+    SecretsTemplateFile: (process.env.SECRETS_TEMPLATE_FILE_LOCATION) ?? './settings/secrets.example.json',
+  },
   CookieProps: {
     Key: 'ExpressGeneratorTs',
     Secret: (process.env.COOKIE_SECRET ?? ''),
@@ -22,7 +32,7 @@ export default {
     },
   },
   Jwt: {
-    Secret: (process.env.JWT_SECRET ??  ''),
+    Secret: (process.env.JWT_SECRET ?? ''),
     Exp: (process.env.COOKIE_EXP ?? ''), // exp at the same time as the cookie
   },
 } as const;

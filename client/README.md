@@ -26,6 +26,19 @@ npm run dev
 pnpm dev
 ```
 
+### Lint
+
+```
+# lint
+yarn lint
+
+# lint and fix fixable problems
+yarn lint:fix
+
+# lint (without fixing problems) and output JSON report
+yarn lint:ci
+```
+
 ### Compiles and minifies for production
 
 ```

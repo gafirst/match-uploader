@@ -2,7 +2,7 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import path from 'path';
 import helmet from 'helmet';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import logger from 'jet-logger';
 
 import 'express-async-errors';
@@ -37,9 +37,9 @@ if (EnvVars.NodeEnv === NodeEnvs.Production) {
 app.use(Paths.Base, apiRouter);
 
 // Serve frontend
-app.use(express.static(path.join(__dirname, "../../client/dist")));
-app.get("*", (request, response) => {
-  response.sendFile(path.join(__dirname, "../../client/dist", "index.html"));
+app.use(express.static(path.join(__dirname, '../../client/dist')));
+app.get('*', (request, response) => {
+  response.sendFile(path.join(__dirname, '../../client/dist', 'index.html'));
 });
 
 // Add error handler

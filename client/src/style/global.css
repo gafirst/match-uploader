@@ -6,7 +6,7 @@
 }
 
 html {
-    overflow: hidden !important; /* FIXME(evan): this might break everything */
+    overflow-y: auto !important;
 }
 
 body {

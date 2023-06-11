@@ -8,10 +8,10 @@
 *.sln
 *.sw?
 
-# Environment dependent files
 **/node_modules
 dist/
 **/**/*.log
-*.env
 
+*.env
+secrets.json
 settings.json

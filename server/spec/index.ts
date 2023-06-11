@@ -4,24 +4,16 @@ import Jasmine from 'jasmine';
 import { parse } from 'ts-command-line-args';
 import logger from 'jet-logger';
 
-
-// **** Types **** //
-
 interface IArgs {
   testFile: string;
 }
 
-
-// **** Setup **** //
-
-// ** Init ** //
-
 // NOTE: MUST BE FIRST!! Load env vars
-const result2 = dotenv.config({
+const testEnv = dotenv.config({
   path: './env/test.env',
 });
-if (result2.error) {
-  throw result2.error;
+if (testEnv.error) {
+  throw testEnv.error;
 }
 
 // Setup command line options.
@@ -32,10 +24,6 @@ const args = parse<IArgs>({
   },
 });
 
-
-// ** Start Jasmine ** //
-
-// Init Jasmine
 const jasmine = new Jasmine();
 jasmine.exitOnCompletion = false;
 
@@ -50,12 +38,12 @@ jasmine.loadConfig({
 });
 
 // Run all or a single unit-test
-let execResp: Promise<jasmine.JasmineDoneInfo> | undefined;
+let execResp;
 if (args.testFile) {
   const testFile = args.testFile;
-  find.file(testFile + '.spec.ts', './spec', (files: string[]) => {
+  find.file(testFile + '.spec.ts', './spec', async (files: string[]) => {
     if (files.length === 1) {
-      jasmine.execute([files[0]]);
+      await jasmine.execute([files[0]]);
     } else {
       logger.err('Test file not found!');
     }
@@ -65,7 +53,7 @@ if (args.testFile) {
 }
 
 // Wait for tests to finish
-(async () => {
+void (async () => {
   if (!!execResp) {
     const info = await execResp;
     if (info.overallStatus === 'passed') {

@@ -1,0 +1,85 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  server_ci:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'yarn'
+        cache-dependency-path: '**/yarn.lock'
+    - name: yarn install
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: install --frozen-lockfile
+        dir: server
+    - name: lint
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: lint:ci
+        dir: server
+      continue-on-error: true
+    - name: Annotate eslint results
+      uses: ataylorme/eslint-annotate-action@v2
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        report-json: "server/eslint_report.json"
+        check-name: "eslint / server"
+
+  client_ci:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'yarn'
+        cache-dependency-path: '**/yarn.lock'
+    - name: yarn install
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: install --frozen-lockfile
+        dir: client
+    - name: lint
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: lint:ci
+        dir: client
+      continue-on-error: true
+    - name: Annotate eslint results
+      uses: ataylorme/eslint-annotate-action@v2
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        report-json: "client/eslint_report.json"
+        check-name: "eslint / client"
+
+  build_client:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'yarn'
+        cache-dependency-path: '**/yarn.lock'
+    - name: yarn install
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: install --frozen-lockfile
+        dir: client
+    - name: build
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: build
+        dir: client
