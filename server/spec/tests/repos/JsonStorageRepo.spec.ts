@@ -1,18 +1,18 @@
 /* globals describe expect expectAsync it */
-import mockFs from 'mock-fs';
-import {type ISettings} from "@src/models/Settings";
-import {readSettingsJson} from "@src/repos/JsonStorageRepo";
+import mockFs from "mock-fs";
+import { type ISettings } from "@src/models/Settings";
+import { readSettingsJson } from "@src/repos/JsonStorageRepo";
 
 const sampleSettings: ISettings = {
-  eventName: 'Example Event',
-  eventTbaCode: '2023gacmp',
-  videoSearchDirectory: './videos',
+  eventName: "Example Event",
+  eventTbaCode: "2023gacmp",
+  videoSearchDirectory: "./videos",
   googleAuthStatus: "",
   googleClientId: "",
   googleRedirectUri: "",
 };
 
-describe('readSettingsJson', () => {
+describe("readSettingsJson", () => {
   it("should throw if settings file doesn't exist", async () => {
     mockFs({ settings: {} });
     const settings = readSettingsJson("houdini.json");
@@ -20,7 +20,7 @@ describe('readSettingsJson', () => {
     mockFs.restore();
   });
 
-  it('should use template file when existing file is not found', async () => {
+  it("should use template file when existing file is not found", async () => {
     mockFs({
       "settings/settings.example.json": JSON.stringify(sampleSettings),
     });
@@ -31,18 +31,18 @@ describe('readSettingsJson', () => {
     mockFs.restore();
   });
 
-  it('should return active settings object when the file exists, even if a template file is also provided',
+  it("should return active settings object when the file exists, even if a template file is also provided",
       async () => {
     mockFs({
-      'settings/settings.example.json': JSON.stringify(sampleSettings),
-      'settings/settings.json': JSON.stringify({
+      "settings/settings.example.json": JSON.stringify(sampleSettings),
+      "settings/settings.json": JSON.stringify({
           ...sampleSettings,
-          eventName: 'Rosstravaganza 2023',
+          eventName: "Rosstravaganza 2023",
         }),
     });
 
     const settings = await readSettingsJson("settings/settings.json");
-    expect(settings).toEqual({ ...sampleSettings, eventName: 'Rosstravaganza 2023' });
+    expect(settings).toEqual({ ...sampleSettings, eventName: "Rosstravaganza 2023" });
     mockFs.restore();
   });
 });

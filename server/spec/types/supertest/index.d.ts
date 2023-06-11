@@ -1,7 +1,6 @@
-import 'supertest';
+import "supertest";
 
-
-declare module 'supertest' {
+declare module "supertest" {
 
   export interface Response {
     headers: Record<string, string[]>;

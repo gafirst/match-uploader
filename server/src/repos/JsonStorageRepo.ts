@@ -1,10 +1,10 @@
-import { readFile, writeFile, copyFile } from 'fs/promises';
-import { type PathLike } from 'fs';
+import { readFile, writeFile, copyFile } from "fs/promises";
+import { type PathLike } from "fs";
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-import {getSystemErrorName} from "util";
+import { getSystemErrorName } from "util";
 import logger from "jet-logger";
 
-const DEFAULT_ENCODING = 'utf-8';
+const DEFAULT_ENCODING = "utf-8";
 
 interface IErrorObj {
   errno: number;

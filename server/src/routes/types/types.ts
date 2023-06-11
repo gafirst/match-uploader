@@ -1,5 +1,5 @@
-import type * as e from 'express';
-import { type Query } from 'express-serve-static-core';
+import type * as e from "express";
+import { type Query } from "express-serve-static-core";
 
 export interface IReq<T = void> extends e.Request {
   body: T
