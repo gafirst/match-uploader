@@ -1,8 +1,8 @@
-import dotenv from 'dotenv';
-import find from 'find';
-import Jasmine from 'jasmine';
-import { parse } from 'ts-command-line-args';
-import logger from 'jet-logger';
+import dotenv from "dotenv";
+import find from "find";
+import Jasmine from "jasmine";
+import { parse } from "ts-command-line-args";
+import logger from "jet-logger";
 
 interface IArgs {
   testFile: string;
@@ -10,7 +10,7 @@ interface IArgs {
 
 // NOTE: MUST BE FIRST!! Load env vars
 const testEnv = dotenv.config({
-  path: './env/test.env',
+  path: "./env/test.env",
 });
 if (testEnv.error) {
   throw testEnv.error;
@@ -20,7 +20,7 @@ if (testEnv.error) {
 const args = parse<IArgs>({
   testFile: {
     type: String,
-    defaultValue: '',
+    defaultValue: "",
   },
 });
 
@@ -30,9 +30,9 @@ jasmine.exitOnCompletion = false;
 // Set location of test files
 jasmine.loadConfig({
   random: true,
-  spec_dir: 'spec',
+  spec_dir: "spec",
   spec_files: [
-    './tests/**/*.spec.ts',
+    "./tests/**/*.spec.ts",
   ],
   stopSpecOnExpectationFailure: false,
 });
@@ -41,11 +41,11 @@ jasmine.loadConfig({
 let execResp;
 if (args.testFile) {
   const testFile = args.testFile;
-  find.file(testFile + '.spec.ts', './spec', async (files: string[]) => {
+  find.file(testFile + ".spec.ts", "./spec", async (files: string[]) => {
     if (files.length === 1) {
       await jasmine.execute([files[0]]);
     } else {
-      logger.err('Test file not found!');
+      logger.err("Test file not found!");
     }
   });
 } else {
@@ -56,10 +56,10 @@ if (args.testFile) {
 void (async () => {
   if (!!execResp) {
     const info = await execResp;
-    if (info.overallStatus === 'passed') {
-      logger.info('All tested passed');
+    if (info.overallStatus === "passed") {
+      logger.info("All tested passed");
     } else {
-      logger.err('One or more tests failed');
+      logger.err("One or more tests failed");
     }
   }
 })();

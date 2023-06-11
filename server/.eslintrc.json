@@ -38,12 +38,17 @@
     "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/member-delimiter-style": "off", // they suggest using a prettier instead
     "@typescript-eslint/indent": "off",  // they suggest using a prettier instead
-    "@typescript-eslint/object-curly-spacing": "off", // TODO: Migrate this in a separate PR
-    "no-multiple-empty-lines": "off", // TODO: Migrate this in a separate PR
-    "quotes": "off", // TODO: Migrate this in a separate PR
+    "@typescript-eslint/object-curly-spacing": ["error", "always", {
+      "arraysInObjects": false,
+      "objectsInObjects": true
+    }],
+    "no-multiple-empty-lines": "error",
+    "quotes": ["error", "double", {
+      "avoidEscape": true,
+      "allowTemplateLiterals": true
+    }],
     "@typescript-eslint/no-misused-promises": "off",
     "no-extra-boolean-cast": "off",
-
     "node/no-missing-import": "off",
     "node/no-unpublished-import": "off"
   },
