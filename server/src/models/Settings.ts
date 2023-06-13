@@ -4,6 +4,8 @@ export interface ISettings {
     videoSearchDirectory: string,
     googleClientId: string,
     googleAuthStatus: string,
+    playoffsType: string,
+    sandboxModeEnabled: boolean,
 }
 
 export type SettingsKey = keyof ISettings;

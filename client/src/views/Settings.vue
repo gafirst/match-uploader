@@ -2,7 +2,7 @@
   <h1>Settings</h1>
   <VRow>
     <VCol md="6">
-      <VProgressCircular v-if="loading" indeterminate/>
+      <VProgressCircular v-if="loading" indeterminate />
       <VAlert v-else-if="!!error"
               color="error"
       >
@@ -35,6 +35,13 @@
                                input-type="text"
                                setting-type="setting"
           />
+
+          <p class="mb-1">Playoffs type</p>
+          <BtnSelect :choices="PLAYOFF_MATCH_TYPES"
+                     :default-value="settings?.playoffsType"
+                     :loading="savingPlayoffMatchType"
+                     @on-choice-selected="savePlayoffMatchType"
+          />
         </VForm>
 
         <h2>YouTube</h2>
@@ -43,13 +50,13 @@
         <VAlert v-if="!youTubeAuthState?.accessTokenStored"
                 class="mb-3"
         >
-          In your Google Cloud project, create an OAuth2 web client.<br/>
-          <br/>
+          In your Google Cloud project, create an OAuth2 web client.<br />
+          <br />
           <div v-if="youTubeOAuth2RedirectUri">
             Make sure to add the following as an authorized redirect URI:
             <VTextField :value="youTubeOAuth2RedirectUri"
-                        variant="underlined"
                         readonly
+                        variant="underlined"
                         @focus="$event.target.select()"
             >
               <template v-slot:append>
@@ -108,6 +115,8 @@ import {ISettings, SettingType} from "@/types/ISettings";
 import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vue";
 import {IYouTubeAuthState} from "@/types/youtube/IYouTubeAuthState";
 import {IYouTubeRedirectUriResponse} from "@/types/youtube/IYouTubeRedirectUriResponse";
+import BtnSelect from "@/components/form/BtnSelect.vue";
+import {PLAYOFF_BEST_OF_3, PLAYOFF_DOUBLE_ELIM, PLAYOFF_MATCH_TYPES, PlayoffMatchType} from "@/types/MatchType";
 
 const loading = ref(true);
 const error = ref("");
@@ -116,6 +125,7 @@ const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
 const dataRefreshKey = ref(1);
 const youTubeOAuth2RedirectUriCopied = ref(false);
 const youTubeOAuth2RedirectUri = ref<string | null>(null);
+const savingPlayoffMatchType = ref(false);
 
 const youTubeOAuth2RedirectCopyBtnText = computed((): string => {
   if (youTubeOAuth2RedirectUriCopied.value) {
@@ -200,6 +210,13 @@ async function submit(settingName: string, value: string, settingType: SettingTy
 
   return submitResult.ok;
 }
+
+async function savePlayoffMatchType(value: string): Promise<void> {
+  savingPlayoffMatchType.value = true;
+  await submit("playoffsType", value, "setting");
+  savingPlayoffMatchType.value = false;
+}
+
 </script>
 
 <style scoped>
