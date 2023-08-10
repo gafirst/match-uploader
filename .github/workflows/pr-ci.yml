@@ -34,6 +34,20 @@ jobs:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         report-json: "server/eslint_report.json"
         check-name: "eslint / server"
+    - name: Run unit tests
+      run: cd server &&
+          npm run coverage:ci
+    - name: Reply with coverage report
+      uses: romeovs/lcov-reporter-action@v0.2.16
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        lcov-file: ./server/coverage/lcov.info
+    - name: Very Good Coverage
+      uses: VeryGoodOpenSource/very_good_coverage@v2
+      with:
+        path: server/coverage/lcov.info
+        min_coverage: 75
+
 
   client_ci:
     runs-on: ubuntu-latest
