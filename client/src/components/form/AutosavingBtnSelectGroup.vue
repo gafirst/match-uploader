@@ -8,6 +8,7 @@
           :disabled="!!loading"
           color="primary"
           :ripple="false"
+          :prepend-icon="getPrependIcon(value)"
           @click="() => onChoiceSelected(value)"
     >
       {{ value }}
@@ -16,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, toRef} from "vue";
+import {ref} from "vue";
 
 interface IProps {
   /**
@@ -39,9 +40,14 @@ interface IEmits {
 
 const emit = defineEmits<IEmits>();
 
-const selectedValue = toRef(props, "defaultValue") ?? ref<string|null>(null);
+// const selectedValue = toRef(props, "defaultValue") ?? ref<string|null>(null);
+const selectedValue = ref<string|null>(null);
 
 function valueIsSelected(value: string): boolean {
+  if (selectedValue.value === null) {
+    return value === props.defaultValue;
+  }
+
   return value === selectedValue.value;
 }
 
@@ -50,6 +56,17 @@ function onChoiceSelected(value: string): void {
   emit("onChoiceSelected", value);
 }
 
+function getPrependIcon(value: string): string|undefined {
+  const selected = valueIsSelected(value);
+
+  if (props.loading && selected) {
+    return "mdi-loading mdi-spin";
+  }
+
+  if (selected) {
+    return "mdi-check";
+  }
+}
 
 </script>
 
