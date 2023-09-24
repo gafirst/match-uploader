@@ -118,3 +118,6 @@ eslint_report.json
 
 # MacOS folder attributes file
 .DS_Store
+
+# Videos directory
+/server/videos/

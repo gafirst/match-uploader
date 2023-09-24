@@ -12,7 +12,7 @@ export async function getRecommendedVideoFiles(matchKey: MatchKey): Promise<Matc
 
     const files = await getFilesMatchingPattern(settings.videoSearchDirectory, `${fullMatchName}*`);
 
-    const parseVideoLabelsRegex = /^[A-Za-z]+ (Match )?\d{1,3}\s?([A-Za-z]*)\..*$/;
+    const parseVideoLabelsRegex = /^[A-Za-z]+ (Match )?\d{1,3}\s?([A-Za-z\s]*)\..*$/;
 
     return files.map((file) => {
         const proposedVideoLabel = parseVideoLabelsRegex.exec(file);
