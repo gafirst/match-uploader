@@ -1,4 +1,5 @@
 <template>
+  <!--  TODO: These need to have an error state -->
   <div class="d-flex flex-wrap">
     <VBtn v-for="value in choices"
           :key="value"
@@ -18,6 +19,11 @@
 
 <script lang="ts" setup>
 import {ref} from "vue";
+
+interface IBtnSelectGroupChoice {
+  value: string,
+  label: string,
+}
 
 interface IProps {
   /**
@@ -52,6 +58,10 @@ function valueIsSelected(value: string): boolean {
 }
 
 function onChoiceSelected(value: string): void {
+  if (value === selectedValue.value) {
+    return;
+  }
+
   selectedValue.value = value;
   emit("onChoiceSelected", value);
 }

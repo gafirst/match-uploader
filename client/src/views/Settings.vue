@@ -13,7 +13,7 @@
         <VForm class="mt-4" @submit.prevent>
           <AutosavingTextInput :key="`eventName-${dataRefreshKey}`"
                                :on-submit="submit"
-                               :initial-value="settings?.eventName"
+                               :initial-value="settingsStore.settings?.eventName"
                                name="eventName"
                                label="Event name"
                                input-type="text"
@@ -21,7 +21,7 @@
           />
           <AutosavingTextInput :key="`eventTbaCode-${dataRefreshKey}`"
                                :on-submit="submit"
-                               :initial-value="settings?.eventTbaCode"
+                               :initial-value="settingsStore.settings?.eventTbaCode"
                                name="eventTbaCode"
                                label="Event TBA code"
                                input-type="text"
@@ -29,7 +29,7 @@
           />
           <AutosavingTextInput :key="`videoSearchDirectory-${dataRefreshKey}`"
                                :on-submit="submit"
-                               :initial-value="settings?.videoSearchDirectory"
+                               :initial-value="settingsStore.settings?.videoSearchDirectory"
                                name="videoSearchDirectory"
                                label="Video search directory"
                                input-type="text"
@@ -38,23 +38,30 @@
 
           <p class="mb-1">Playoffs type</p>
           <AutosavingBtnSelectGroup :choices="PLAYOFF_MATCH_TYPES"
-                                    :default-value="settings?.playoffsType"
+                                    :default-value="settingsStore.settings?.playoffsType"
                                     :loading="savingPlayoffMatchType"
                                     @on-choice-selected="savePlayoffMatchType"
+          />
+
+          <p class="mb-1">Sandbox mode</p>
+          <AutosavingBtnSelectGroup :choices="['On', 'Off']"
+                                    :default-value="settingsStore.settings?.sandboxModeEnabled ? 'On' : 'Off'"
+                                    :loading="savingSandboxMode"
+                                    @on-choice-selected="saveSandboxMode"
           />
         </VForm>
 
         <h2>YouTube</h2>
 
         <h3 class="mb-2">OAuth2 client details</h3>
-        <VAlert v-if="!youTubeAuthState?.accessTokenStored"
+        <VAlert v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
                 class="mb-3"
         >
           In your Google Cloud project, create an OAuth2 web client.<br />
           <br />
-          <div v-if="youTubeOAuth2RedirectUri">
+          <div v-if="settingsStore.youTubeOAuth2RedirectUri">
             Make sure to add the following as an authorized redirect URI:
-            <VTextField :value="youTubeOAuth2RedirectUri"
+            <VTextField :value="settingsStore.youTubeOAuth2RedirectUri"
                         readonly
                         variant="underlined"
                         @focus="$event.target.select()"
@@ -69,38 +76,36 @@
             </VTextField>
           </div>
         </VAlert>
-        <VAlert v-if="youTubeAuthState?.accessTokenStored"
+        <VAlert v-if="settingsStore.youTubeAuthState?.accessTokenStored"
                 class="mb-3"
                 color="info"
         >
           You already have an active YouTube connection. Please use the Reset YouTube Connection button below to
           adjust your YouTube OAuth2 client details.
         </VAlert>
-        <AutosavingTextInput :key="`googleClientId-${dataRefreshKey}`"
-                             :on-submit="submit"
-                             :initial-value="settings?.googleClientId"
+        <AutosavingTextInput :on-submit="submit"
+                             :initial-value="settingsStore.settings?.googleClientId"
                              name="googleClientId"
                              label="OAuth2 client ID"
-                             :disabled="youTubeAuthState?.accessTokenStored"
+                             :disabled="settingsStore.youTubeAuthState?.accessTokenStored"
                              input-type="text"
                              setting-type="setting"
-                             @saved-value-updated="refreshData"
+                             @saved-value-updated="() => refreshData(false)"
         />
 
-        <AutosavingTextInput :key="`googleClientSecret-${dataRefreshKey}`"
-                             :on-submit="submit"
+        <AutosavingTextInput :on-submit="submit"
                              initial-value=""
                              name="googleClientSecret"
                              label="OAuth2 client secret"
-                             :help-text="youTubeAuthState?.clientSecretProvided ? 'Current value hidden' : ''"
+                             :help-text="settingsStore.youTubeAuthState?.clientSecretProvided ? 'Current value hidden' : ''"
                              input-type="password"
                              setting-type="secret"
-                             :disabled="youTubeAuthState?.accessTokenStored"
+                             :disabled="settingsStore.youTubeAuthState?.accessTokenStored"
                              class="mb-3"
-                             @saved-value-updated="refreshData"
+                             @saved-value-updated="() => refreshData(false)"
         />
-        <YouTubeConnectionInfo :google-auth-status="settings?.googleAuthStatus"
-                               :you-tube-auth-state="youTubeAuthState"
+        <YouTubeConnectionInfo :google-auth-status="settingsStore.settings?.googleAuthStatus"
+                               :you-tube-auth-state="settingsStore.youTubeAuthState"
                                @trigger-refresh="refreshData"
         />
       </div>
@@ -111,20 +116,27 @@
 <script lang="ts" setup>
 import AutosavingTextInput from "@/components/form/AutosavingTextInput.vue";
 import {computed, onMounted, ref} from "vue";
-import {ISettings, SettingType} from "@/types/ISettings";
+import {SettingType} from "@/types/ISettings";
 import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vue";
-import {IYouTubeAuthState} from "@/types/youtube/IYouTubeAuthState";
-import {IYouTubeRedirectUriResponse} from "@/types/youtube/IYouTubeRedirectUriResponse";
 import {PLAYOFF_MATCH_TYPES} from "@/types/MatchType";
 import AutosavingBtnSelectGroup from "@/components/form/AutosavingBtnSelectGroup.vue";
+import {useSettingsStore} from "@/stores/settings";
 
-const loading = ref(true);
-const error = ref("");
-const settings = ref<ISettings | null>(null);
-const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
+// const loading = ref(true);
+const loading = computed(() => {
+  return settingsStore.loading;
+});
+
+// const error = ref("");
+const error = computed(() => {
+  return settingsStore.error;
+});
+const settingsStore = useSettingsStore();
+// const settings = ref<ISettings | null>(null);
+// const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
 const dataRefreshKey = ref(1);
 const youTubeOAuth2RedirectUriCopied = ref(false);
-const youTubeOAuth2RedirectUri = ref<string | null>(null);
+// const youTubeOAuth2RedirectUri = ref<string | null>(null);
 const savingPlayoffMatchType = ref(false);
 
 const youTubeOAuth2RedirectCopyBtnText = computed((): string => {
@@ -144,47 +156,14 @@ const youTubeOAuth2RedirectCopyBtnColor = computed((): string => {
 });
 
 function copyYouTubeOAuth2RedirectUri() {
-  if (youTubeOAuth2RedirectUri.value) {
-    navigator.clipboard.writeText(youTubeOAuth2RedirectUri.value); // https://stackoverflow.com/a/61503961
+  if (settingsStore.youTubeOAuth2RedirectUri) {
+    navigator.clipboard.writeText(settingsStore.youTubeOAuth2RedirectUri); // https://stackoverflow.com/a/61503961
     youTubeOAuth2RedirectUriCopied.value = true;
   }
 }
 
-function handleApiError(result: Response, message: string) {
-  console.log(result.ok);
-  if (!result.ok) {
-    error.value = `API error (${result.status} ${result.statusText}): ${message}`;
-    return true;
-  }
-
-  return false;
-}
-
-async function refreshData() {
-  const [settingsResult, youtubeAuthStatusResult, youTubeOAuth2RedirectUriResult] = await Promise.all([
-    fetch("/api/v1/settings"),
-    fetch("/api/v1/youtube/auth/status"),
-    fetch("/api/v1/youtube/auth/meta/redirectUri"),
-  ]);
-
-  if (handleApiError(settingsResult, "Unable to load settings")
-    || handleApiError(youtubeAuthStatusResult, "Unable to load YouTube auth status")
-    || handleApiError(youTubeOAuth2RedirectUriResult, "Unable to obtain YouTube OAuth2 redirect URI from server")
-  ) {
-    loading.value = false;
-    return;
-  }
-
-  [settings.value, youTubeAuthState.value] = await Promise.all([
-    settingsResult.json(),
-    youtubeAuthStatusResult.json(),
-  ]);
-
-  youTubeOAuth2RedirectUri.value = (
-    (await youTubeOAuth2RedirectUriResult.json()) as IYouTubeRedirectUriResponse
-  ).redirectUri;
-
-  loading.value = false;
+async function refreshData(showLoading: boolean = true) {
+  await settingsStore.getSettings(showLoading);
   dataRefreshKey.value++;
 }
 
@@ -192,29 +171,30 @@ onMounted(async () => {
   await refreshData();
 });
 
-async function submit(settingName: string, value: string, settingType: SettingType) {
-  const submitResult = await fetch(`/api/v1/settings/${settingName}`, {
-    method: "POST",
-    body: JSON.stringify({
-      value,
-      settingType,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!submitResult.ok) {
-    return `Save error: ${submitResult.status} ${submitResult.statusText}`;
-  }
-
-  return submitResult.ok;
+async function submit(settingName: string, value: string | boolean, settingType: SettingType) {
+  return await settingsStore.saveSetting(settingName, value, settingType);
 }
 
 async function savePlayoffMatchType(value: string): Promise<void> {
   savingPlayoffMatchType.value = true;
   await submit("playoffsType", value, "setting");
+  await refreshData(false);
   savingPlayoffMatchType.value = false;
+}
+
+// TODO(Evan): Move into its own component
+const savingSandboxMode = ref(false);
+
+const handleBtnSelectGroupError = (e: Error) => {
+  console.error(e);
+  savingSandboxMode.value = false;
+};
+
+async function saveSandboxMode(value: string): Promise<void> {
+  savingSandboxMode.value = true;
+  await submit("sandboxModeEnabled", value === "On", "setting");
+  await refreshData(false);
+  savingSandboxMode.value = false;
 }
 
 </script>

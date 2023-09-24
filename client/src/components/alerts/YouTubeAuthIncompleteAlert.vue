@@ -1,0 +1,18 @@
+<template>
+  <VAlert v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
+          color="error"
+          variant="tonal"
+          :rounded="0"
+          icon="mdi-alert-circle"
+  >
+    <template v-slot:text>
+      <strong>YouTube authentication incomplete.</strong> YouTube uploads will not work until you complete the YouTube
+      setup steps in <router-link to="/settings">Settings</router-link>.
+    </template>
+  </VAlert>
+</template>
+<script lang="ts" setup>
+import {useSettingsStore} from "@/stores/settings";
+
+const settingsStore = useSettingsStore();
+</script>

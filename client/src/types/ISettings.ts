@@ -8,7 +8,8 @@ export interface ISettings {
   googleClientId: string,
   googleRedirectUri: string,
   googleAuthStatus: string,
-  [key: string]: string,
+  sandboxModeEnabled: boolean,
+  [key: string]: string | boolean,
 }
 
 export type SettingType = "setting" | "secret";

@@ -1,9 +1,9 @@
-import { Router } from "express";
+import {Router} from "express";
 import Paths from "@src/routes/constants/Paths";
-import { type IReq, type IRes } from "@src/routes/types/types";
-import { getSettings, setSecret, setSetting } from "@src/services/SettingsService";
-import { body, matchedData, param, validationResult } from "express-validator";
-import { type ISecretSettings, type ISettings } from "@src/models/Settings";
+import {type IReq, type IRes} from "@src/routes/types/types";
+import {getSettings, setSecret, setSetting} from "@src/services/SettingsService";
+import {body, matchedData, param, validationResult} from "express-validator";
+import {type ISecretSettings, type ISettings} from "@src/models/Settings";
 
 export const settingsRouter = Router();
 
@@ -19,7 +19,7 @@ async function listSettings(req: IReq, res: IRes): Promise<void> {
 settingsRouter.post(
   Paths.Settings.Update,
   param("name", "Setting name to be updated is required and must be a string").isString(),
-  body("value", "New setting value is required and must be a string").isString().trim(),
+  body("value", "New setting value is required and must be non-null").exists({ checkNull: true }).trim(),
   body("settingType", "Type must be 'setting' or 'secret' to indicate desired storage location")
     .isIn(["setting", "secret"])
     .trim(),
