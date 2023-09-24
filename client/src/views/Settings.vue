@@ -37,10 +37,10 @@
           />
 
           <p class="mb-1">Playoffs type</p>
-          <BtnSelect :choices="PLAYOFF_MATCH_TYPES"
-                     :default-value="settings?.playoffsType"
-                     :loading="savingPlayoffMatchType"
-                     @on-choice-selected="savePlayoffMatchType"
+          <AutosavingBtnSelectGroup :choices="PLAYOFF_MATCH_TYPES"
+                                    :default-value="settings?.playoffsType"
+                                    :loading="savingPlayoffMatchType"
+                                    @on-choice-selected="savePlayoffMatchType"
           />
         </VForm>
 
@@ -115,8 +115,8 @@ import {ISettings, SettingType} from "@/types/ISettings";
 import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vue";
 import {IYouTubeAuthState} from "@/types/youtube/IYouTubeAuthState";
 import {IYouTubeRedirectUriResponse} from "@/types/youtube/IYouTubeRedirectUriResponse";
-import BtnSelect from "@/components/form/BtnSelect.vue";
-import {PLAYOFF_BEST_OF_3, PLAYOFF_DOUBLE_ELIM, PLAYOFF_MATCH_TYPES, PlayoffMatchType} from "@/types/MatchType";
+import {PLAYOFF_MATCH_TYPES} from "@/types/MatchType";
+import AutosavingBtnSelectGroup from "@/components/form/AutosavingBtnSelectGroup.vue";
 
 const loading = ref(true);
 const error = ref("");

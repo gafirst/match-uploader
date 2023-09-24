@@ -1,5 +1,7 @@
 <template>
   <VNavigationDrawer permanent
+                     expand-on-hover
+                     rail
                      app
                      location="left"
   >

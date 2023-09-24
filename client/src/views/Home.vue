@@ -1,6 +1,6 @@
 <template>
   <VRow>
-    <VCol md="6">
+    <VCol cols="12" md="6">
       <h1 class="mb-2">Upload match</h1>
 
       <VAlert v-if="!!error"
@@ -10,45 +10,12 @@
       </VAlert>
 
       <h2 class="mb-2">Match info</h2>
-      <MatchSelector
-        @match-selected="matchSelected"
-      />
+      <MatchSelector />
 
-      <h3 class="mb-2">Video files</h3>
-      <div v-if="selectedMatchKey">
-        <VList v-if="videoFileSuggestions.length">
-          <VListItem v-for="file in videoFileSuggestions"
-                     :key="file.path"
-                     :title="file.path"
-                     :subtitle="file.videoLabel ? `Label: ${file.videoLabel}`: ''"
-          />
-        </VList>
-        <VAlert v-else
-                class="mb-2"
-                color="warning"
-        >
-          No video files found.
-        </VAlert>
-      </div>
-      <p v-else class="mb-2">No match selected</p>
-      <VExpansionPanels>
-        <VExpansionPanel>
-          <VExpansionPanelTitle>
-            How to name match video files
-          </VExpansionPanelTitle>
-          <VExpansionPanelText>
-            <strong>Qualification matches:</strong> <pre>Qualification #[ Label].mp4</pre>
-            <br />
-            <strong>Double elimination playoff matches:</strong> <pre>Playoff #[ Label].mp4</pre>
-            <br />
-            <strong>Best of 3 playoff matches:</strong> <pre>Quarterfinal #[ Label].mp4</pre> or
-            <pre>Semifinal #[ Label].mp4</pre> or <pre>Final #[ Label].mp4</pre>
-
-            <br />
-            Be sure to set your playoff type in Settings so we know how to parse your playoff matches!
-          </VExpansionPanelText>
-        </VExpansionPanel>
-      </VExpansionPanels>
+      <h3>
+        Video files
+      </h3>
+      <MatchVideoFiles />
 
       <h2
         class="mt-2 mb-2"
@@ -64,78 +31,92 @@
       <YouTubeChannelSelector />
       <MatchVideosUploader :videos="videoDataForUploads" />
     </VCol>
-    <VCol md="6">
+    <VCol v-if="matchStore.videoFileSuggestions.length"
+          cols="12"
+          md="6"
+    >
       <h1 class="mb-2">Preview</h1>
-      <h2 class="mb-2">Video 1: Overhead</h2>
-      <VSkeletonLoader boilerplate
-                       color="gray"
-                       class="mb-2"
-      />
-      <h3 class="mb-2">{{ selectedMatchKey ?? "Video title" }}</h3>
+
+      <VRow>
+        <VSheet class="d-flex flex-wrap">
+          <VSheet v-for="video in matchStore.videoFileSuggestions"
+                  :key="video.path"
+                  class="pa-3 video-preview"
+          >
+            <h2>{{ video.videoLabel ?? "Unlabeled" }}</h2>
+            <video :src="`videos/${video.path}`"
+                   controls
+                   preload="metadata"
+            />
+          </VSheet>
+        </VSheet>
+      </VRow>
+
+      <h2>YouTube channel</h2>
+      <VRow align="center">
+        <VCol>
+          <VAvatar v-if="selectedYouTubeChannel && selectedYouTubeChannel.thumbnailUrl"
+                   :image="selectedYouTubeChannel.thumbnailUrl"
+          />
+
+          {{ selectedYouTubeChannel?.title ?? "No channel selected" }}
+        </VCol>
+      </VRow>
+
+      <h2>Description</h2>
       <pre class="mb-2 description">{{ matchDescription ?? "Video description" }}</pre>
+
+      <!--      <VSkeletonLoader boilerplate-->
+      <!--                       color="gray"-->
+      <!--                       class="mb-2"-->
+      <!--      />-->
     </VCol>
   </VRow>
 </template>
 
 <script lang="ts" setup>
 import {computed, ref, watch} from "vue";
-import MatchSelector from "@/components/form/MatchSelector.vue";
-import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
+import MatchSelector from "@/components/matches/MatchSelector.vue";
 import {MatchVideoFileInfo} from "@/types/MatchVideoFileInfo";
 import YouTubeChannelSelector from "@/components/form/YouTubeChannelSelector.vue";
 import MatchVideosUploader from "@/components/matches/MatchVideosUploader.vue";
 import {MatchVideoUploadInfo} from "@/types/MatchVideoUploadInfo";
 import {YouTubeVideoPrivacy} from "@/types/youtube/YouTubeVideoPrivacy";
+import {useMatchStore} from "@/stores/match";
+import MatchVideoFiles from "@/components/matches/MatchVideoFiles.vue";
+import useSWRV from "swrv";
+import {IYouTubeStatus} from "@/types/youtube/IYouTubeStatus";
 
-const selectedMatchKey = ref<string|null>(null);
 const matchDescription = ref<string|null>(null);
-const videoSuggestionsLoading = ref(false);
 const error = ref("");
-
-function matchSelected(matchKey: string) {
-  selectedMatchKey.value = matchKey;
-}
 
 const videoFileSuggestions = ref<MatchVideoFileInfo[]>([]);
 
+const matchStore = useMatchStore();
 
-function handleApiError(result: Response, message: string) {
-  if (!result.ok) {
-    error.value = `API error (${result.status} ${result.statusText}): ${message}`;
-    return true;
-  }
+const { data: youTubeStatus, error: youTubeStatusError } = useSWRV("/api/v1/youtube/status");
 
-  return false;
+watch(youTubeStatusError, (err) => {
+  console.error("YouTube status error:", err.message);
+  error.value = `Error obtaining authenticated YouTube channel info: ${err.message}`;
+});
+
+function isYouTubeStatus(obj: object): obj is IYouTubeStatus {
+  return !!(obj as IYouTubeStatus).channels;
 }
 
-async function getSuggestions() {
-  videoSuggestionsLoading.value = true;
-
-  const suggestionsResult = await fetch(`/api/v1/matches/${selectedMatchKey.value}/videos/recommend`);
-
-  if (handleApiError(suggestionsResult, `Unable to retrieve video file suggestions for ${selectedMatchKey.value}`)) {
-    videoSuggestionsLoading.value = false;
-    return;
+const selectedYouTubeChannel = computed(() => {
+  if (!youTubeStatus.value) {
+    console.log("no status");
+    return null;
   }
 
-  const data = await suggestionsResult.json();
-
-  if (! Object.hasOwnProperty.call(data, "recommendedVideoFiles")) {
-    error.value =
-      `Error: video file suggestions API response missing recommendedVideoFiles property: ${JSON.stringify(data)}`;
-    videoSuggestionsLoading.value = false;
-    return;
+  if (!isYouTubeStatus(youTubeStatus.value)) {
+    return null;
   }
 
-  videoFileSuggestions.value = data.recommendedVideoFiles as MatchVideoFileInfo[];
-  videoSuggestionsLoading.value = false;
-}
-
-watch(selectedMatchKey, async (newValue, oldValue) => {
-  if (newValue) {
-    await getSuggestions();
-  }
-}, { immediate: true });
+  return youTubeStatus.value.channels.find((channel) => channel.id === matchStore.youTubeChannelId);
+});
 
 const videoDataForUploads = computed((): MatchVideoUploadInfo[] => {
   return videoFileSuggestions.value.map((file) => {
@@ -154,5 +135,16 @@ pre.description {
   white-space: pre-wrap;
   word-wrap: break-word;
   font-family: inherit;
+}
+
+.video-preview {
+  max-width: 15rem;
+}
+
+/* https://css-tricks.com/fluid-width-video/ */
+video {
+  /* override other styles to make responsive */
+  width: 100% !important;
+  height: auto !important;
 }
 </style>
