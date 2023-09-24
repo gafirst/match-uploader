@@ -91,6 +91,7 @@ export async function getAuthenticatedYouTubeChannels(): Promise<YouTubeChannelL
     return {
       id: item.id,
       title: item.snippet?.title,
+      thumbnailUrl: item.snippet?.thumbnails?.default?.url,
     };
   });
 }
