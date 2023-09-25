@@ -14,4 +14,5 @@
 import {useSettingsStore} from "@/stores/settings";
 
 const settingsStore = useSettingsStore();
+settingsStore.getSettings();
 </script>

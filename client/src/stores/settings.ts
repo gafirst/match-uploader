@@ -24,14 +24,22 @@ export const useSettingsStore = defineStore("settings", () => {
 
     async function getSettings(showLoading: boolean = true) {
         loading.value = showLoading;
-        const [settingsResult, youtubeAuthStatusResult, youTubeOAuth2RedirectUriResult] = await Promise.all([
-            fetch("/api/v1/settings"),
+        const settingsResult = await fetch("/api/v1/settings");
+
+        // Load settings separately from YouTube auth status and redirect URI
+        if (handleApiError(settingsResult, "Unable to load settings")) {
+            loading.value = false;
+            return;
+        } else {
+            settings.value = await settingsResult.json();
+        }
+
+        const [youtubeAuthStatusResult, youTubeOAuth2RedirectUriResult] = await Promise.all([
             fetch("/api/v1/youtube/auth/status"),
             fetch("/api/v1/youtube/auth/meta/redirectUri"),
         ]);
 
-        if (handleApiError(settingsResult, "Unable to load settings")
-            || handleApiError(youtubeAuthStatusResult, "Unable to load YouTube auth status")
+        if (handleApiError(youtubeAuthStatusResult, "Unable to load YouTube auth status")
             || handleApiError(
                 youTubeOAuth2RedirectUriResult,
                 "Unable to obtain YouTube OAuth2 redirect URI from server",
@@ -41,10 +49,7 @@ export const useSettingsStore = defineStore("settings", () => {
             return;
         }
 
-        [settings.value, youTubeAuthState.value] = await Promise.all([
-            settingsResult.json(),
-            youtubeAuthStatusResult.json(),
-        ]);
+        youTubeAuthState.value = await youtubeAuthStatusResult.json();
 
         youTubeOAuth2RedirectUri.value = (
             (await youTubeOAuth2RedirectUriResult.json()) as IYouTubeRedirectUriResponse

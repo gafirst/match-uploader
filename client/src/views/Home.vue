@@ -28,7 +28,8 @@
                  class="mb-4"
       />
 
-      <YouTubeChannelSelector />
+      <h3>YouTube</h3>
+      <YouTubeChannelSelector class="mt-2 mb-4" />
       <MatchVideosUploader :videos="videoDataForUploads" />
     </VCol>
     <VCol v-if="matchStore.videoFileSuggestions.length"
