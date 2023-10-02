@@ -1,5 +1,6 @@
 <template>
-  <VAlert v-if="settingsStore.settings?.sandboxModeEnabled"
+  <VAlert v-if="!settingsStore.isFirstLoad && settingsStore.settings?.sandboxModeEnabled"
+          id="sandbox-mode-alert"
           color="warning"
           variant="tonal"
           :rounded="0"

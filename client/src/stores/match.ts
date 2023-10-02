@@ -1,6 +1,6 @@
 import {acceptHMRUpdate, defineStore} from "pinia";
 import {computed, ref} from "vue";
-import {MatchVideoFileInfo} from "@/types/MatchVideoFileInfo";
+import {MatchVideoInfo} from "@/types/MatchVideoInfo";
 
 // Eventually the server will send this data
 const matchesByKey: {
@@ -23,8 +23,8 @@ const matchesByKey: {
         matchKey: "2023gacar_qm4",
     },
     "2023gacar_qm5": {
-        title: "Qualification 5",
-        matchKey: "2023gacar_qm5",
+        title: "Qualification 10",
+        matchKey: "2023gacar_qm10",
     },
 };
 
@@ -34,9 +34,11 @@ export const useMatchStore = defineStore("match", () => {
     const matches = ref(Object.values(matchesByKey));
     const selectedMatchKey = ref<string | null>(null);
 
+    const uploadInProgress = ref(false);
+
     async function selectMatch(matchKey: string) {
         selectedMatchKey.value = matchKey;
-        await getVideoFileSuggestions();
+        await getMatchVideos();
     }
 
     const selectedMatch = computed(() => {
@@ -46,24 +48,24 @@ export const useMatchStore = defineStore("match", () => {
         return matchesByKey[selectedMatchKey.value];
     });
 
-    const videoFileSuggestions = ref<MatchVideoFileInfo[]>([]);
-    const videoSuggestionsLoading = ref(false);
-    const videoSuggestionsError = ref("");
+    const matchVideos = ref<MatchVideoInfo[]>([]);
+    const matchVideosLoading = ref(false);
+    const matchVideoError = ref("");
 
-    async function getVideoFileSuggestions() {
+    async function getMatchVideos() {
         if (!selectedMatchKey.value) {
             return;
         }
 
-        videoSuggestionsLoading.value = true;
-        videoSuggestionsError.value = "";
+        matchVideosLoading.value = true;
+        matchVideoError.value = "";
 
         const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/videos/recommend`);
 
         if (!result.ok) {
             const message = `Unable to retrieve video file suggestions for ${selectedMatchKey.value}`;
-            videoSuggestionsError.value = `API error (${result.status} ${result.statusText}): ${message}`;
-            videoSuggestionsLoading.value = false;
+            matchVideoError.value = `API error (${result.status} ${result.statusText}): ${message}`;
+            matchVideosLoading.value = false;
             return;
         }
 
@@ -71,18 +73,18 @@ export const useMatchStore = defineStore("match", () => {
 
         if (!Object.hasOwnProperty.call(data, "recommendedVideoFiles")) {
             const stringifiedData = JSON.stringify(data);
-            videoSuggestionsError.value =
+            matchVideoError.value =
                 `Error: video file suggestions API response missing recommendedVideoFiles property: ${stringifiedData}`;
-            videoSuggestionsLoading.value = false;
+            matchVideosLoading.value = false;
             return;
         }
 
         console.log(data.recommendedVideoFiles);
-        videoFileSuggestions.value = data.recommendedVideoFiles as MatchVideoFileInfo[];
-        videoSuggestionsLoading.value = false;
+        matchVideos.value = data.recommendedVideoFiles as MatchVideoInfo[];
+        matchVideosLoading.value = false;
     }
 
-    const description = ref("");
+    const description = ref<string | null>(null);
     const youTubeChannelId = ref<string | null>(null);
 
     return {
@@ -92,10 +94,11 @@ export const useMatchStore = defineStore("match", () => {
         youTubeChannelId,
         selectMatch,
         selectedMatch,
-        videoFileSuggestions,
-        videoSuggestionsLoading,
-        videoSuggestionsError,
-        getVideoFileSuggestions,
+        matchVideos,
+        matchVideosLoading,
+        matchVideoError,
+        getMatchVideos,
+        uploadInProgress,
     };
 });
 

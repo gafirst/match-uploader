@@ -3,12 +3,17 @@ import {ISettings, SettingType} from "@/types/ISettings";
 import {ref} from "vue";
 import {IYouTubeRedirectUriResponse} from "@/types/youtube/IYouTubeRedirectUriResponse";
 import {IYouTubeAuthState} from "@/types/youtube/IYouTubeAuthState";
+import {IObfuscatedSecrets} from "@/types/IObfuscatedSecrets";
 
 export const useSettingsStore = defineStore("settings", () => {
     const settings = ref<ISettings | null>(null);
+    // Whether secret values exist - not the actual secret values
+    const obfuscatedSecrets = ref<IObfuscatedSecrets | null>(null);
+
     const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
     const youTubeOAuth2RedirectUri = ref<string | null>(null);
 
+    const isFirstLoad = ref(true);
     const loading = ref(false);
     const error = ref("");
 
@@ -29,9 +34,19 @@ export const useSettingsStore = defineStore("settings", () => {
         // Load settings separately from YouTube auth status and redirect URI
         if (handleApiError(settingsResult, "Unable to load settings")) {
             loading.value = false;
+            isFirstLoad.value = false;
             return;
         } else {
             settings.value = await settingsResult.json();
+        }
+
+        const secretsResult = await fetch("/api/v1/settings/secrets");
+        if (handleApiError(secretsResult, "Unable to load obfuscatedSecrets")) {
+            loading.value = false;
+          isFirstLoad.value = false;
+            return;
+        } else {
+            obfuscatedSecrets.value = await secretsResult.json();
         }
 
         const [youtubeAuthStatusResult, youTubeOAuth2RedirectUriResult] = await Promise.all([
@@ -46,6 +61,7 @@ export const useSettingsStore = defineStore("settings", () => {
             )
         ) {
             loading.value = false;
+          isFirstLoad.value = false;
             return;
         }
 
@@ -56,6 +72,7 @@ export const useSettingsStore = defineStore("settings", () => {
         ).redirectUri;
 
         loading.value = false;
+      isFirstLoad.value = false;
     }
 
     async function saveSetting(settingName: keyof ISettings, value: string | boolean, settingType: SettingType) {
@@ -90,9 +107,11 @@ export const useSettingsStore = defineStore("settings", () => {
     return {
         error,
         getSettings,
+        isFirstLoad,
         loading,
         saveSetting,
         settings,
+        obfuscatedSecrets,
         youTubeAuthState,
         youTubeOAuth2RedirectUri,
     };

@@ -1,5 +1,5 @@
 <template>
-  <VAlert v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
+  <VAlert v-if="!settingsStore.isFirstLoad && !settingsStore.youTubeAuthState?.accessTokenStored"
           color="error"
           variant="tonal"
           :rounded="0"

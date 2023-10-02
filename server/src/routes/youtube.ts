@@ -1,17 +1,18 @@
-import { Router } from "express";
-import { type IReq, type IRes } from "@src/routes/types/types";
-import { getSecrets, getSettings, setSecret, setSetting } from "@src/services/SettingsService";
+import {Router} from "express";
+import {type IReq, type IRes} from "@src/routes/types/types";
+import {getSecrets, getSettings, setSecret, setSetting} from "@src/services/SettingsService";
 import Paths from "@src/routes/constants/Paths";
 import {
     getAuthenticatedYouTubeChannels,
     getGoogleOAuth2RedirectUri,
     getOAuth2AuthUrl,
-    oauth2AuthCodeExchange, uploadYouTubeVideo,
+    oauth2AuthCodeExchange,
+    uploadYouTubeVideo,
 } from "@src/services/YouTubeService";
 import logger from "jet-logger";
-import { body, matchedData, validationResult } from "express-validator";
-import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
-import { isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
+import {body, matchedData, validationResult} from "express-validator";
+import {type YouTubeVideoPrivacy} from "@src/models/YouTubeVideoPrivacy";
+import {isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess} from "@src/models/YouTubeVideoUploadResult";
 
 export const youTubeRouter = Router();
 export const youTubeAuthRouter = Router();
@@ -128,7 +129,7 @@ async function getYouTubeStatus(req: IReq, res: IRes): Promise<void> {
 youTubeRouter.post(
     Paths.YouTube.Upload,
     body("videoTitle", "Title of the YouTube video").isString().trim(),
-    body("videoPath", "File name of video to upload, should exist in the server videos directory")
+    body("videoPath", "File name of video to upload, which should exist in the server videos directory")
         .isString()
         .trim(),
     body("description", "Exact video description for the YouTube video").isString().trim(),

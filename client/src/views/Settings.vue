@@ -10,48 +10,60 @@
       </VAlert>
       <div v-else>
         <h2>General</h2>
-        <VForm class="mt-4" @submit.prevent>
-          <AutosavingTextInput :key="`eventName-${dataRefreshKey}`"
-                               :on-submit="submit"
-                               :initial-value="settingsStore.settings?.eventName"
-                               name="eventName"
-                               label="Event name"
-                               input-type="text"
-                               setting-type="setting"
-          />
-          <AutosavingTextInput :key="`eventTbaCode-${dataRefreshKey}`"
-                               :on-submit="submit"
-                               :initial-value="settingsStore.settings?.eventTbaCode"
-                               name="eventTbaCode"
-                               label="Event TBA code"
-                               input-type="text"
-                               setting-type="setting"
-          />
-          <AutosavingTextInput :key="`videoSearchDirectory-${dataRefreshKey}`"
-                               :on-submit="submit"
-                               :initial-value="settingsStore.settings?.videoSearchDirectory"
-                               name="videoSearchDirectory"
-                               label="Video search directory"
-                               input-type="text"
-                               setting-type="setting"
-          />
+        <AutosavingTextInput :key="`eventName-${dataRefreshKey}`"
+                             :on-submit="submit"
+                             :initial-value="settingsStore.settings?.eventName"
+                             name="eventName"
+                             label="Event name"
+                             input-type="text"
+                             setting-type="setting"
+                             class="mt-4"
+        />
+        <AutosavingTextInput :key="`eventTbaCode-${dataRefreshKey}`"
+                             :on-submit="submit"
+                             :initial-value="settingsStore.settings?.eventTbaCode"
+                             name="eventTbaCode"
+                             label="Event TBA code"
+                             input-type="text"
+                             setting-type="setting"
+        />
+        <AutosavingTextInput :key="`videoSearchDirectory-${dataRefreshKey}`"
+                             :on-submit="submit"
+                             :initial-value="settingsStore.settings?.videoSearchDirectory"
+                             name="videoSearchDirectory"
+                             label="Video search directory"
+                             input-type="text"
+                             setting-type="setting"
+        />
 
-          <p class="mb-1">Playoffs type</p>
-          <AutosavingBtnSelectGroup :choices="PLAYOFF_MATCH_TYPES"
-                                    :default-value="settingsStore.settings?.playoffsType"
-                                    :loading="savingPlayoffMatchType"
-                                    @on-choice-selected="savePlayoffMatchType"
-          />
+        <p class="mb-1">Playoffs type</p>
+        <AutosavingBtnSelectGroup :choices="PLAYOFF_MATCH_TYPES"
+                                  :default-value="settingsStore.settings?.playoffsType"
+                                  :loading="savingPlayoffMatchType"
+                                  @on-choice-selected="savePlayoffMatchType"
+        />
 
-          <p class="mb-1">Sandbox mode</p>
-          <AutosavingBtnSelectGroup :choices="['On', 'Off']"
-                                    :default-value="settingsStore.settings?.sandboxModeEnabled ? 'On' : 'Off'"
-                                    :loading="savingSandboxMode"
-                                    @on-choice-selected="saveSandboxMode"
-          />
-        </VForm>
+        <p class="mb-1">Sandbox mode</p>
+        <AutosavingBtnSelectGroup :choices="['On', 'Off']"
+                                  :default-value="settingsStore.settings?.sandboxModeEnabled ? 'On' : 'Off'"
+                                  :loading="savingSandboxMode"
+                                  @on-choice-selected="saveSandboxMode"
+        />
 
-        <h2>YouTube</h2>
+        <h2 class="mt-4">The Blue Alliance (TBA)</h2>
+        <AutosavingTextInput :key="`theBlueAllianceReadApiKey-${dataRefreshKey}`"
+                             :on-submit="submit"
+                             initial-value=""
+                             name="theBlueAllianceReadApiKey"
+                             label="TBA read API key"
+                             input-type="password"
+                             setting-type="secret"
+                             :help-text="theBlueAllianceReadApiKeyHelpText"
+        />
+
+        <h2 class="mt-4">
+          YouTube
+        </h2>
 
         <h3 class="mb-2">OAuth2 client details</h3>
         <VAlert v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
@@ -196,6 +208,16 @@ async function saveSandboxMode(value: string): Promise<void> {
   await refreshData(false);
   savingSandboxMode.value = false;
 }
+
+const theBlueAllianceReadApiKeyHelpText = computed((): string => {
+  const baseText = "Generate a read API key from your account page on The Blue Alliance.";
+
+  if (settingsStore.obfuscatedSecrets?.theBlueAllianceReadApiKey) {
+    return `Current value hidden. ${baseText}`;
+  }
+
+  return baseText;
+});
 
 </script>
 

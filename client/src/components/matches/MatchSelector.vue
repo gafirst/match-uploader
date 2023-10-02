@@ -1,6 +1,6 @@
 <template>
-  <v-autocomplete v-model="uploaderStore.selectedMatchKey"
-                  :items="Object.values(uploaderStore.matches)"
+  <v-autocomplete v-model="matchStore.selectedMatchKey"
+                  :items="Object.values(matchStore.matches)"
                   rounded
                   auto-select-first
                   placeholder="Select a match..."
@@ -8,6 +8,7 @@
                   label="Match"
                   item-title="title"
                   item-value="matchKey"
+                  :disabled="matchStore.uploadInProgress"
                   @update:model-value="matchSelected"
   />
 </template>
@@ -15,10 +16,10 @@
 <script lang="ts" setup>
 import {useMatchStore} from "@/stores/match";
 
-const uploaderStore = useMatchStore();
+const matchStore = useMatchStore();
 
 async function matchSelected(matchKey: string) {
   console.log(matchKey);
-  await uploaderStore.selectMatch(matchKey);
+  await matchStore.selectMatch(matchKey);
 }
 </script>

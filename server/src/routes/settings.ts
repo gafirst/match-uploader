@@ -1,7 +1,7 @@
 import {Router} from "express";
 import Paths from "@src/routes/constants/Paths";
 import {type IReq, type IRes} from "@src/routes/types/types";
-import {getSettings, setSecret, setSetting} from "@src/services/SettingsService";
+import {getObfuscatedSecrets, getSettings, setSecret, setSetting} from "@src/services/SettingsService";
 import {body, matchedData, param, validationResult} from "express-validator";
 import {type ISecretSettings, type ISettings} from "@src/models/Settings";
 
@@ -14,6 +14,15 @@ settingsRouter.get(
 
 async function listSettings(req: IReq, res: IRes): Promise<void> {
   res.json(await getSettings());
+}
+
+settingsRouter.get(
+    Paths.Settings.ListSecrets,
+    listSecrets,
+);
+
+async function listSecrets(req: IReq, res: IRes): Promise<void> {
+  res.json(await getObfuscatedSecrets());
 }
 
 settingsRouter.post(

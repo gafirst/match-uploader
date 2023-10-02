@@ -1,12 +1,12 @@
 <template>
   <div v-if="matchStore.selectedMatchKey">
-    <VProgressCircular v-if="matchStore.videoSuggestionsLoading"
+    <VProgressCircular v-if="matchStore.matchVideosLoading"
                        indeterminate
                        class="mb-2"
     />
-    <div v-else-if="matchStore.videoFileSuggestions.length">
+    <div v-else-if="matchStore.matchVideos.length">
       <VList>
-        <VListItem v-for="file in matchStore.videoFileSuggestions"
+        <VListItem v-for="file in matchStore.matchVideos"
                    :key="file.path"
                    :title="file.path"
                    :subtitle="file.videoLabel ? `Label: ${file.videoLabel}`: 'Unlabeled'"
@@ -15,7 +15,7 @@
       <VBtn prepend-icon="mdi-refresh"
             variant="outlined"
             class="mb-2"
-            @click="matchStore.getVideoFileSuggestions()"
+            @click="matchStore.getMatchVideos()"
       >
         Refresh
       </VBtn>

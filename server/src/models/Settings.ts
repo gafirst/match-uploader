@@ -14,6 +14,7 @@ export interface ISecretSettings {
     googleClientSecret: string,
     googleAccessToken: string,
     googleRefreshToken: string,
+    theBlueAllianceReadApiKey: string,
     [key: string]: string,
 }
 

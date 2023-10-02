@@ -2,7 +2,7 @@
  * Express router paths
  */
 
-import { type Immutable } from "@src/util/Immutable";
+import {type Immutable} from "@src/util/Immutable";
 
 // Start all paths with a /, even if empty
 const Paths = {
@@ -10,6 +10,7 @@ const Paths = {
   Settings: {
     Base: "/settings",
     List: "/",
+    ListSecrets: "/secrets",
     Update: "/:name",
   },
   Matches: {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mt-64">
     <YouTubeAuthIncompleteAlert />
     <SandboxModeAlert />
   </div>
