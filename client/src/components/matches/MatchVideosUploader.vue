@@ -66,7 +66,6 @@ async function uploadVideo(video: MatchVideoInfo): Promise<any> {
 async function uploadVideos() {
   matchStore.uploadInProgress = true;
   for (const video of matchStore.matchVideos) {
-    // video.uploaded = true;
     const result = await uploadVideo(video);
     console.log("result", result);
     if (result.ok) {

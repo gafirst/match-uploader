@@ -43,7 +43,7 @@ export const useSettingsStore = defineStore("settings", () => {
         const secretsResult = await fetch("/api/v1/settings/secrets");
         if (handleApiError(secretsResult, "Unable to load obfuscatedSecrets")) {
             loading.value = false;
-          isFirstLoad.value = false;
+            isFirstLoad.value = false;
             return;
         } else {
             obfuscatedSecrets.value = await secretsResult.json();
@@ -61,7 +61,7 @@ export const useSettingsStore = defineStore("settings", () => {
             )
         ) {
             loading.value = false;
-          isFirstLoad.value = false;
+            isFirstLoad.value = false;
             return;
         }
 
@@ -72,7 +72,7 @@ export const useSettingsStore = defineStore("settings", () => {
         ).redirectUri;
 
         loading.value = false;
-      isFirstLoad.value = false;
+        isFirstLoad.value = false;
     }
 
     async function saveSetting(settingName: keyof ISettings, value: string | boolean, settingType: SettingType) {

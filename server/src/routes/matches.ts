@@ -1,20 +1,21 @@
 import {Router} from "express";
 import Paths from "@src/routes/constants/Paths";
 import {type IReq, type IRes} from "@src/routes/types/types";
-import {getLocalVideoFilesForMatch} from "@src/services/MatchesService";
+import {getLocalVideoFilesForMatch, getTbaMatchList} from "@src/services/MatchesService";
 import {matchedData, param, validationResult} from "express-validator";
 import MatchKey from "@src/models/MatchKey";
 import {type MatchVideoInfo} from "@src/models/MatchVideoInfo";
-import FullPaths from "@src/routes/constants/FullPaths";
 
 export const matchesRouter = Router();
 
 matchesRouter.get(
     Paths.Matches.List,
-    (req, res, next) => {
-        res.json({ Hello: FullPaths });
-    },
+    getMatchList,
 );
+
+async function getMatchList(req: IReq, res: IRes): Promise<void> {
+    res.json(await getTbaMatchList());
+}
 
 matchesRouter.get(
     Paths.Matches.RecommendVideoFiles,

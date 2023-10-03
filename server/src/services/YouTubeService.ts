@@ -9,7 +9,7 @@ import fs from "fs-extra";
 import {type YouTubeVideoPrivacy} from "@src/models/YouTubeVideoPrivacy";
 import path from "path";
 import sanitizeFilename from "sanitize-filename";
-import {type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess,} from "@src/models/YouTubeVideoUploadResult";
+import {type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess} from "@src/models/YouTubeVideoUploadResult";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
   const port = EnvVars.Port;
