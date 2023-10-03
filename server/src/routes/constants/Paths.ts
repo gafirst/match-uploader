@@ -10,15 +10,27 @@ const Paths = {
   Settings: {
     Base: "/settings",
     List: "/",
+    ListSecrets: "/secrets",
     Update: "/:name",
+  },
+  Matches: {
+    Base: "/matches",
+    List: "/",
+    Get: "/:matchKey",
+    RecommendVideoFiles: "/:matchKey/videos/recommend",
   },
   YouTube: {
     Base: "/youtube",
-    AuthStart: "/auth",
-    AuthStatus: "/auth/status",
-    AuthCallback: "/auth/callback",
-    AuthReset: "/auth/reset",
-    AuthRedirectUri: "/auth/meta/redirectUri",
+    Auth: {
+      Base: "/auth",
+      Start: "/",
+      Status: "/status",
+      Callback: "/callback",
+      Reset: "/reset",
+      RedirectUri: "/meta/redirectUri",
+    },
+    Status: "/status",
+    Upload: "/upload",
   },
 };
 

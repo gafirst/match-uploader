@@ -38,6 +38,10 @@ app.use(Paths.Base, apiRouter);
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, "../../client/dist")));
+
+// Serve the videos directory at /videos/video-file.mp4
+app.use("/videos", express.static(path.join(__dirname, "../videos")));
+
 app.get("*", (request, response) => {
   response.sendFile(path.join(__dirname, "../../client/dist", "index.html"));
 });

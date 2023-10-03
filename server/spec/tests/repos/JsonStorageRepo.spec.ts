@@ -9,7 +9,6 @@ const sampleSettings: ISettings = {
   videoSearchDirectory: "./videos",
   googleAuthStatus: "",
   googleClientId: "",
-  googleRedirectUri: "",
 };
 
 describe("readSettingsJson", () => {

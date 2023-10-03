@@ -17,9 +17,10 @@ module.exports = {
   rules: {
     "comma-dangle": ["error", "always-multiline"],
     "comma-style": ["error", "last"],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "off",
     "quotes": ["error", "double"],
     "vue/component-name-in-template-casing": ["error", "PascalCase"],
-
     "vue/first-attribute-linebreak": ["error", {
       multiline: "beside",
     }],

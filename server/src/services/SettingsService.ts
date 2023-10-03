@@ -1,9 +1,9 @@
 import {
-  type ISecretSettingsHidden,
   type ISecretSettings,
+  type ISecretSettingsHidden,
   type ISettings,
-  type SettingsKey,
   type SecretSettingsKey,
+  type SettingsKey,
 } from "@src/models/Settings";
 import { readSettingsJson, writeSettingsJson } from "@src/repos/JsonStorageRepo";
 import EnvVars from "@src/constants/EnvVars";
@@ -18,9 +18,16 @@ export async function getSettings(): Promise<ISettings> {
 export async function setSetting(key: SettingsKey, value: string): Promise<void> {
   const currentSettings = await getSettings();
 
+  let valueToSave: string | boolean = value;
+
+  // Coerce string boolean values to actual boolean types
+  if (value === "true" || value === "false") {
+    valueToSave = !!JSON.parse(value);
+  }
+
   return await writeSettingsJson<ISettings>(EnvVars.SettingsLocations.SettingsFile, {
     ...currentSettings,
-    [key]: value,
+    [key]: valueToSave,
   });
 }
 
@@ -38,6 +45,7 @@ export async function getObfuscatedSecrets(): Promise<ISecretSettingsHidden> {
     googleClientSecret: false,
     googleAccessToken: false,
     googleRefreshToken: false,
+    theBlueAllianceReadApiKey: false,
   };
 
   for (const key in secrets) {
