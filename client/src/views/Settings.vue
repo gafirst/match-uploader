@@ -109,7 +109,9 @@
                              initial-value=""
                              name="googleClientSecret"
                              label="OAuth2 client secret"
-                             :help-text="settingsStore.youTubeAuthState?.clientSecretProvided ? 'Current value hidden' : ''"
+                             :help-text="settingsStore.youTubeAuthState?.clientSecretProvided ?
+                               'Current value hidden' :
+                               ''"
                              input-type="password"
                              setting-type="secret"
                              :disabled="settingsStore.youTubeAuthState?.accessTokenStored"

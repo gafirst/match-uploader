@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Represents the competition level of a match.
  */

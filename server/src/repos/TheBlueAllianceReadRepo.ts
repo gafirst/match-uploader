@@ -1,4 +1,4 @@
-import {isTbaMatchSimple, type TbaMatchSimpleApiResponse} from "@src/models/theBlueAlliance/tbaMatchSimpleApiResponse";
+import {isTbaMatchSimple, type TbaMatchSimpleApiResponse,} from "@src/models/theBlueAlliance/tbaMatchSimpleApiResponse";
 import {isObject} from "@src/util/isObject";
 import fetch from "node-fetch";
 

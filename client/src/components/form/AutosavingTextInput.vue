@@ -55,9 +55,14 @@ const props = defineProps<IProps>();
 const emit = defineEmits(["savedValueUpdated"]);
 
 const state = ref<State>(State.READY);
+
+// TODO: These no-setup-props-destructure rules are valid but not breaking the component
+// eslint-disable-next-line vue/no-setup-props-destructure
 const inputValue = ref(props.initialValue);
+// eslint-disable-next-line vue/no-setup-props-destructure
 const lastSubmittedValue = ref(props.initialValue);
 const error = ref("");
+// eslint-disable-next-line vue/no-setup-props-destructure
 const showPlainText = ref(props.inputType === "text");
 
 async function submit() {

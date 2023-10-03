@@ -43,6 +43,8 @@
     "morgan": "^1.10.0",
     "node-fetch": "2",
     "sanitize-filename": "^1.6.3",
+    "string-width": "4",
+    "strip-ansi": "6",
     "ts-command-line-args": "^2.4.2"
   },
   "devDependencies": {
