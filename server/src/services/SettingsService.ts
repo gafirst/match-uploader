@@ -1,9 +1,9 @@
 import {
-    type ISecretSettings,
-    type ISecretSettingsHidden,
-    type ISettings,
-    type SecretSettingsKey,
-    type SettingsKey,
+  type ISecretSettings,
+  type ISecretSettingsHidden,
+  type ISettings,
+  type SecretSettingsKey,
+  type SettingsKey,
 } from "@src/models/Settings";
 import {readSettingsJson, writeSettingsJson} from "@src/repos/JsonStorageRepo";
 import EnvVars from "@src/constants/EnvVars";
