@@ -5,7 +5,7 @@ import {
   type SecretSettingsKey,
   type SettingsKey,
 } from "@src/models/Settings";
-import {readSettingsJson, writeSettingsJson} from "@src/repos/JsonStorageRepo";
+import { readSettingsJson, writeSettingsJson } from "@src/repos/JsonStorageRepo";
 import EnvVars from "@src/constants/EnvVars";
 
 export async function getSettings(): Promise<ISettings> {

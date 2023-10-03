@@ -1,9 +1,9 @@
-import {Router} from "express";
+import { Router } from "express";
 import Paths from "@src/routes/constants/Paths";
-import {type IReq, type IRes} from "@src/routes/types/types";
-import {getObfuscatedSecrets, getSettings, setSecret, setSetting} from "@src/services/SettingsService";
-import {body, matchedData, param, validationResult} from "express-validator";
-import {type ISecretSettings, type ISettings} from "@src/models/Settings";
+import { type IReq, type IRes } from "@src/routes/types/types";
+import { getObfuscatedSecrets, getSettings, setSecret, setSetting } from "@src/services/SettingsService";
+import { body, matchedData, param, validationResult } from "express-validator";
+import { type ISecretSettings, type ISettings } from "@src/models/Settings";
 
 export const settingsRouter = Router();
 

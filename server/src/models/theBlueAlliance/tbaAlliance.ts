@@ -1,4 +1,4 @@
-import {type TbaFrcTeam} from "@src/models/theBlueAlliance/tbaFrcTeam";
+import { type TbaFrcTeam } from "@src/models/theBlueAlliance/tbaFrcTeam";
 
 export interface TbaAlliance {
     dq_team_keys: TbaFrcTeam[];
