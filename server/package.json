@@ -11,7 +11,7 @@
     "test": "nodemon --config ./spec/nodemon.json",
     "test:no-reloading": "npx ts-node --files -r tsconfig-paths/register ./spec",
     "coverage": "nyc --reporter=lcov --reporter=text npm run test:no-reloading",
-    "coverage:ci": "nyc --reporter=lcov npm run test:no-reloading"
+    "coverage:ci": "nyc --reporter=lcov yarn run test:no-reloading"
   },
   "nodemonConfig": {
     "watch": [
