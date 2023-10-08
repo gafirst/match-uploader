@@ -10,7 +10,7 @@ const sampleSettings: ISettings = {
   googleAuthStatus: "status",
   googleClientId: "id",
   playoffsType: "type",
-  sandboxModeEnabled: false
+  sandboxModeEnabled: false,
 };
 
 describe("readSettingsJson", () => {
