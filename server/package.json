@@ -9,7 +9,9 @@
     "start": "node -r module-alias/register ./dist --env=production",
     "dev": "nodemon",
     "test": "nodemon --config ./spec/nodemon.json",
-    "test:no-reloading": "npx ts-node --files -r tsconfig-paths/register ./spec"
+    "test:no-reloading": "npx ts-node --files -r tsconfig-paths/register ./spec",
+    "coverage": "nyc --reporter=lcov --reporter=text npm run test:no-reloading",
+    "coverage:ci": "nyc --reporter=lcov yarn run test:no-reloading"
   },
   "nodemonConfig": {
     "watch": [
@@ -43,8 +45,8 @@
     "morgan": "^1.10.0",
     "node-fetch": "2",
     "sanitize-filename": "^1.6.3",
-    "string-width": "4",
-    "strip-ansi": "6",
+    "string-width": "^4",
+    "strip-ansi": "^6",
     "ts-command-line-args": "^2.4.2"
   },
   "devDependencies": {
@@ -73,6 +75,7 @@
     "jasmine": "^5.0.0",
     "mock-fs": "^5.2.0",
     "nodemon": "^2.0.21",
+    "nyc": "^15.1.0",
     "supertest": "^6.3.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.2",

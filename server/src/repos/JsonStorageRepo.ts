@@ -27,7 +27,7 @@ async function readJsonFileContents<T>(filePath: PathLike): Promise<T> {
 }
 
 export async function readSettingsJson<T>(filePath: PathLike,
-                                          templateFilePath: string | null = null,
+  templateFilePath: string | null = null,
 ): Promise<T> {
   // Paths are relative to the directory the server is running out of
   try {
@@ -39,7 +39,7 @@ export async function readSettingsJson<T>(filePath: PathLike,
         await copyFile(templateFilePath, filePath);
         return await readJsonFileContents(filePath);
       } else {
-       throw Error(`readSettingsJson: ${filePath} does not exist and no template file was provided`);
+        throw Error(`readSettingsJson: ${filePath} does not exist and no template file was provided`);
       }
     } else {
       throw error;
