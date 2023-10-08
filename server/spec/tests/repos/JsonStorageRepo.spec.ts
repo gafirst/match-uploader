@@ -7,8 +7,10 @@ const sampleSettings: ISettings = {
   eventName: "Example Event",
   eventTbaCode: "2023gacmp",
   videoSearchDirectory: "./videos",
-  googleAuthStatus: "",
-  googleClientId: "",
+  googleAuthStatus: "status",
+  googleClientId: "id",
+  playoffsType: "type",
+  sandboxModeEnabled: false
 };
 
 describe("readSettingsJson", () => {

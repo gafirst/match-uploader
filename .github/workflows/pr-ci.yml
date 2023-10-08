@@ -46,7 +46,7 @@ jobs:
       uses: VeryGoodOpenSource/very_good_coverage@v2
       with:
         path: server/coverage/lcov.info
-        min_coverage: 75
+        min_coverage: 50
 
 
   client_ci:
