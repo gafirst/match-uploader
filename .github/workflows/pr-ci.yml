@@ -35,8 +35,10 @@ jobs:
         report-json: "server/eslint_report.json"
         check-name: "eslint / server"
     - name: Run unit tests
-      run: cd server &&
-          npm run coverage:ci
+      uses: borales/actions-yarn@v4
+      with:
+        cmd: coverage:ci
+        dir: server
     - name: Reply with coverage report
       uses: romeovs/lcov-reporter-action@v0.2.16
       with:
