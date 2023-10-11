@@ -1,8 +1,9 @@
 import {Router} from "express";
 import {type IReq, type IRes} from "@src/routes/types/types";
-import {getSecrets, getSettings, setSecret, setSetting} from "@src/services/SettingsService";
+import {getSecrets, getSettings, getYouTubePlaylists, setSecret, setSetting} from "@src/services/SettingsService";
 import Paths from "@src/routes/constants/Paths";
 import {
+    cachePlaylistNames,
     getAuthenticatedYouTubeChannels,
     getGoogleOAuth2RedirectUri,
     getOAuth2AuthUrl,
@@ -185,4 +186,28 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
             error: "An unknown error occurred while processing the YouTube video upload result",
         });
     }
+}
+
+youTubeRouter.get(
+    Paths.YouTube.Playlists,
+    getLabelPlaylistMapping,
+);
+
+async function getLabelPlaylistMapping(req: IReq, res: IRes): Promise<void> {
+    const updateSuccess = await cachePlaylistNames();
+
+    if (!updateSuccess) {
+        res.status(500).json({
+            ok: false,
+            error: "Failed to get playlist names",
+        });
+        return;
+    }
+
+    const playlists = await getYouTubePlaylists();
+
+    res.json({
+        ok: true,
+        playlists,
+    });
 }

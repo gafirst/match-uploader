@@ -5,9 +5,9 @@ import {
   type SecretSettingsKey,
   type SettingsKey,
 } from "@src/models/Settings";
-import { readSettingsJson, writeSettingsJson } from "@src/repos/JsonStorageRepo";
+import {readSettingsJson, writeSettingsJson} from "@src/repos/JsonStorageRepo";
 import EnvVars from "@src/constants/EnvVars";
-import { type YouTubePlaylists } from "@src/models/YouTubePlaylists";
+import {type YouTubePlaylists} from "@src/models/YouTubePlaylists";
 
 export async function getSettings(): Promise<ISettings> {
   return await readSettingsJson<ISettings>(
@@ -74,14 +74,16 @@ export async function getYouTubePlaylists(): Promise<YouTubePlaylists> {
   );
 }
 
-export async function setYouTubePlaylist(videoLabel: string, playlistId: string): Promise<void> {
+export async function setYouTubePlaylist(videoLabel: string,
+                                         playlistId: string,
+                                         playlistName: string | null = null): Promise<void> {
     const currentPlaylists = await getYouTubePlaylists();
 
     return await writeSettingsJson<YouTubePlaylists>(EnvVars.SettingsLocations.YouTubePlaylistsFile, {
         ...currentPlaylists,
         [videoLabel]: {
           id: playlistId,
-          name: null,
+          name: playlistName,
         },
     });
 }

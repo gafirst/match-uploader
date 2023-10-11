@@ -1,5 +1,5 @@
 import {auth, youtube, type youtube_v3} from "@googleapis/youtube";
-import {getSecrets, getSettings, getYouTubePlaylists} from "@src/services/SettingsService";
+import {getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist} from "@src/services/SettingsService";
 import logger from "jet-logger";
 import {type Credentials, type OAuth2Client} from "google-auth-library";
 import EnvVars from "@src/constants/EnvVars";
@@ -232,4 +232,45 @@ export async function uploadYouTubeVideo(title: string,
         videoId,
         videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
     };
+}
+
+export async function cachePlaylistNames(forceUpdate = false): Promise<boolean> {
+    const playlists = await getYouTubePlaylists();
+
+    if (!playlists) {
+        return false;
+    }
+
+    // map playlist IDs to labels
+    const playlistIdsToLabels: Record<string, string> = {};
+    Object.keys(playlists).forEach((label) => {
+        playlistIdsToLabels[playlists[label].id] = label;
+    });
+
+    const playlistsWithoutNames = Object.values(playlists).filter((playlist) => !playlist.name);
+
+    if (!forceUpdate && playlistsWithoutNames.length === 0) {
+        return true;
+    }
+
+    const youtubeClient = await getYouTubeApiClient();
+
+    const playlistIds = playlistsWithoutNames.map((playlist) => playlist.id);
+
+    const result = await youtubeClient.playlists.list({
+        part: ["snippet"],
+        id: playlistIds,
+    });
+
+    if (!result.data.items) {
+        return false;
+    }
+
+    for (const playlist of result.data.items) {
+        if (playlist.id && playlist.snippet?.title && playlistIdsToLabels[playlist.id]) {
+            await setYouTubePlaylist(playlistIdsToLabels[playlist.id], playlist.id, playlist.snippet?.title);
+        }
+    }
+
+    return true;
 }
