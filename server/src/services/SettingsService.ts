@@ -5,9 +5,9 @@ import {
   type SecretSettingsKey,
   type SettingsKey,
 } from "@src/models/Settings";
-import {readSettingsJson, writeSettingsJson} from "@src/repos/JsonStorageRepo";
+import { readSettingsJson, writeSettingsJson } from "@src/repos/JsonStorageRepo";
 import EnvVars from "@src/constants/EnvVars";
-import {type YouTubePlaylists} from "@src/models/YouTubePlaylists";
+import { type YouTubePlaylists } from "@src/models/YouTubePlaylists";
 
 export async function getSettings(): Promise<ISettings> {
   return await readSettingsJson<ISettings>(

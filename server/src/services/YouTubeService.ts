@@ -1,16 +1,16 @@
-import {auth, youtube, type youtube_v3} from "@googleapis/youtube";
-import {getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist} from "@src/services/SettingsService";
+import { auth, youtube, type youtube_v3 } from "@googleapis/youtube";
+import { getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist } from "@src/services/SettingsService";
 import logger from "jet-logger";
-import {type Credentials, type OAuth2Client} from "google-auth-library";
+import { type Credentials, type OAuth2Client } from "google-auth-library";
 import EnvVars from "@src/constants/EnvVars";
 import FullPaths from "@src/routes/constants/FullPaths";
-import {type YouTubeChannelList} from "@src/models/YouTubeChannel";
+import { type YouTubeChannelList } from "@src/models/YouTubeChannel";
 import fs from "fs-extra";
-import {type YouTubeVideoPrivacy} from "@src/models/YouTubeVideoPrivacy";
+import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
 import path from "path";
 import sanitizeFilename from "sanitize-filename";
-import {type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess} from "@src/models/YouTubeVideoUploadResult";
-import {type YouTubePostUploadSteps} from "@src/models/YouTubePostUploadSteps";
+import { type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
+import { type YouTubePostUploadSteps } from "@src/models/YouTubePostUploadSteps";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
   const port = EnvVars.Port;
