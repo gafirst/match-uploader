@@ -1,19 +1,20 @@
 import type MatchKey from "@src/models/MatchKey";
-import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
-import { getSecrets, getSettings } from "@src/services/SettingsService";
-import { Match } from "@src/models/Match";
-import { capitalizeFirstLetter } from "@src/util/string";
-import { MatchVideoInfo } from "@src/models/MatchVideoInfo";
-import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchSimpleApiResponse";
-import { TheBlueAllianceReadRepo } from "@src/repos/TheBlueAllianceReadRepo";
+import {getFilesMatchingPattern} from "@src/repos/FileStorageRepo";
+import {getSecrets, getSettings} from "@src/services/SettingsService";
+import {Match} from "@src/models/Match";
+import {capitalizeFirstLetter} from "@src/util/string";
+import {MatchVideoInfo} from "@src/models/MatchVideoInfo";
+import {type TbaMatchSimple} from "@src/models/theBlueAlliance/tbaMatchSimpleApiResponse";
+import {TheBlueAllianceReadRepo} from "@src/repos/TheBlueAllianceReadRepo";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
     const settings = await getSettings();
     const match = new Match(matchKey);
-    const fullMatchName = capitalizeFirstLetter(match.verboseMatchName);
+    const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);
+    const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
     const eventName = settings.eventName;
 
-    const files = await getFilesMatchingPattern(settings.videoSearchDirectory, `${fullMatchName}*`);
+    const files = await getFilesMatchingPattern(settings.videoSearchDirectory, `${videoFileMatchingName}*`);
     const parseVideoLabelsRegex = /^[A-Za-z]+ (Match )?(\d{1,3})\s?([A-Za-z\s]*)\..*$/;
 
     return files.filter(file => {
@@ -43,9 +44,9 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
         }
 
         if (!videoLabel) {
-            videoTitle = `${fullMatchName} - ${eventName}`;
+            videoTitle = `${matchTitleName} - ${eventName}`;
         } else {
-            videoTitle = `${fullMatchName} - ${videoLabel} - ${eventName}`;
+            videoTitle = `${matchTitleName} - ${videoLabel} - ${eventName}`;
         }
 
         return new MatchVideoInfo(file, videoLabel, videoTitle);

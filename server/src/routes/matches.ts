@@ -1,10 +1,14 @@
-import { Router } from "express";
+import {Router} from "express";
 import Paths from "@src/routes/constants/Paths";
-import { type IReq, type IRes } from "@src/routes/types/types";
-import { getLocalVideoFilesForMatch, getTbaMatchList } from "@src/services/MatchesService";
-import { matchedData, param, validationResult } from "express-validator";
+import {type IReq, type IRes} from "@src/routes/types/types";
+import {getLocalVideoFilesForMatch, getTbaMatchList} from "@src/services/MatchesService";
+import {matchedData, param, validationResult} from "express-validator";
 import MatchKey from "@src/models/MatchKey";
-import { type MatchVideoInfo } from "@src/models/MatchVideoInfo";
+import {type MatchVideoInfo} from "@src/models/MatchVideoInfo";
+import {Match} from "@src/models/Match";
+import {capitalizeFirstLetter} from "@src/util/string";
+import {getSettings} from "@src/services/SettingsService";
+import {type PlayoffsType} from "@src/models/PlayoffsType";
 
 export const matchesRouter = Router();
 
@@ -14,7 +18,24 @@ matchesRouter.get(
 );
 
 async function getMatchList(req: IReq, res: IRes): Promise<void> {
-    res.json(await getTbaMatchList());
+    const { playoffsType: playoffsTypeRaw } = await getSettings();
+    const playoffsType = playoffsTypeRaw as PlayoffsType;
+
+    const matchList = (await getTbaMatchList()).map((match) => {
+        return {
+            key: match.key,
+            verboseName: capitalizeFirstLetter(
+                new Match(
+                    MatchKey.fromString(match.key, playoffsType),
+                ).verboseMatchName,
+            ),
+        };
+    });
+
+    res.json({
+        ok: true,
+        matches: matchList,
+    });
 }
 
 matchesRouter.get(
@@ -27,6 +48,8 @@ matchesRouter.get(
 );
 
 async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
+    const { playoffsType: playoffsTypeRaw } = await getSettings();
+    const playoffsType = playoffsTypeRaw as PlayoffsType;
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -38,7 +61,7 @@ async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
     }
 
     const { matchKey } = matchedData(req);
-    const matchKeyObject = MatchKey.fromString(matchKey as string);
+    const matchKeyObject = MatchKey.fromString(matchKey as string, playoffsType);
 
     const recommendedVideoFiles = await getLocalVideoFilesForMatch(matchKeyObject);
     res.json({
