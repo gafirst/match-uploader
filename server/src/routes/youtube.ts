@@ -1,5 +1,5 @@
-import {Router} from "express";
-import {type IReq, type IRes} from "@src/routes/types/types";
+import { Router } from "express";
+import { type IReq, type IRes } from "@src/routes/types/types";
 import {
     deleteYouTubePlaylistMapping,
     getSecrets,
@@ -20,9 +20,9 @@ import {
     uploadYouTubeVideo,
 } from "@src/services/YouTubeService";
 import logger from "jet-logger";
-import {body, matchedData, param, validationResult} from "express-validator";
-import {type YouTubeVideoPrivacy} from "@src/models/YouTubeVideoPrivacy";
-import {isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess} from "@src/models/YouTubeVideoUploadResult";
+import { body, matchedData, param, validationResult } from "express-validator";
+import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
+import { isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
 
 export const youTubeRouter = Router();
 export const youTubeAuthRouter = Router();
