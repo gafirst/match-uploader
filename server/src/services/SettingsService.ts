@@ -1,13 +1,13 @@
 import {
-  type ISecretSettings,
-  type ISecretSettingsHidden,
-  type ISettings,
-  type SecretSettingsKey,
-  type SettingsKey,
+    type ISecretSettings,
+    type ISecretSettingsHidden,
+    type ISettings,
+    type SecretSettingsKey,
+    type SettingsKey,
 } from "@src/models/Settings";
-import { readSettingsJson, writeSettingsJson } from "@src/repos/JsonStorageRepo";
+import {readSettingsJson, writeSettingsJson} from "@src/repos/JsonStorageRepo";
 import EnvVars from "@src/constants/EnvVars";
-import { type YouTubePlaylists } from "@src/models/YouTubePlaylists";
+import {type YouTubePlaylists} from "@src/models/YouTubePlaylists";
 
 export async function getSettings(): Promise<ISettings> {
   return await readSettingsJson<ISettings>(
@@ -86,4 +86,13 @@ export async function setYouTubePlaylist(videoLabel: string,
           name: playlistName,
         },
     });
+}
+
+export async function deleteYouTubePlaylistMapping(videoLabel: string): Promise<void> {
+  const currentPlaylists = await getYouTubePlaylists();
+
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+  delete currentPlaylists[videoLabel];
+
+  return await writeSettingsJson<YouTubePlaylists>(EnvVars.SettingsLocations.YouTubePlaylistsFile, currentPlaylists);
 }

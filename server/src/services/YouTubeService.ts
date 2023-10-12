@@ -1,16 +1,16 @@
-import { auth, youtube, type youtube_v3 } from "@googleapis/youtube";
-import { getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist } from "@src/services/SettingsService";
+import {auth, youtube, type youtube_v3} from "@googleapis/youtube";
+import {getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist} from "@src/services/SettingsService";
 import logger from "jet-logger";
-import { type Credentials, type OAuth2Client } from "google-auth-library";
+import {type Credentials, type OAuth2Client} from "google-auth-library";
 import EnvVars from "@src/constants/EnvVars";
 import FullPaths from "@src/routes/constants/FullPaths";
-import { type YouTubeChannelList } from "@src/models/YouTubeChannel";
+import {type YouTubeChannelList} from "@src/models/YouTubeChannel";
 import fs from "fs-extra";
-import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
+import {type YouTubeVideoPrivacy} from "@src/models/YouTubeVideoPrivacy";
 import path from "path";
 import sanitizeFilename from "sanitize-filename";
-import { type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
-import { type YouTubePostUploadSteps } from "@src/models/YouTubePostUploadSteps";
+import {type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess} from "@src/models/YouTubeVideoUploadResult";
+import {type YouTubePostUploadSteps} from "@src/models/YouTubePostUploadSteps";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
   const port = EnvVars.Port;
@@ -137,7 +137,7 @@ export async function addVideoToPlaylist(videoId: string, playlistId: string): P
 /**
  * Given a match video's label, returns the ID of the YouTube playlist that it should be added to.
  *
- * @param label
+ * @param label The label (case-sensitive) of the match video
  */
 export async function getPlaylistIdForVideoLabel(label: string): Promise<string | undefined> {
     const playlists = await getYouTubePlaylists();
@@ -145,9 +145,16 @@ export async function getPlaylistIdForVideoLabel(label: string): Promise<string 
     return playlists[label]?.id;
 }
 
+/**
+ * Handles post-upload steps for a match video, such as adding it to a playlist.
+ * @param videoId The ID of the uploaded video on YouTube
+ * @param videoLabel The label (NOT case-sensitive) of the match video
+ */
 export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabel: string):
     Promise<YouTubePostUploadSteps> {
-    const playlistId = await getPlaylistIdForVideoLabel(videoLabel);
+    // Make video labels more flexible by not requiring them to match case
+    const lowercasedVideoLabel = videoLabel.toLowerCase();
+    const playlistId = await getPlaylistIdForVideoLabel(lowercasedVideoLabel);
     let addToPlaylistSuccess = false;
 
     if (playlistId) {
@@ -157,7 +164,7 @@ export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabe
             logger.err(`Failed to add video ${videoId} to playlist ${playlistId}`);
         }
     } else {
-        logger.err(`No playlist ID found for video label ${videoLabel}`);
+        logger.err(`No playlist ID found for video label ${lowercasedVideoLabel}`);
     }
 
     return {
@@ -261,6 +268,13 @@ export async function cachePlaylistNames(forceUpdate = false): Promise<boolean> 
         part: ["snippet"],
         id: playlistIds,
     });
+
+    if (result.data.items && result.data.items.length !== playlistIds.length) {
+        logger.warn(`Expecting data for playlist IDs ${playlistIds.join(", ")}, but did not receive data ` +
+            `back for all of them (see below). This might mean that some of the playlist IDs are invalid or not ` +
+            `accessible by this channel.`);
+        logger.info(`YouTube API response for playlist IDs: ${JSON.stringify(result.data.items)}`);
+    }
 
     if (!result.data.items) {
         return false;

@@ -2,7 +2,7 @@
  * Express router paths
  */
 
-import { type Immutable } from "@src/util/Immutable";
+import {type Immutable} from "@src/util/Immutable";
 
 // Start all paths with a /, even if empty
 const Paths = {
@@ -32,6 +32,7 @@ const Paths = {
     Status: "/status",
     Upload: "/upload",
     Playlists: "/playlists",
+    SavePlaylistMapping: "/playlistMapping/:videoLabel",
   },
 };
 

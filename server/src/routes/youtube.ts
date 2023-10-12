@@ -1,6 +1,14 @@
-import { Router } from "express";
-import { type IReq, type IRes } from "@src/routes/types/types";
-import { getSecrets, getSettings, getYouTubePlaylists, setSecret, setSetting } from "@src/services/SettingsService";
+import {Router} from "express";
+import {type IReq, type IRes} from "@src/routes/types/types";
+import {
+    deleteYouTubePlaylistMapping,
+    getSecrets,
+    getSettings,
+    getYouTubePlaylists,
+    setSecret,
+    setSetting,
+    setYouTubePlaylist,
+} from "@src/services/SettingsService";
 import Paths from "@src/routes/constants/Paths";
 import {
     cachePlaylistNames,
@@ -12,9 +20,9 @@ import {
     uploadYouTubeVideo,
 } from "@src/services/YouTubeService";
 import logger from "jet-logger";
-import { body, matchedData, validationResult } from "express-validator";
-import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
-import { isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
+import {body, matchedData, param, validationResult} from "express-validator";
+import {type YouTubeVideoPrivacy} from "@src/models/YouTubeVideoPrivacy";
+import {isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess} from "@src/models/YouTubeVideoUploadResult";
 
 export const youTubeRouter = Router();
 export const youTubeAuthRouter = Router();
@@ -209,5 +217,65 @@ async function getLabelPlaylistMapping(req: IReq, res: IRes): Promise<void> {
     res.json({
         ok: true,
         playlists,
+    });
+}
+
+youTubeRouter.post(
+    Paths.YouTube.SavePlaylistMapping,
+    param("videoLabel", "Video label to update playlist mapping for is required and must be a string")
+        .isString()
+        .toLowerCase(),
+    body("playlistId", "Playlist ID to map to is required, must start with PL, and must only contain " +
+        "the characters A-Za-z0-9 _-")
+        .exists({ checkNull: true })
+        .matches(/^PL[A-Za-z0-9_-]+$/)
+        .trim(),
+    updatePlaylistMapping,
+);
+
+async function updatePlaylistMapping(req: IReq<{ value: string }>, res: IRes): Promise<void> {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        res.status(400)
+            .json({
+                errors: errors.array(),
+            });
+        return;
+    }
+
+    const { videoLabel, playlistId } = matchedData(req);
+
+    await setYouTubePlaylist(videoLabel as string, playlistId as string);
+
+    res.json({
+        ok: true,
+    });
+}
+
+youTubeRouter.delete(
+    Paths.YouTube.SavePlaylistMapping,
+    param("videoLabel", "Video label to update playlist mapping for is required and must be a string")
+        .isString(),
+    deletePlaylistMapping,
+);
+
+async function deletePlaylistMapping(req: IReq<{ value: string }>, res: IRes): Promise<void> {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        res.status(400)
+            .json({
+                errors: errors.array(),
+            });
+        return;
+    }
+
+    const { videoLabel } = matchedData(req);
+
+    await deleteYouTubePlaylistMapping(videoLabel as string);
+
+    res.json({
+        ok: true,
     });
 }

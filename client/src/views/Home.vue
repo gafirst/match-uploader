@@ -36,6 +36,14 @@
                   class="pa-3 video-preview"
           >
             <h3>{{ video.videoLabel ?? "Unlabeled" }}</h3>
+            <VAlert v-if="video.videoLabel && !playlistStore.playlistMappings[video.videoLabel.toLowerCase()]"
+                    density="compact"
+                    class="mb-2"
+                    variant="tonal"
+                    color="warning"
+            >
+              Missing playlist mapping
+            </VAlert>
             <video :src="`videos/${video.path}`"
                    controls
                    preload="metadata"
@@ -52,6 +60,8 @@
           <VExpansionPanels>
             <NameMatchVideoFilesHelp />
             <MissingMatchVideosHelp />
+            <MissingPlaylistMapping />
+            <UploadErrors />
           </VExpansionPanels>
         </VCol>
       </VRow>
@@ -66,10 +76,14 @@ import MatchVideosUploader from "@/components/matches/MatchVideosUploader.vue";
 import {useMatchStore} from "@/stores/match";
 import NameMatchVideoFilesHelp from "@/components/help/NameMatchVideoFilesHelp.vue";
 import MissingMatchVideosHelp from "@/components/help/MissingMatchVideosHelp.vue";
+import {usePlaylistsStore} from "@/stores/playlists";
+import UploadErrors from "@/components/help/UploadErrors.vue";
+import MissingPlaylistMapping from "@/components/help/MissingPlaylistMapping.vue";
 
 const error = ref("");
 
 const matchStore = useMatchStore();
+const playlistStore = usePlaylistsStore();
 
 </script>
 

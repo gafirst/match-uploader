@@ -62,7 +62,7 @@
         />
 
         <h2 class="mt-4">
-          Playlist mapping
+          Playlist mappings
         </h2>
         <YouTubePlaylistMapping />
 
