@@ -37,6 +37,13 @@
         />
 
         <p class="mb-1">Playoffs type</p>
+        <VAlert v-if="settingsStore.settings?.playoffsType === PLAYOFF_BEST_OF_3"
+                color="warning"
+                variant="tonal"
+                class="mb-2"
+        >
+          Best of 3 playoff support is limited and functionality may be broken or limited in this playoff mode.
+        </VAlert>
         <AutosavingBtnSelectGroup :choices="PLAYOFF_MATCH_TYPES"
                                   :default-value="settingsStore.settings?.playoffsType"
                                   :loading="savingPlayoffMatchType"
@@ -132,7 +139,7 @@ import AutosavingTextInput from "@/components/form/AutosavingTextInput.vue";
 import {computed, onMounted, ref} from "vue";
 import {SettingType} from "@/types/ISettings";
 import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vue";
-import {PLAYOFF_MATCH_TYPES} from "@/types/MatchType";
+import {PLAYOFF_BEST_OF_3, PLAYOFF_MATCH_TYPES} from "@/types/MatchType";
 import AutosavingBtnSelectGroup from "@/components/form/AutosavingBtnSelectGroup.vue";
 import {useSettingsStore} from "@/stores/settings";
 
