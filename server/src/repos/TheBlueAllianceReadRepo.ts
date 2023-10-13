@@ -4,7 +4,7 @@ import {
     type TbaMatchesSimpleApiResponse,
     type TbaMatchSimpleApiResponse,
 } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
-import {isObject} from "@src/util/isObject";
+import { isObject } from "@src/util/isObject";
 import fetch from "node-fetch";
 
 export class TheBlueAllianceReadRepo {

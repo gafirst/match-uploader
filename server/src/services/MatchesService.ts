@@ -1,13 +1,13 @@
 import type MatchKey from "@src/models/MatchKey";
-import {getFilesMatchingPattern} from "@src/repos/FileStorageRepo";
-import {getSecrets, getSettings} from "@src/services/SettingsService";
-import {Match} from "@src/models/Match";
-import {capitalizeFirstLetter} from "@src/util/string";
-import {MatchVideoInfo} from "@src/models/MatchVideoInfo";
-import {type TbaMatchSimple} from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
-import {TheBlueAllianceReadRepo} from "@src/repos/TheBlueAllianceReadRepo";
+import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
+import { getSecrets, getSettings } from "@src/services/SettingsService";
+import { Match } from "@src/models/Match";
+import { capitalizeFirstLetter } from "@src/util/string";
+import { MatchVideoInfo } from "@src/models/MatchVideoInfo";
+import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
+import { TheBlueAllianceReadRepo } from "@src/repos/TheBlueAllianceReadRepo";
 import dedent from "dedent";
-import {type TbaFrcTeam} from "@src/models/theBlueAlliance/tbaFrcTeam";
+import { type TbaFrcTeam } from "@src/models/theBlueAlliance/tbaFrcTeam";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
     const settings = await getSettings();
