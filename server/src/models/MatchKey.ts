@@ -1,6 +1,6 @@
-import { CompLevel, compLevelFromString } from "@src/models/CompLevel";
-import { PlayoffsType } from "@src/models/PlayoffsType";
-import { getBestOf3RoundNumberFromSetNumber } from "@src/util/playoffs";
+import {abbreviatedCompLevel, CompLevel, compLevelFromString} from "@src/models/CompLevel";
+import {PlayoffsType} from "@src/models/PlayoffsType";
+import {getBestOf3RoundNumberFromSetNumber} from "@src/util/playoffs";
 
 class MatchKey {
     year: number;
@@ -49,7 +49,11 @@ class MatchKey {
     }
 
     get matchKey(): string {
-        return `${this.year}${this.eventCode}_${this.compLevel}${this.setNumber}m${this.matchNumber}`;
+        // TODO: We should add tests to ensure this value is correct
+        const compLevel = abbreviatedCompLevel(this.compLevel);
+        const setNumber = this.setNumber === null ? "" : this.setNumber;
+
+        return `${this.year}${this.eventCode}_${compLevel}${setNumber}m${this.matchNumber}`;
     }
 
     /**

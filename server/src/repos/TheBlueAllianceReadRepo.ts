@@ -1,7 +1,10 @@
+import type MatchKey from "@src/models/MatchKey";
 import {
-    isTbaMatchSimple, type TbaMatchSimpleApiResponse,
-} from "@src/models/theBlueAlliance/tbaMatchSimpleApiResponse";
-import { isObject } from "@src/util/isObject";
+    isTbaMatchSimple,
+    type TbaMatchesSimpleApiResponse,
+    type TbaMatchSimpleApiResponse,
+} from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
+import {isObject} from "@src/util/isObject";
 import fetch from "node-fetch";
 
 export class TheBlueAllianceReadRepo {
@@ -34,16 +37,29 @@ export class TheBlueAllianceReadRepo {
         return data;
     }
 
-    async getEventMatches(eventKey: string): Promise<TbaMatchSimpleApiResponse> {
+    async getEventMatches(eventKey: string): Promise<TbaMatchesSimpleApiResponse> {
         try {
             return await this.get(
                 `event/${eventKey}/matches/simple`,
-                (x): x is TbaMatchSimpleApiResponse =>
-                    Array.isArray(x) &&
-                    x.every(isObject) &&
-                    x.every(isTbaMatchSimple));
+                (elem): elem is TbaMatchesSimpleApiResponse =>
+                    Array.isArray(elem) &&
+                    elem.every(isObject) &&
+                    elem.every(isTbaMatchSimple),
+            );
         } catch (e) {
-            throw new Error(`Error fetching event matches for ${eventKey}: ${e}`);
+            throw new Error(`Error fetching event matches from The Blue Alliance for ${eventKey}: ${e}`);
+        }
+    }
+
+    async getMatchResults(matchKey: MatchKey): Promise<TbaMatchSimpleApiResponse> {
+        try {
+            return await this.get(
+                `/match/${matchKey.matchKey}/simple`,
+                (elem): elem is TbaMatchSimpleApiResponse => isObject(elem) && isTbaMatchSimple(elem),
+            );
+        } catch (e) {
+            throw new Error("Error fetching simple match results from The Blue Alliance for " +
+                `${matchKey.matchKey}: ${e}`);
         }
     }
 }

@@ -1,5 +1,5 @@
 import type MatchKey from "@src/models/MatchKey";
-import { CompLevel } from "@src/models/CompLevel";
+import {CompLevel} from "@src/models/CompLevel";
 
 export class Match {
     key: MatchKey;
@@ -11,6 +11,7 @@ export class Match {
     /**
      * Generate a human-readable name for this match.
      * @param includeMatch Whether to include the word "Match" or not
+     * @param includeDoubleElimRound
      * @returns The match name
      * @private
      */
