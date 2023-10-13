@@ -1,7 +1,11 @@
 import { Router } from "express";
 import Paths from "@src/routes/constants/Paths";
 import { type IReq, type IRes } from "@src/routes/types/types";
-import { generateMatchVideoDescription, getLocalVideoFilesForMatch, getTbaMatchList } from "@src/services/MatchesService";
+import {
+    generateMatchVideoDescription,
+    getLocalVideoFilesForMatch,
+    getTbaMatchList,
+} from "@src/services/MatchesService";
 import { matchedData, param, validationResult } from "express-validator";
 import MatchKey from "@src/models/MatchKey";
 import { type MatchVideoInfo } from "@src/models/MatchVideoInfo";
