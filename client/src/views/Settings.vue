@@ -27,14 +27,6 @@
                              input-type="text"
                              setting-type="setting"
         />
-        <AutosavingTextInput :key="`videoSearchDirectory-${dataRefreshKey}`"
-                             :on-submit="submit"
-                             :initial-value="settingsStore.settings?.videoSearchDirectory"
-                             name="videoSearchDirectory"
-                             label="Video search directory"
-                             input-type="text"
-                             setting-type="setting"
-        />
 
         <p class="mb-1">Playoffs type</p>
         <VAlert v-if="settingsStore.settings?.playoffsType === PLAYOFF_BEST_OF_3"
