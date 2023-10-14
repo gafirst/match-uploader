@@ -22,13 +22,26 @@
                   :disabled="matchStore.uploadInProgress || !!matchListStore.error"
                   @update:model-value="matchSelected"
   />
-  <VBtn :disabled="matchStore.uploadInProgress"
-        prepend-icon="mdi-refresh"
-        variant="outlined"
-        @click="matchListStore.getMatchList(true)"
-  >
-    Refresh
-  </VBtn>
+  <VRow class="mb-2">
+    <VBtn :disabled="matchStore.uploadInProgress"
+          prepend-icon="mdi-refresh"
+          variant="outlined"
+          class="ml-4"
+          @click="matchListStore.getMatchList(true)"
+    >
+      Refresh
+    </VBtn>
+    <!--    A button to view the match on The Blue Alliance-->
+    <VBtn v-if="matchStore.selectedMatchKey"
+          prepend-icon="mdi-open-in-new"
+          variant="outlined"
+          class="ml-2"
+          :href="`https://thebluealliance.com/match/${matchStore.selectedMatchKey}`"
+          target="_blank"
+    >
+      View on TBA
+    </VBtn>
+  </VRow>
 </template>
 
 <script lang="ts" setup>
