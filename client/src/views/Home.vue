@@ -17,15 +17,7 @@
       >
         Video metadata
       </h2>
-      <VTextarea v-model="matchStore.description"
-                 label="Description"
-                 :disabled="matchStore.uploadInProgress"
-                 messages="Raw YouTube video description"
-                 class="mb-4"
-      />
-
-      <!--      <h3>YouTube</h3>-->
-      <!--      <YouTubeChannelSelector class="mt-2 mb-4" />-->
+      <MatchDescription />
     </VCol>
     <VCol cols="12" md="7">
       <h2 class="mb-2">Videos</h2>
@@ -74,6 +66,7 @@ import {ref} from "vue";
 import MatchSelector from "@/components/matches/MatchSelector.vue";
 import MatchVideosUploader from "@/components/matches/MatchVideosUploader.vue";
 import {useMatchStore} from "@/stores/match";
+import MatchDescription from "@/components/matches/MatchDescription.vue";
 import NameMatchVideoFilesHelp from "@/components/help/NameMatchVideoFilesHelp.vue";
 import MissingMatchVideosHelp from "@/components/help/MissingMatchVideosHelp.vue";
 import {usePlaylistsStore} from "@/stores/playlists";
@@ -84,7 +77,6 @@ const error = ref("");
 
 const matchStore = useMatchStore();
 const playlistStore = usePlaylistsStore();
-
 </script>
 
 <style>

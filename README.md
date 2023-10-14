@@ -1,5 +1,13 @@
 # match-uploader
 
+Match Uploader is a tool to help upload FRC match videos to YouTube in a fast, consistent manner.
+
+Match team and score data is provided by [The Blue Alliance](https://www.thebluealliance.com).
+
+## Production usage
+
+Coming soon!
+
 ## Local development
 
 Project organization:
@@ -7,7 +15,7 @@ Project organization:
  - [`client`](client) contains all frontend code (Vue3, Typescript)
 
 Install some baseline dependencies:
-  - nodejs (v16+)
+  - nodejs (v18 recommended)
   - yarn
 
 - To run the server: `cd server && yarn run dev`
