@@ -98,7 +98,7 @@ export async function generateMatchVideoDescription(match: Match, eventName: str
         throw new Error(`Match ${matchKey.matchKey} has not been scored yet.`);
     }
 
-    const matchTbaUrl = `https://www.thebluealliance.com/match/${matchKey.matchKey}`;
+    const matchTbaUrl = `https://thebluealliance.com/match/${matchKey.matchKey}`;
     // TODO: Don't hardcode references to GAFIRST
     const footageSource = `Footage of the ${eventName} is provided by the GeorgiaFIRST A/V Team.`;
     const socialMedia = "Follow us on Twitter (@GeorgiaFIRST) and Facebook " +

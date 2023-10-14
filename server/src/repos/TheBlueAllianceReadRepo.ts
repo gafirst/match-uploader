@@ -46,8 +46,8 @@ export class TheBlueAllianceReadRepo {
                     elem.every(isObject) &&
                     elem.every(isTbaMatchSimple),
             );
-        } catch (e) {
-            throw new Error(`Error fetching event matches from The Blue Alliance for ${eventKey}: ${e}`);
+        } catch (error) {
+            throw new Error(`Error fetching event matches from The Blue Alliance for ${eventKey}: ${error}`);
         }
     }
 
@@ -57,9 +57,9 @@ export class TheBlueAllianceReadRepo {
                 `/match/${matchKey.matchKey}/simple`,
                 (elem): elem is TbaMatchSimpleApiResponse => isObject(elem) && isTbaMatchSimple(elem),
             );
-        } catch (e) {
+        } catch (error) {
             throw new Error("Error fetching simple match results from The Blue Alliance for " +
-                `${matchKey.matchKey}: ${e}`);
+                `${matchKey.matchKey}: ${error}`);
         }
     }
 }
