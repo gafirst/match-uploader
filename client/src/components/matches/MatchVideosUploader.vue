@@ -7,12 +7,19 @@
                          class="mb-2"
       />
       <div v-else-if="matchStore.selectedMatchKey">
-        <VList>
+        <VList v-if="matchStore.matchVideos.length">
           <MatchVideoListItem v-for="video in matchStore.matchVideos"
                               :key="video.path"
                               :video="video"
           />
         </VList>
+        <VAlert v-else
+                class="mb-2"
+                color="warning"
+                variant="tonal"
+        >
+          No video files found for this match
+        </VAlert>
         <VBtn prepend-icon="mdi-refresh"
               variant="outlined"
               class="mb-2"
@@ -25,7 +32,7 @@
       <div v-else>
         <p class="mb-2">No match selected</p>
       </div>
-      <VBtn color="success"
+      <VBtn :color="settingsStore.settings?.sandboxModeEnabled ? 'warning' : 'success'"
             size="large"
             :prepend-icon="matchStore.uploadInProgress ? 'mdi-loading mdi-spin' : ''"
             :disabled="matchStore.uploadInProgress || !matchStore.matchVideos.length || !matchStore.description"
@@ -33,6 +40,7 @@
       >
         {{ matchStore.uploadInProgress ? "Uploading..." : "Upload all" }}
       </VBtn>
+      <SandboxModeAlert class="mt-4" :rounded="4" />
     </VCardText>
   </VCard>
 </template>
@@ -41,8 +49,11 @@
 import {useMatchStore} from "@/stores/match";
 import {MatchVideoInfo} from "@/types/MatchVideoInfo";
 import MatchVideoListItem from "@/components/matches/MatchVideoListItem.vue";
+import {useSettingsStore} from "@/stores/settings";
+import SandboxModeAlert from "@/components/alerts/SandboxModeAlert.vue";
 
 const matchStore = useMatchStore();
+const settingsStore = useSettingsStore();
 
 // TODO: cleanup types
 async function uploadVideo(video: MatchVideoInfo): Promise<any> {
@@ -55,6 +66,7 @@ async function uploadVideo(video: MatchVideoInfo): Promise<any> {
     body: JSON.stringify({
       videoPath: video.path,
       videoTitle: video.videoTitle,
+      label: video.videoLabel ?? "Unlabeled",
       description: matchStore.description,
       videoPrivacy: "private",
     }),
@@ -73,7 +85,13 @@ async function uploadVideos() {
       video.youTubeVideoId = result.videoId;
       video.youTubeVideoUrl = `https://www.youtube.com/watch?v=${result.videoId}`;
     } else {
-      video.uploadError = result.error;
+      // Catches if the server returns parameter validation errors
+      if (result.errors) {
+        console.log("errors", result.errors);
+        video.uploadError = result.errors.map((error: any) => error.msg).join(", ");
+      } else {
+        video.uploadError = result.error;
+      }
     }
   }
   matchStore.uploadInProgress = false;

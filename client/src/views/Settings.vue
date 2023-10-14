@@ -61,6 +61,11 @@
         />
 
         <h2 class="mt-4">
+          Playlist mappings
+        </h2>
+        <YouTubePlaylistMapping />
+
+        <h2 class="mt-4">
           YouTube
         </h2>
 
@@ -134,6 +139,7 @@ import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vu
 import {PLAYOFF_BEST_OF_3, PLAYOFF_MATCH_TYPES} from "@/types/MatchType";
 import AutosavingBtnSelectGroup from "@/components/form/AutosavingBtnSelectGroup.vue";
 import {useSettingsStore} from "@/stores/settings";
+import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.vue";
 
 // const loading = ref(true);
 const loading = computed(() => {

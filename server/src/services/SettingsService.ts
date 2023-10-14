@@ -1,12 +1,13 @@
 import {
-  type ISecretSettings,
-  type ISecretSettingsHidden,
-  type ISettings,
-  type SecretSettingsKey,
-  type SettingsKey,
+    type ISecretSettings,
+    type ISecretSettingsHidden,
+    type ISettings,
+    type SecretSettingsKey,
+    type SettingsKey,
 } from "@src/models/Settings";
 import { readSettingsJson, writeSettingsJson } from "@src/repos/JsonStorageRepo";
 import EnvVars from "@src/constants/EnvVars";
+import { type YouTubePlaylists } from "@src/models/YouTubePlaylists";
 
 export async function getSettings(): Promise<ISettings> {
   return await readSettingsJson<ISettings>(
@@ -64,4 +65,34 @@ export async function setSecret(key: SecretSettingsKey, value: string): Promise<
     ...currentSecrets,
     [key]: value,
   });
+}
+
+export async function getYouTubePlaylists(): Promise<YouTubePlaylists> {
+  return await readSettingsJson<YouTubePlaylists>(
+      EnvVars.SettingsLocations.YouTubePlaylistsFile,
+      EnvVars.SettingsLocations.YouTubePlaylistsTemplateFile,
+  );
+}
+
+export async function setYouTubePlaylist(videoLabel: string,
+                                         playlistId: string,
+                                         playlistName: string | null = null): Promise<void> {
+    const currentPlaylists = await getYouTubePlaylists();
+
+    return await writeSettingsJson<YouTubePlaylists>(EnvVars.SettingsLocations.YouTubePlaylistsFile, {
+        ...currentPlaylists,
+        [videoLabel]: {
+          id: playlistId,
+          name: playlistName,
+        },
+    });
+}
+
+export async function deleteYouTubePlaylistMapping(videoLabel: string): Promise<void> {
+  const currentPlaylists = await getYouTubePlaylists();
+
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+  delete currentPlaylists[videoLabel];
+
+  return await writeSettingsJson<YouTubePlaylists>(EnvVars.SettingsLocations.YouTubePlaylistsFile, currentPlaylists);
 }
