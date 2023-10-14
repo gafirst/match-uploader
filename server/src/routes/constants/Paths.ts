@@ -31,6 +31,8 @@ const Paths = {
     },
     Status: "/status",
     Upload: "/upload",
+    Playlists: "/playlists",
+    SavePlaylistMapping: "/playlistMapping/:videoLabel",
   },
 };
 

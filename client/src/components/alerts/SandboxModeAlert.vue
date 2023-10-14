@@ -1,9 +1,8 @@
 <template>
   <VAlert v-if="!settingsStore.isFirstLoad && settingsStore.settings?.sandboxModeEnabled"
-          id="sandbox-mode-alert"
           color="warning"
           variant="tonal"
-          :rounded="0"
+          :rounded="props.rounded ?? 0"
           icon="mdi-upload-off"
   >
     <template v-slot:text>
@@ -16,4 +15,9 @@ import {useSettingsStore} from "@/stores/settings";
 
 const settingsStore = useSettingsStore();
 settingsStore.getSettings();
+
+interface IProps {
+  rounded?: number;
+}
+const props = defineProps<IProps>();
 </script>

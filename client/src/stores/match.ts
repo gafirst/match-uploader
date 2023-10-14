@@ -79,7 +79,6 @@ export const useMatchStore = defineStore("match", () => {
             return;
         }
 
-        console.log(data.recommendedVideoFiles);
         matchVideos.value = data.recommendedVideoFiles as MatchVideoInfo[];
         matchVideosLoading.value = false;
     }

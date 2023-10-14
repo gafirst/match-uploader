@@ -14,18 +14,18 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
     const eventName = settings.eventName;
 
     const files = await getFilesMatchingPattern(settings.videoSearchDirectory, `${fullMatchName}*`);
-    const parseVideoLabelsRegex = /^[A-Za-z]+ (Match )?(\d{1,3})\s?([A-Za-z\s]*)\..*$/;
+    const parseVideoLabelsRegex = /^[A-Za-z]+ (\d{1,3})\s?([A-Za-z\s]*)\..*$/;
 
     return files.filter(file => {
         const proposedVideoLabel = parseVideoLabelsRegex.exec(file);
 
         // Filter out this file if the pattern is incorrect
-        if (!proposedVideoLabel || proposedVideoLabel.length < 4) {
+        if (!proposedVideoLabel || proposedVideoLabel.length < 3) {
             return false;
         }
 
         // Pulls the actual match number out of the file name using the 2nd capture group in parseVideoLabelsRegex
-        const fileMatchNumber = proposedVideoLabel[2];
+        const fileMatchNumber = proposedVideoLabel[1];
 
         // Filter out this file if the match number in the file name doesn't match the match we want to get videos for
         if (!fileMatchNumber || Number.parseInt(fileMatchNumber, 10) !== match.key.matchNumber) {
@@ -38,8 +38,8 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
         let videoLabel: string | null = null;
         let videoTitle: string;
 
-        if (proposedVideoLabel !== null && proposedVideoLabel.length >= 4 && proposedVideoLabel[3] !== "") {
-            videoLabel = proposedVideoLabel[3];
+        if (proposedVideoLabel !== null && proposedVideoLabel.length >= 3 && proposedVideoLabel[2] !== "") {
+            videoLabel = proposedVideoLabel[2];
         }
 
         if (!videoLabel) {
