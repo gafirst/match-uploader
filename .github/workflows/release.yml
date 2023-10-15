@@ -48,7 +48,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64 # ,linux/arm64 (temporarily disable ARM builds: https://github.com/nodejs/docker-node/issues/1335#issuecomment-1551547206 might help)
           push: false
           tags: |
             gafirst/match-uploader:latest
