@@ -8,6 +8,8 @@ Match team and score data is provided by [The Blue Alliance](https://www.theblue
 
 Coming soon!
 
+This line added to test a release
+
 ## Local development
 
 Project organization:
