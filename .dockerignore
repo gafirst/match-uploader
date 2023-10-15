@@ -1,0 +1,12 @@
+.eslint
+.github
+**/.idea
+**/.run
+**/dist
+**/node_modules
+**/yarn-error.log
+**/eslint_report.json
+**/videos
+**/settings/settings.json
+**/settings/secrets.json
+**/settings/playlists.json

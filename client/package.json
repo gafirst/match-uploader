@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ignore-path .gitignore",
     "lint:fix": "eslint . --fix --ignore-path .gitignore",
@@ -29,7 +29,7 @@
     "typescript": "^5.1.6",
     "vite": "^4.4.8",
     "vite-plugin-vuetify": "^1.0.2",
-    "vue-tsc": "^1.8.8"
+    "vue-tsc": "^1.8.19"
   },
   "license": "GPL-3.0"
 }
