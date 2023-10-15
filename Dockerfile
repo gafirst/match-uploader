@@ -64,8 +64,6 @@ COPY --from=build_server_prod /home/node/app/server/dist ./server/dist
 COPY --from=build_server_prod /home/node/app/server/package.json ./server/package.json
 COPY --from=run_server_prod /home/node/app/server/node_modules ./server/node_modules
 
-COPY server/env/production.env server/env/production.env
-
 WORKDIR /home/node/app/server/settings
 COPY server/settings/*.example.json .
 
