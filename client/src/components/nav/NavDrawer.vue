@@ -27,19 +27,9 @@ const navItems = ref<INavItem[]>([
     icon: "mdi-cloud-upload-outline",
   },
   {
-    title: "Matches",
-    to: "/matches",
-    icon: "mdi-format-list-numbered",
-  },
-  {
     title: "Settings",
     to: "/settings",
     icon: "mdi-cog",
-  },
-  {
-    title: "Logs",
-    to: "/logs",
-    icon: "mdi-code-json",
   },
 ]);
 </script>

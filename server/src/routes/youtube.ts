@@ -80,7 +80,12 @@ async function handleYouTubeOAuth2Callback(req: IReq, res: IRes): Promise<void> 
         logger.info("OAuth2 completed successfully");
 
         try {
-            const { access_token, refresh_token } = await oauth2AuthCodeExchange(code as string, req.protocol);
+            const {
+                access_token,
+                refresh_token,
+                expiry_date,
+            } = await oauth2AuthCodeExchange(code as string, req.protocol);
+
             if (access_token) {
                 await setSecret("googleAccessToken", access_token);
                 await setSetting("googleAuthStatus", "YouTube connection successful");
@@ -94,6 +99,13 @@ async function handleYouTubeOAuth2Callback(req: IReq, res: IRes): Promise<void> 
                 await setSecret("googleRefreshToken", "");
                 logger.warn("OAuth2 code exchange: no refresh_token was received. Google only sends the refresh " +
                     "token on the first authorization attempt.");
+            }
+
+            if (expiry_date) {
+                await setSecret("googleTokenExpiry", expiry_date.toString());
+            } else {
+                await setSecret("googleTokenExpiry", "");
+                logger.warn("OAuth2 code exchange: no expiry_date was received.");
             }
         } catch (codeExchangeError) {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

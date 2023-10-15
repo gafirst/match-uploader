@@ -22,25 +22,48 @@
                   :disabled="matchStore.uploadInProgress || !!matchListStore.error"
                   @update:model-value="matchSelected"
   />
-  <VRow class="mb-2">
-    <VBtn :disabled="matchStore.uploadInProgress"
-          prepend-icon="mdi-refresh"
-          variant="outlined"
-          class="ml-4"
-          @click="matchListStore.getMatchList(true)"
-    >
-      Refresh
-    </VBtn>
-    <!--    A button to view the match on The Blue Alliance-->
-    <VBtn v-if="matchStore.selectedMatchKey"
-          prepend-icon="mdi-open-in-new"
-          variant="outlined"
-          class="ml-2"
-          :href="`https://thebluealliance.com/match/${matchStore.selectedMatchKey}`"
-          target="_blank"
-    >
-      View on TBA
-    </VBtn>
+  <VRow>
+    <VCol>
+      <VBtn :disabled="matchStore.uploadInProgress"
+            prepend-icon="mdi-refresh"
+            variant="outlined"
+            @click="matchListStore.getMatchList(true)"
+      >
+        Refresh
+      </VBtn>
+      <VBtn v-if="matchStore.selectedMatchKey"
+            prepend-icon="mdi-open-in-new"
+            variant="outlined"
+            class="ml-2"
+            :href="`https://thebluealliance.com/match/${matchStore.selectedMatchKey}`"
+            target="_blank"
+      >
+        View on TBA
+      </VBtn>
+    </VCol>
+  </VRow>
+  <VRow class="mt-0">
+    <VCol>
+      <VBtn v-if="matchStore.selectedMatchKey"
+            :variant="!matchStore.allMatchVideosUploaded ? 'outlined' : undefined"
+            :disabled="matchStore.uploadInProgress"
+            @click="matchStore.advanceMatch"
+      >
+        Next match <VChip density="comfortable"
+                          variant="tonal"
+                          class="ml-2"
+        >
+          Beta
+        </VChip>
+      </VBtn>
+    </VCol>
+  </VRow>
+  <VRow>
+    <VCol>
+      <VAlert v-if="matchStore.selectedMatchKey" class="mb-2">
+        Next Match only works for qualification and playoff finals matches.
+      </VAlert>
+    </VCol>
   </VRow>
 </template>
 

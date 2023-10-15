@@ -27,12 +27,27 @@
     </template>
     <template v-slot:append>
       <VBtn v-if="video.youTubeVideoUrl"
-            density="default"
             variant="text"
             icon="mdi-open-in-new"
             :href="video.youTubeVideoUrl"
             target="_blank"
       />
+      <VBtn v-else-if="!!video.uploadError"
+            variant="text"
+            prepend-icon="mdi-refresh"
+            :disabled="matchStore.uploadInProgress"
+            @click="matchStore.uploadSingleVideo(video)"
+      >
+        Retry
+      </VBtn>
+      <VBtn v-else
+            variant="text"
+            prepend-icon="mdi-upload"
+            :disabled="matchStore.uploadInProgress"
+            @click="matchStore.uploadSingleVideo(video)"
+      >
+        Upload
+      </VBtn>
     </template>
   </VListItem>
 </template>
@@ -40,6 +55,9 @@
 <script lang="ts" setup>
 import {MatchVideoInfo} from "@/types/MatchVideoInfo";
 import {computed} from "vue";
+import {useMatchStore} from "@/stores/match";
+
+const matchStore = useMatchStore();
 
 interface IProps {
   video: MatchVideoInfo;
