@@ -18,6 +18,7 @@ const Paths = {
     List: "/",
     Get: "/:matchKey",
     RecommendVideoFiles: "/:matchKey/videos/recommend",
+    GenerateDescription: "/:matchKey/description",
   },
   YouTube: {
     Base: "/youtube",
@@ -31,6 +32,8 @@ const Paths = {
     },
     Status: "/status",
     Upload: "/upload",
+    Playlists: "/playlists",
+    SavePlaylistMapping: "/playlistMapping/:videoLabel",
   },
 };
 

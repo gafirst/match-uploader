@@ -17,6 +17,9 @@ export default {
     SettingsTemplateFile: (process.env.SETTINGS_TEMPLATE_FILE_LOCATION) ?? "./settings/settings.example.json",
     SecretsFile: (process.env.SECRETS_FILE_LOCATION) ?? "./settings/secrets.json",
     SecretsTemplateFile: (process.env.SECRETS_TEMPLATE_FILE_LOCATION) ?? "./settings/secrets.example.json",
+    YouTubePlaylistsFile: (process.env.YOUTUBE_PLAYLISTS_FILE_LOCATION) ?? "./settings/playlists.json",
+    YouTubePlaylistsTemplateFile: (process.env.YOUTUBE_PLAYLISTS_TEMPLATE_FILE_LOCATION) ??
+        "./settings/playlists.example.json",
   },
   CookieProps: {
     Key: "ExpressGeneratorTs",
@@ -30,9 +33,5 @@ export default {
       domain: (process.env.COOKIE_DOMAIN ?? ""),
       secure: (process.env.SECURE_COOKIE === "true"),
     },
-  },
-  Jwt: {
-    Secret: (process.env.JWT_SECRET ?? ""),
-    Exp: (process.env.COOKIE_EXP ?? ""), // exp at the same time as the cookie
   },
 } as const;

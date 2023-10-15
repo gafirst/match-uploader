@@ -1,5 +1,5 @@
 import { auth, youtube, type youtube_v3 } from "@googleapis/youtube";
-import { getSecrets, getSettings } from "@src/services/SettingsService";
+import { getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist } from "@src/services/SettingsService";
 import logger from "jet-logger";
 import { type Credentials, type OAuth2Client } from "google-auth-library";
 import EnvVars from "@src/constants/EnvVars";
@@ -10,6 +10,7 @@ import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
 import path from "path";
 import sanitizeFilename from "sanitize-filename";
 import { type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
+import { type YouTubePostUploadSteps } from "@src/models/YouTubePostUploadSteps";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
   const port = EnvVars.Port;
@@ -53,7 +54,6 @@ export async function oauth2AuthCodeExchange(code: string, requestProtocol: stri
 
   return tokens;
 }
-
 export async function getYouTubeApiClient(): Promise<youtube_v3.Youtube> {
   const { googleClientId } = await getSettings();
   const { googleClientSecret, googleAccessToken, googleRefreshToken } = await getSecrets();
@@ -93,6 +93,92 @@ export async function getAuthenticatedYouTubeChannels(): Promise<YouTubeChannelL
   });
 }
 
+/**
+ * Adds a video to a YouTube playlist.
+ *
+ * Be careful: Every call to this YouTube API costs 50 quota units
+ *
+ * @param videoId The ID of the (must be already uploaded) video to add to the playlist
+ * @param playlistId The ID of the playlist (must already exist) to add the video to
+ */
+export async function addVideoToPlaylist(videoId: string, playlistId: string): Promise<boolean> {
+    const youtubeClient = await getYouTubeApiClient();
+
+    const { sandboxModeEnabled } = await getSettings();
+    if (sandboxModeEnabled) {
+        logger.info("Would have added the following video to the following playlist:");
+        logger.info(`Video ID: ${videoId}, playlist ID: ${playlistId}`);
+        return false;
+    }
+
+    const result = await youtubeClient.playlistItems.insert({
+        part: ["snippet"],
+        requestBody: {
+            snippet: {
+                playlistId,
+                resourceId: {
+                    kind: "youtube#video",
+                    videoId,
+                },
+            },
+        },
+    });
+
+    if (!result.data.id) {
+        logger.err(
+            `No ID returned from YouTube API while trying to add video ${videoId} to playlist ${playlistId}}`,
+        );
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Given a match video's label, returns the ID of the YouTube playlist that it should be added to.
+ *
+ * @param label The label (case-sensitive) of the match video
+ */
+export async function getPlaylistIdForVideoLabel(label: string): Promise<string | undefined> {
+    const playlists = await getYouTubePlaylists();
+
+    return playlists[label]?.id;
+}
+
+/**
+ * Handles post-upload steps for a match video, such as adding it to a playlist.
+ * @param videoId The ID of the uploaded video on YouTube
+ * @param videoLabel The label (NOT case-sensitive) of the match video
+ */
+export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabel: string):
+    Promise<YouTubePostUploadSteps> {
+    // Make video labels more flexible by not requiring them to match case
+    const lowercasedVideoLabel = videoLabel.toLowerCase();
+    const playlistId = await getPlaylistIdForVideoLabel(lowercasedVideoLabel);
+    let addToPlaylistSuccess = false;
+
+    if (playlistId) {
+        addToPlaylistSuccess = await addVideoToPlaylist(videoId, playlistId);
+
+        if (!addToPlaylistSuccess) {
+            logger.err(`Failed to add video ${videoId} to playlist ${playlistId}`);
+        }
+    } else {
+        logger.err(`No playlist ID found for video label ${lowercasedVideoLabel}`);
+    }
+
+    return {
+        addToYouTubePlaylist: addToPlaylistSuccess,
+    };
+}
+
+/**
+ * Uploads a video to YouTube.
+ * @param title
+ * @param description
+ * @param videoPath
+ * @param privacy
+ */
 export async function uploadYouTubeVideo(title: string,
                                          description: string,
                                          videoPath: string,
@@ -139,8 +225,6 @@ export async function uploadYouTubeVideo(title: string,
 
     const result = await youtubeClient.videos.insert(uploadParams);
 
-    logger.info(result.data);
-
     const videoId = result.data.id;
 
     if (!videoId) {
@@ -153,4 +237,52 @@ export async function uploadYouTubeVideo(title: string,
         videoId,
         videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
     };
+}
+
+export async function cachePlaylistNames(forceUpdate = false): Promise<boolean> {
+    const playlists = await getYouTubePlaylists();
+
+    if (!playlists) {
+        return false;
+    }
+
+    // map playlist IDs to labels
+    const playlistIdsToLabels: Record<string, string> = {};
+    Object.keys(playlists).forEach((label) => {
+        playlistIdsToLabels[playlists[label].id] = label;
+    });
+
+    const playlistsWithoutNames = Object.values(playlists).filter((playlist) => !playlist.name);
+
+    if (!forceUpdate && playlistsWithoutNames.length === 0) {
+        return true;
+    }
+
+    const youtubeClient = await getYouTubeApiClient();
+
+    const playlistIds = playlistsWithoutNames.map((playlist) => playlist.id);
+
+    const result = await youtubeClient.playlists.list({
+        part: ["snippet"],
+        id: playlistIds,
+    });
+
+    if (result.data.items && result.data.items.length !== playlistIds.length) {
+        logger.warn(`Expecting data for playlist IDs ${playlistIds.join(", ")}, but did not receive data ` +
+            `back for all of them (see below). This might mean that some of the playlist IDs are invalid or not ` +
+            `accessible by this channel.`);
+        logger.info(`YouTube API response for playlist IDs: ${JSON.stringify(result.data.items)}`);
+    }
+
+    if (!result.data.items) {
+        return false;
+    }
+
+    for (const playlist of result.data.items) {
+        if (playlist.id && playlist.snippet?.title && playlistIdsToLabels[playlist.id]) {
+            await setYouTubePlaylist(playlistIdsToLabels[playlist.id], playlist.id, playlist.snippet?.title);
+        }
+    }
+
+    return true;
 }

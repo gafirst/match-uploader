@@ -1,16 +1,26 @@
 import { Router } from "express";
 import { type IReq, type IRes } from "@src/routes/types/types";
-import { getSecrets, getSettings, setSecret, setSetting } from "@src/services/SettingsService";
+import {
+    deleteYouTubePlaylistMapping,
+    getSecrets,
+    getSettings,
+    getYouTubePlaylists,
+    setSecret,
+    setSetting,
+    setYouTubePlaylist,
+} from "@src/services/SettingsService";
 import Paths from "@src/routes/constants/Paths";
 import {
+    cachePlaylistNames,
     getAuthenticatedYouTubeChannels,
     getGoogleOAuth2RedirectUri,
     getOAuth2AuthUrl,
+    handleMatchVideoPostUploadSteps,
     oauth2AuthCodeExchange,
     uploadYouTubeVideo,
 } from "@src/services/YouTubeService";
 import logger from "jet-logger";
-import { body, matchedData, validationResult } from "express-validator";
+import { body, matchedData, param, validationResult } from "express-validator";
 import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
 import { isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
 
@@ -128,12 +138,13 @@ async function getYouTubeStatus(req: IReq, res: IRes): Promise<void> {
 
 youTubeRouter.post(
     Paths.YouTube.Upload,
-    body("videoTitle", "Title of the YouTube video").isString().trim(),
-    body("videoPath", "File name of video to upload, which should exist in the server videos directory")
+    body("videoTitle", "Title of the YouTube video is required").isString().trim(),
+    body("videoPath", "File name of video to upload, which should exist in the server videos directory, is required")
         .isString()
         .trim(),
-    body("description", "Exact video description for the YouTube video").isString().trim(),
-    body("videoPrivacy", "YouTube video privacy setting. Choose from `public`, `unlisted`, or `private`")
+    body("label", "Video label (e.g., Unlabeled, Overhead) is required").isString().trim(),
+    body("description", "Exact video description for the YouTube video is required").isString().trim(),
+    body("videoPrivacy", "YouTube video privacy setting is required. Choose from `public`, `unlisted`, or `private`")
         .isIn([
             "public",
             "unlisted",
@@ -154,7 +165,7 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
         return;
     }
 
-    const { videoPath, videoTitle, description, videoPrivacy } = matchedData(req);
+    const { videoPath, videoTitle, description, videoPrivacy, label } = matchedData(req);
 
     const uploadResult = await uploadYouTubeVideo(videoTitle as string,
         description as string,
@@ -163,15 +174,108 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
     );
 
     if (isYouTubeVideoUploadSuccess(uploadResult)) {
+        const postUploadStepsResult =
+            await handleMatchVideoPostUploadSteps(uploadResult.videoId, label as string);
+
         res.json({
             ok: true,
             videoId: uploadResult.videoId,
+            postUploadSteps: postUploadStepsResult,
         });
     } else if (isYouTubeVideoUploadError(uploadResult)) {
-        res.status(400)
+        res.status(500)
             .json({
                 ok: false,
                 error: uploadResult.error,
             });
+    } else {
+        res.status(500).json({
+            ok: false,
+            error: "An unknown error occurred while processing the YouTube video upload result",
+        });
     }
+}
+
+youTubeRouter.get(
+    Paths.YouTube.Playlists,
+    getLabelPlaylistMapping,
+);
+
+async function getLabelPlaylistMapping(req: IReq, res: IRes): Promise<void> {
+    const updateSuccess = await cachePlaylistNames();
+
+    if (!updateSuccess) {
+        res.status(500).json({
+            ok: false,
+            error: "Failed to get playlist names",
+        });
+        return;
+    }
+
+    const playlists = await getYouTubePlaylists();
+
+    res.json({
+        ok: true,
+        playlists,
+    });
+}
+
+youTubeRouter.post(
+    Paths.YouTube.SavePlaylistMapping,
+    param("videoLabel", "Video label to update playlist mapping for is required and must be a string")
+        .isString()
+        .toLowerCase(),
+    body("playlistId", "Playlist ID to map to is required, must start with PL, and must only contain " +
+        "the characters A-Za-z0-9 _-")
+        .exists({ checkNull: true })
+        .matches(/^PL[A-Za-z0-9_-]+$/)
+        .trim(),
+    updatePlaylistMapping,
+);
+
+async function updatePlaylistMapping(req: IReq<{ value: string }>, res: IRes): Promise<void> {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        res.status(400)
+            .json({
+                errors: errors.array(),
+            });
+        return;
+    }
+
+    const { videoLabel, playlistId } = matchedData(req);
+
+    await setYouTubePlaylist(videoLabel as string, playlistId as string);
+
+    res.json({
+        ok: true,
+    });
+}
+
+youTubeRouter.delete(
+    Paths.YouTube.SavePlaylistMapping,
+    param("videoLabel", "Video label to update playlist mapping for is required and must be a string")
+        .isString(),
+    deletePlaylistMapping,
+);
+
+async function deletePlaylistMapping(req: IReq<{ value: string }>, res: IRes): Promise<void> {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        res.status(400)
+            .json({
+                errors: errors.array(),
+            });
+        return;
+    }
+
+    const { videoLabel } = matchedData(req);
+
+    await deleteYouTubePlaylistMapping(videoLabel as string);
+
+    res.json({
+        ok: true,
+    });
 }

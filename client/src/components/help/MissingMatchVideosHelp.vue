@@ -2,7 +2,7 @@
   <!--  Make sure to use this component within Vuetify's VExpansionPanels component-->
   <VExpansionPanel>
     <VExpansionPanelTitle>
-      How to troubleshoot missing video files
+      Missing video files
     </VExpansionPanelTitle>
     <VExpansionPanelText>
       <ol class="ml-4">
