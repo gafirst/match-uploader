@@ -34,8 +34,9 @@ jobs:
           cmd: install --frozen-lockfile
       - name: Audit npm signatures
         run: npm audit signatures
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        # Uncomment if trying ARM Docker builds again
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to GitHub Container Registry
