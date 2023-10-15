@@ -25,9 +25,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
-      - name: Install dependencies
-        run: npm clean-install
+          node-version: 18.x
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
+      - name: yarn install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install --frozen-lockfile
       - name: Audit npm signatures
         run: npm audit signatures
       - name: Set up Docker Buildx
