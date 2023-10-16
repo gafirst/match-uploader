@@ -39,8 +39,9 @@ Install some baseline dependencies:
 
 ## Releases
 
-To trigger an automatic version increment and create releases, make sure your PR title starts with
-a type and scope, followed by a colon and a description. For example:
+To trigger an automatic version increment and create releases, make sure the commit message when merging your PR starts
+with a type and scope, followed by a colon and a description (it's easiest to do this if you set your PR title correctly
+when you create it). For example:
 ```
 type(scope): Brief description of changes
 feat(youtube): Improve upload error handling
