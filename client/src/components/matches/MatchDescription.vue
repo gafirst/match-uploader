@@ -5,14 +5,24 @@
   >
     {{ matchStore.descriptionFetchError }}
   </VAlert>
-  <VBtn class="mb-4"
+  <VBtn v-if="matchStore.selectedMatchKey"
+        class="mb-4"
         variant="outlined"
         prepend-icon="mdi-refresh"
         :loading="matchStore.descriptionLoading"
+        :disabled="matchStore.uploadInProgress"
         @click="matchStore.getSuggestedDescription()"
   >
     Regenerate description
   </VBtn>
+  <VAlert v-else
+          color="warning"
+          variant="tonal"
+          class="mb-4"
+  >
+    Careful! If you enter a description before selecting a match, it will be overwritten by the
+    auto-generated description.
+  </VAlert>
   <VTextarea v-model="matchStore.description"
              label="Description"
              :disabled="matchStore.uploadInProgress || matchStore.descriptionLoading"

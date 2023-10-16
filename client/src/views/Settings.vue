@@ -49,6 +49,13 @@
                                   @on-choice-selected="saveSandboxMode"
         />
 
+        <p class="mb-1">Video upload privacy</p>
+        <AutosavingBtnSelectGroup :choices="['Public', 'Unlisted', 'Private']"
+                                  :default-value="capitalize(settingsStore.settings?.youTubeVideoPrivacy ?? 'public')"
+                                  :loading="savingUploadPrivacy"
+                                  @on-choice-selected="saveUploadPrivacy"
+        />
+
         <h2 class="mt-4">The Blue Alliance (TBA)</h2>
         <AutosavingTextInput :key="`theBlueAllianceReadApiKey-${dataRefreshKey}`"
                              :on-submit="submit"
@@ -133,7 +140,7 @@
 
 <script lang="ts" setup>
 import AutosavingTextInput from "@/components/form/AutosavingTextInput.vue";
-import {computed, onMounted, ref} from "vue";
+import {capitalize, computed, onMounted, ref} from "vue";
 import {SettingType} from "@/types/ISettings";
 import YouTubeConnectionInfo from "@/components/youtube/YouTubeConnectionInfo.vue";
 import {PLAYOFF_BEST_OF_3, PLAYOFF_MATCH_TYPES} from "@/types/MatchType";
@@ -204,16 +211,21 @@ async function savePlayoffMatchType(value: string): Promise<void> {
 // TODO(Evan): Move into its own component
 const savingSandboxMode = ref(false);
 
-const handleBtnSelectGroupError = (e: Error) => {
-  console.error(e);
-  savingSandboxMode.value = false;
-};
-
 async function saveSandboxMode(value: string): Promise<void> {
   savingSandboxMode.value = true;
   await submit("sandboxModeEnabled", value === "On", "setting");
   await refreshData(false);
   savingSandboxMode.value = false;
+}
+
+// TODO(Evan): Move into its own component
+const savingUploadPrivacy = ref(false);
+
+async function saveUploadPrivacy(value: string): Promise<void> {
+  savingUploadPrivacy.value = true;
+  await submit("youTubeVideoPrivacy", value.toLowerCase(), "setting");
+  await refreshData(false);
+  savingUploadPrivacy.value = false;
 }
 
 const theBlueAllianceReadApiKeyHelpText = computed((): string => {

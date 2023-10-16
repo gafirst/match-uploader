@@ -1,37 +1,12 @@
 import {acceptHMRUpdate, defineStore} from "pinia";
-import {computed, handleError, ref} from "vue";
+import {computed, ref} from "vue";
 import {MatchVideoInfo} from "@/types/MatchVideoInfo";
-
-// Eventually the server will send this data
-const matchesByKey: {
-  [matchKey: string]: { matchKey: string; title: string };
-} = {
-  "2023gacar_qm1": {
-    title: "Qualification 1",
-    matchKey: "2023gacar_qm1",
-  },
-  "2023gacar_qm2": {
-    title: "Qualification 2",
-    matchKey: "2023gacar_qm2",
-  },
-  "2023gacar_qm3": {
-    title: "Qualification 3",
-    matchKey: "2023gacar_qm3",
-  },
-  "2023gacar_qm4": {
-    title: "Qualification 4",
-    matchKey: "2023gacar_qm4",
-  },
-  "2023gacar_qm5": {
-    title: "Qualification 10",
-    matchKey: "2023gacar_qm10",
-  },
-};
-
+import {useSettingsStore} from "@/stores/settings";
 
 export const useMatchStore = defineStore("match", () => {
   // Note: Variables intended to be exported to be used elsewhere must be returned from this function!
-  const matches = ref(Object.values(matchesByKey));
+  const matches = ref([]);
+  const settingsStore = useSettingsStore();
   const selectedMatchKey = ref<string | null>(null);
 
   const uploadInProgress = ref(false);
@@ -42,12 +17,38 @@ export const useMatchStore = defineStore("match", () => {
     await getSuggestedDescription();
   }
 
-  const selectedMatch = computed(() => {
+  async function advanceMatch() {
     if (!selectedMatchKey.value) {
-      return null;
+      return; // TODO: set to qm1
     }
-    return matchesByKey[selectedMatchKey.value];
-  });
+
+    const matchKeyRegex = /^(\d{4})([a-z]+)_(q|qf|sf|f)(\d{1,2})?m(\d+)$/;
+
+    const currentMatchNumber = selectedMatchKey.value?.match(matchKeyRegex);
+
+    if (currentMatchNumber && currentMatchNumber.length === 6) {
+      console.log(currentMatchNumber[5]);
+      const currentMatchNumberDigits = currentMatchNumber[5].length;
+      const incrementedMatchNumber = Number.parseInt(currentMatchNumber[5], 10) + 1;
+      console.log(incrementedMatchNumber);
+      const currentMatchKeyPrefix =
+          selectedMatchKey.value.substring(0, selectedMatchKey.value.length - currentMatchNumberDigits);
+      const nextMatchKey = `${currentMatchKeyPrefix}${incrementedMatchNumber}`;
+      console.log(nextMatchKey);
+      await selectMatch(nextMatchKey);
+    } else {
+      console.error(`Unable to advance match: selected match key ${selectedMatchKey.value} didn't match regex or was `
+          + "missing match number in capture groups");
+    }
+    //
+    // // Get the first part of the match key (everything before the number)
+    // const matchKeyPrefix = selectedMatchKey.value?.match(/^[A-Z]+/)![0];
+    //
+    // // Combine the prefix, incremented number, and suffix to get the next match key
+    // const nextMatchKey = `${matchKeyPrefix}${matchNumber}`;
+    // // Select the next match
+    // await selectMatch(nextMatchKey);
+  }
 
   const matchVideos = ref<MatchVideoInfo[]>([]);
   const matchVideosLoading = ref(false);
@@ -80,9 +81,70 @@ export const useMatchStore = defineStore("match", () => {
       return;
     }
 
-
     matchVideos.value = data.recommendedVideoFiles as MatchVideoInfo[];
     matchVideosLoading.value = false;
+  }
+
+  const allMatchVideosUploaded = computed(() => {
+    return matchVideos.value.length > 0 && matchVideos.value.every(video => video.uploaded);
+  });
+
+  // TODO: cleanup types
+  async function uploadVideo(video: MatchVideoInfo): Promise<any> {
+    video.uploadInProgress = true;
+
+    if (!settingsStore.settings?.youTubeVideoPrivacy) {
+        throw new Error("Unable to upload video: YouTube video privacy setting is undefined");
+    }
+
+    const response = await fetch("/api/v1/youtube/upload", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        videoPath: video.path,
+        videoTitle: video.videoTitle,
+        label: video.videoLabel ?? "Unlabeled",
+        description: description.value,
+        videoPrivacy: settingsStore.settings.youTubeVideoPrivacy,
+      }),
+    });
+
+    const result: any = await response.json();
+    console.log("result", result);
+
+    if (response.ok) {
+      video.uploaded = true;
+      video.youTubeVideoId = result.videoId;
+      video.youTubeVideoUrl = `https://www.youtube.com/watch?v=${result.videoId}`;
+      video.uploadError = "";
+    } else {
+      // Catches if the server returns parameter validation errors
+      if (result.errors) {
+        console.log("errors", result.errors);
+        video.uploadError = result.errors.map((error: any) => error.msg).join(", ");
+      } else {
+        video.uploadError = result.error;
+      }
+    }
+
+    video.uploadInProgress = false;
+    return result;
+  }
+
+  async function uploadSingleVideo(video: MatchVideoInfo): Promise<void> {
+    uploadInProgress.value = true;
+    await uploadVideo(video);
+    uploadInProgress.value = false;
+  }
+
+  async function uploadVideos(): Promise<void> {
+    uploadInProgress.value = true;
+    for (const video of matchVideos.value) {
+      await uploadVideo(video);
+    }
+    uploadInProgress.value = false;
   }
 
   const description = ref<string | null>(null);
@@ -120,7 +182,14 @@ export const useMatchStore = defineStore("match", () => {
     description.value = data.description;
   }
 
+  const allowMatchUpload = computed(() => {
+    return uploadInProgress.value && matchVideos.value.length || !descriptionLoading.value || description.value;
+  });
+
   return {
+    advanceMatch,
+    allMatchVideosUploaded,
+    allowMatchUpload,
     description,
     descriptionFetchError,
     descriptionLoading,
@@ -131,9 +200,10 @@ export const useMatchStore = defineStore("match", () => {
     matchVideosLoading,
     matches,
     selectMatch,
-    selectedMatch,
     selectedMatchKey,
     uploadInProgress,
+    uploadSingleVideo,
+    uploadVideos,
   };
 });
 

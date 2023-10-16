@@ -1,5 +1,11 @@
 import { auth, youtube, type youtube_v3 } from "@googleapis/youtube";
-import { getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist } from "@src/services/SettingsService";
+import {
+    getSecrets,
+    getSettings,
+    getYouTubePlaylists,
+    setSecret,
+    setYouTubePlaylist,
+} from "@src/services/SettingsService";
 import logger from "jet-logger";
 import { type Credentials, type OAuth2Client } from "google-auth-library";
 import EnvVars from "@src/constants/EnvVars";
@@ -13,84 +19,110 @@ import { type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess } from "@s
 import { type YouTubePostUploadSteps } from "@src/models/YouTubePostUploadSteps";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
-  const port = EnvVars.Port;
-  const includePort = port !== "80" && port !== "443";
-  const portString = includePort ? `:${port}` : "";
-  return `${requestProtocol}://${EnvVars.Host}${portString}${FullPaths.YouTube.Auth.Callback}`;
+    const port = EnvVars.Port;
+    const includePort = port !== "80" && port !== "443";
+    const portString = includePort ? `:${port}` : "";
+    return `${requestProtocol}://${EnvVars.Host}${portString}${FullPaths.YouTube.Auth.Callback}`;
 }
 
 export async function getGoogleOAuth2Client(requestProtocol: string): Promise<OAuth2Client> {
-  const settings = await getSettings();
-  const secrets = await getSecrets();
+    const settings = await getSettings();
+    const secrets = await getSecrets();
 
-  return new auth.OAuth2(
-    settings.googleClientId,
-    secrets.googleClientSecret,
-    getGoogleOAuth2RedirectUri(requestProtocol),
-  );
+    return new auth.OAuth2(
+        settings.googleClientId,
+        secrets.googleClientSecret,
+        getGoogleOAuth2RedirectUri(requestProtocol),
+    );
 }
 
 export async function getOAuth2AuthUrl(requestProtocol: string): Promise<string> {
-  const client = await getGoogleOAuth2Client(requestProtocol);
+    const client = await getGoogleOAuth2Client(requestProtocol);
 
-  const scope = [
-    "https://www.googleapis.com/auth/youtube",
-    "https://www.googleapis.com/auth/youtube.upload",
-  ];
+    const scope = [
+        "https://www.googleapis.com/auth/youtube",
+        "https://www.googleapis.com/auth/youtube.upload",
+    ];
 
-  const authUrl = client.generateAuthUrl({
-    access_type: "offline",
-    include_granted_scopes: true,
-    scope,
-  });
-  logger.info(authUrl);
-  return authUrl;
+    const authUrl = client.generateAuthUrl({
+        access_type: "offline",
+        include_granted_scopes: true,
+        scope,
+    });
+    logger.info(authUrl);
+    return authUrl;
 }
 
 export async function oauth2AuthCodeExchange(code: string, requestProtocol: string): Promise<Credentials> {
-  const client = await getGoogleOAuth2Client(requestProtocol);
+    const client = await getGoogleOAuth2Client(requestProtocol);
 
-  const { tokens } = await client.getToken(code);
+    const { tokens } = await client.getToken(code);
 
-  return tokens;
+    return tokens;
 }
+
 export async function getYouTubeApiClient(): Promise<youtube_v3.Youtube> {
-  const { googleClientId } = await getSettings();
-  const { googleClientSecret, googleAccessToken, googleRefreshToken } = await getSecrets();
+    const { googleClientId } = await getSettings();
+    const { googleClientSecret, googleAccessToken, googleRefreshToken, googleTokenExpiry } = await getSecrets();
 
-  // Note we use auth from the @googleapis/youtube package, while google-auth-library is around mostly for its
-  // TypeScript types
-  const oauth2Client = new auth.OAuth2(
-      googleClientId,
-      googleClientSecret,
-  );
+    // Note we use auth from the @googleapis/youtube package, while google-auth-library is around mostly for its
+    // TypeScript types
+    const oauth2Client = new auth.OAuth2({
+        clientId: googleClientId,
+        clientSecret: googleClientSecret,
+        // forceRefreshOnFailure helps makes sure expired access tokens actually get refreshed,
+        // see https://github.com/googleapis/google-api-nodejs-client/issues/2350
+        forceRefreshOnFailure: true,
+    });
 
-  oauth2Client.setCredentials({
-    access_token: googleAccessToken,
-    refresh_token: googleRefreshToken,
-  });
+    oauth2Client.setCredentials({
+        access_token: googleAccessToken,
+        refresh_token: googleRefreshToken,
+        // If the expiry date has passed, the client library will refresh the access token automatically
+        expiry_date: googleTokenExpiry ? Number.parseInt(googleTokenExpiry, 10) : undefined,
+    });
 
-  return youtube({
-    version: "v3",
-    auth: oauth2Client,
-  });
+    // If we get back updated tokens from the YouTube API, store the updated tokens and expiry date
+    oauth2Client.on("tokens", async (tokens) => {
+        logger.info("Received new tokens from YouTube API");
+        if (tokens.access_token) {
+            logger.info("Storing updated access token");
+            await setSecret("googleAccessToken", tokens.access_token);
+        }
+
+        if (tokens.refresh_token) {
+            logger.info("Storing updated refresh token");
+            logger.info(tokens.refresh_token.substring(0, 10));
+            await setSecret("googleRefreshToken", tokens.refresh_token);
+        }
+
+        if (tokens.expiry_date) {
+            logger.info(`Storing new expiry date ${new Date(tokens.expiry_date)}`);
+            await setSecret("googleTokenExpiry", tokens.expiry_date.toString());
+        }
+    });
+
+    return youtube({
+        version: "v3",
+        auth: oauth2Client,
+    });
 }
 
 export async function getAuthenticatedYouTubeChannels(): Promise<YouTubeChannelList[] | undefined> {
-  const youtubeClient = await getYouTubeApiClient();
+    const youtubeClient = await getYouTubeApiClient();
 
-  const resp = await youtubeClient.channels.list({
-    mine: true,
-    part: ["snippet"],
-  });
+    const resp = await youtubeClient.channels.list({
+        mine: true,
+        part: ["snippet"],
+    });
 
-  return resp.data.items?.map((item) => {
-    return {
-      id: item.id,
-      title: item.snippet?.title,
-      thumbnailUrl: item.snippet?.thumbnails?.default?.url,
-    };
-  });
+    return resp.data.items?.map((item) => {
+        return {
+            id: item.id,
+            title: item.snippet?.title,
+            thumbnailUrl: item.snippet?.thumbnails?.default?.url,
+        };
+    });
 }
 
 /**
@@ -174,6 +206,9 @@ export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabe
 
 /**
  * Uploads a video to YouTube.
+ *
+ * Be careful: Every call to this YouTube API costs 1600 quota units
+ *
  * @param title
  * @param description
  * @param videoPath

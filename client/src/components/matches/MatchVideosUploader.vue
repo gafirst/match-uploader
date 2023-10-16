@@ -14,7 +14,7 @@
           />
         </VList>
         <VAlert v-else
-                class="mb-2"
+                class="mb-4"
                 color="warning"
                 variant="tonal"
         >
@@ -32,68 +32,36 @@
       <div v-else>
         <p class="mb-2">No match selected</p>
       </div>
+      <VAlert v-if="!!matchStore.descriptionFetchError"
+              color="warning"
+              variant="tonal"
+              class="mt-2 mb-4"
+      >
+        An error occurred while fetching the video description for this match. You may want to confirm its accuracy
+        before uploading.
+      </VAlert>
       <VBtn :color="settingsStore.settings?.sandboxModeEnabled ? 'warning' : 'success'"
             size="large"
             :prepend-icon="matchStore.uploadInProgress ? 'mdi-loading mdi-spin' : ''"
-            :disabled="matchStore.uploadInProgress || !matchStore.matchVideos.length || !matchStore.description"
-            @click="uploadVideos"
+            :disabled="!matchStore.allowMatchUpload"
+            @click="matchStore.uploadVideos"
       >
         {{ matchStore.uploadInProgress ? "Uploading..." : "Upload all" }}
       </VBtn>
       <SandboxModeAlert class="mt-4" :rounded="4" />
+      <PrivateUploads class="mt-4" :rounded="4" />
     </VCardText>
   </VCard>
 </template>
 
 <script lang="ts" setup>
 import {useMatchStore} from "@/stores/match";
-import {MatchVideoInfo} from "@/types/MatchVideoInfo";
 import MatchVideoListItem from "@/components/matches/MatchVideoListItem.vue";
 import {useSettingsStore} from "@/stores/settings";
 import SandboxModeAlert from "@/components/alerts/SandboxModeAlert.vue";
+import PrivateUploads from "@/components/alerts/PrivateUploads.vue";
 
 const matchStore = useMatchStore();
 const settingsStore = useSettingsStore();
 
-// TODO: cleanup types
-async function uploadVideo(video: MatchVideoInfo): Promise<any> {
-  video.uploadInProgress = true;
-  const result = await fetch("/api/v1/youtube/upload", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      videoPath: video.path,
-      videoTitle: video.videoTitle,
-      label: video.videoLabel ?? "Unlabeled",
-      description: matchStore.description,
-      videoPrivacy: "private",
-    }),
-  });
-  video.uploadInProgress = false;
-  return result.json();
-}
-
-async function uploadVideos() {
-  matchStore.uploadInProgress = true;
-  for (const video of matchStore.matchVideos) {
-    const result = await uploadVideo(video);
-    console.log("result", result);
-    if (result.ok) {
-      video.uploaded = true;
-      video.youTubeVideoId = result.videoId;
-      video.youTubeVideoUrl = `https://www.youtube.com/watch?v=${result.videoId}`;
-    } else {
-      // Catches if the server returns parameter validation errors
-      if (result.errors) {
-        console.log("errors", result.errors);
-        video.uploadError = result.errors.map((error: any) => error.msg).join(", ");
-      } else {
-        video.uploadError = result.error;
-      }
-    }
-  }
-  matchStore.uploadInProgress = false;
-}
 </script>
