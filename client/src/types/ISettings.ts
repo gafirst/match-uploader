@@ -9,6 +9,7 @@ export interface ISettings {
   googleRedirectUri: string,
   googleAuthStatus: string,
   sandboxModeEnabled: boolean,
+  youTubeVideoPrivacy: string,
   [key: string]: string | boolean,
 }
 

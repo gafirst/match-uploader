@@ -6,6 +6,7 @@ export interface ISettings {
     googleAuthStatus: string,
     playoffsType: string,
     sandboxModeEnabled: boolean,
+    youTubeVideoPrivacy: string,
 }
 
 export type SettingsKey = keyof ISettings;

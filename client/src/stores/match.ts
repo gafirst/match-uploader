@@ -1,10 +1,12 @@
 import {acceptHMRUpdate, defineStore} from "pinia";
 import {computed, ref} from "vue";
 import {MatchVideoInfo} from "@/types/MatchVideoInfo";
+import {useSettingsStore} from "@/stores/settings";
 
 export const useMatchStore = defineStore("match", () => {
   // Note: Variables intended to be exported to be used elsewhere must be returned from this function!
   const matches = ref([]);
+  const settingsStore = useSettingsStore();
   const selectedMatchKey = ref<string | null>(null);
 
   const uploadInProgress = ref(false);
@@ -90,6 +92,11 @@ export const useMatchStore = defineStore("match", () => {
   // TODO: cleanup types
   async function uploadVideo(video: MatchVideoInfo): Promise<any> {
     video.uploadInProgress = true;
+
+    if (!settingsStore.settings?.youTubeVideoPrivacy) {
+        throw new Error("Unable to upload video: YouTube video privacy setting is undefined");
+    }
+
     const response = await fetch("/api/v1/youtube/upload", {
       method: "POST",
       headers: {
@@ -100,7 +107,7 @@ export const useMatchStore = defineStore("match", () => {
         videoTitle: video.videoTitle,
         label: video.videoLabel ?? "Unlabeled",
         description: description.value,
-        videoPrivacy: "private",
+        videoPrivacy: settingsStore.settings.youTubeVideoPrivacy,
       }),
     });
 
@@ -175,9 +182,14 @@ export const useMatchStore = defineStore("match", () => {
     description.value = data.description;
   }
 
+  const allowMatchUpload = computed(() => {
+    return uploadInProgress.value && matchVideos.value.length || !descriptionLoading.value || description.value;
+  });
+
   return {
     advanceMatch,
     allMatchVideosUploaded,
+    allowMatchUpload,
     description,
     descriptionFetchError,
     descriptionLoading,

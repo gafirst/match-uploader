@@ -64,7 +64,16 @@
     </VAlert>
 
     <h3 class="mt-2">Add mapping</h3>
-    <VAlert variant="tonal"
+    <VAlert v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
+            color="error"
+            variant="tonal"
+            :rounded="0"
+            icon="mdi-alert-circle"
+    >
+      Complete YouTube authentication setup steps before adding playlist mappings.
+    </VAlert>
+    <VAlert v-else
+            variant="tonal"
             color="info"
             class="mt-2"
             density="compact"
@@ -79,6 +88,7 @@
                     hint="Not case-sensitive"
                     persistent-hint
                     type="text"
+                    :disabled="playlistsStore.loading || !settingsStore.youTubeAuthState?.accessTokenStored"
         />
       </VCol>
       <VCol cols="12" md="6">
@@ -88,6 +98,7 @@
                     hint="Playlist ID starting with PL"
                     persistent-hint
                     type="text"
+                    :disabled="playlistsStore.loading || !settingsStore.youTubeAuthState?.accessTokenStored"
         />
       </VCol>
     </VRow>
@@ -104,7 +115,9 @@
 <script lang="ts" setup>
 import {usePlaylistsStore} from "@/stores/playlists";
 import {ref} from "vue";
+import {useSettingsStore} from "@/stores/settings";
 
+const settingsStore = useSettingsStore();
 const playlistsStore = usePlaylistsStore();
 playlistsStore.getPlaylists();
 
