@@ -57,6 +57,7 @@
         />
 
         <h2 class="mt-4">The Blue Alliance (TBA)</h2>
+        <h3>Read API</h3>
         <AutosavingTextInput :key="`theBlueAllianceReadApiKey-${dataRefreshKey}`"
                              :on-submit="submit"
                              initial-value=""
@@ -64,7 +65,59 @@
                              label="TBA read API key"
                              input-type="password"
                              setting-type="secret"
-                             :help-text="theBlueAllianceReadApiKeyHelpText"
+                             :help-text="tbaReadApiKeyHelpText"
+        />
+
+        <h3 class="mt-2">Trusted (write) API</h3>
+        <p>
+          You can use TBA's trusted API to associate uploaded videos with matches on TBA. To use this feature,
+          you must request write tokens for your event on
+          <a href="https://www.thebluealliance.com/request/apiwrite/">
+            https://www.thebluealliance.com/request/apiwrite/
+          </a>
+        </p>
+
+        <p class="mt-4">Link match videos on TBA</p>
+        <AutosavingBtnSelectGroup :choices="['On', 'Off']"
+                                  :default-value="settingsStore.settings?.linkVideosOnTheBlueAlliance ? 'On' : 'Off'"
+                                  :loading="savingTbaLinkVideos"
+                                  @on-choice-selected="saveTbaLinkVideos"
+        />
+
+        <VAlert v-if="!settingsStore.settings?.linkVideosOnTheBlueAlliance"
+                color="info"
+                variant="tonal"
+                class="mt-4 mb-4"
+        >
+          Before you can enter your TBA trusted API auth ID and secret, you need to enable this feature using the
+          toggle above.
+        </VAlert>
+
+        <AutosavingTextInput v-if="
+                               settingsStore.settings?.linkVideosOnTheBlueAlliance"
+                             :key="`theBlueAllianceTrustedApiAuthId-${dataRefreshKey}`"
+                             :on-submit="submit"
+                             initial-value=""
+                             name="theBlueAllianceTrustedApiAuthId"
+                             label="TBA trusted API auth ID"
+                             input-type="password"
+                             setting-type="secret"
+                             :help-text="settingsStore.obfuscatedSecrets?.theBlueAllianceTrustedApiAuthId ?
+                               'Current value hidden' :
+                               ''"
+        />
+
+        <AutosavingTextInput v-if="settingsStore.settings?.linkVideosOnTheBlueAlliance"
+                             :key="`theBlueAllianceTrustedApiAuthSecret-${dataRefreshKey}`"
+                             :on-submit="submit"
+                             initial-value=""
+                             name="theBlueAllianceTrustedApiAuthSecret"
+                             label="TBA trusted API auth secret"
+                             input-type="password"
+                             setting-type="secret"
+                             :help-text="settingsStore.obfuscatedSecrets?.theBlueAllianceTrustedApiAuthId ?
+                               'Current value hidden' :
+                               ''"
         />
 
         <h2 class="mt-4">
@@ -228,7 +281,17 @@ async function saveUploadPrivacy(value: string): Promise<void> {
   savingUploadPrivacy.value = false;
 }
 
-const theBlueAllianceReadApiKeyHelpText = computed((): string => {
+// TODO(Evan): Move into its own component
+const savingTbaLinkVideos = ref(false);
+
+async function saveTbaLinkVideos(value: string): Promise<void> {
+  savingTbaLinkVideos.value = true;
+  await submit("linkVideosOnTheBlueAlliance", value === "On", "setting");
+  await refreshData(false);
+  savingTbaLinkVideos.value = false;
+}
+
+const tbaReadApiKeyHelpText = computed((): string => {
   const baseText = "Generate a read API key from your account page on The Blue Alliance.";
 
   if (settingsStore.obfuscatedSecrets?.theBlueAllianceReadApiKey) {

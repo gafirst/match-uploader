@@ -40,6 +40,14 @@
         An error occurred while fetching the video description for this match. You may want to confirm its accuracy
         before uploading.
       </VAlert>
+      <VAlert v-if="matchStore.allMatchVideosUploaded"
+              color="success"
+              variant="tonal"
+              icon="mdi-check-circle"
+              class="mt-2 mb-4"
+      >
+        All videos uploaded!
+      </VAlert>
       <VBtn :color="settingsStore.settings?.sandboxModeEnabled ? 'warning' : 'success'"
             size="large"
             :prepend-icon="matchStore.uploadInProgress ? 'mdi-loading mdi-spin' : ''"

@@ -48,21 +48,46 @@ class MatchKey {
         );
     }
 
-    get matchKey(): string {
+    private generateMatchKey(includeEventInfo = true): string {
         // TODO: We should add tests to ensure this value is correct
         const compLevel = abbreviatedCompLevel(this.compLevel);
         const setNumber = this.setNumber === null ? "" : this.setNumber;
 
-        return `${this.year}${this.eventCode}_${compLevel}${setNumber}m${this.matchNumber}`;
+        const eventInfo = includeEventInfo ? `${this.year}${this.eventCode}_` : "";
+
+        return `${eventInfo}${compLevel}${setNumber}m${this.matchNumber}`;
+    }
+
+    /**
+     * Compute the event key for this match. Example: 2020gadal
+     */
+    get eventKey(): string {
+        return `${this.year}${this.eventCode}`;
+    }
+
+    /**
+     * Get the full match key for this match. Example: 2020gadal_qm1
+     */
+    get matchKey(): string {
+        return this.generateMatchKey(true);
+    }
+
+    /**
+     * Compute the match number portion of the match key. Used for The Blue Alliance's trusted (write) API, which
+     * refers to this as a partial match key.
+     * Example: qm1
+     */
+    get partialMatchKey(): string {
+        return this.generateMatchKey(false);
     }
 
     /**
      * Get the playoff round for this match, if we're able to calculate it.
      *
      * @returns The playoff round, or null if:
-     * - The match is a qualification match
-     * - There is no set number for the match
-     * - The match is a playoff match, but the playoffs type is not double elimination
+     * - The match is a qualification match, or
+     * - There is no set number for the match, or
+     * - The match is a playoff match, but the playoffs type is not double elimination.
      */
     get playoffsRound(): number | null {
         if (this.playoffsType === PlayoffsType.DoubleElimination && this.compLevel === CompLevel.Semifinal &&

@@ -23,6 +23,8 @@ import logger from "jet-logger";
 import { body, matchedData, param, validationResult } from "express-validator";
 import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
 import { isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
+import MatchKey from "@src/models/MatchKey";
+import { type PlayoffsType } from "@src/models/PlayoffsType";
 
 export const youTubeRouter = Router();
 export const youTubeAuthRouter = Router();
@@ -150,6 +152,11 @@ async function getYouTubeStatus(req: IReq, res: IRes): Promise<void> {
 
 youTubeRouter.post(
     Paths.YouTube.Upload,
+    body(
+        "matchKey",
+        "Match key is required and must pass a format test. (See MatchKey class for regex.)",
+    ).isString()
+        .matches(MatchKey.matchKeyRegex),
     body("videoTitle", "Title of the YouTube video is required").isString().trim(),
     body("videoPath", "File name of video to upload, which should exist in the server videos directory, is required")
         .isString()
@@ -177,7 +184,12 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
         return;
     }
 
-    const { videoPath, videoTitle, description, videoPrivacy, label } = matchedData(req);
+    const { matchKey, videoPath, videoTitle, description, videoPrivacy, label } = matchedData(req);
+
+    const { playoffsType: playoffsTypeRaw } = await getSettings();
+    const playoffsType = playoffsTypeRaw as PlayoffsType;
+
+    const matchKeyObject = MatchKey.fromString(matchKey as string, playoffsType);
 
     const uploadResult = await uploadYouTubeVideo(videoTitle as string,
         description as string,
@@ -187,7 +199,7 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
 
     if (isYouTubeVideoUploadSuccess(uploadResult)) {
         const postUploadStepsResult =
-            await handleMatchVideoPostUploadSteps(uploadResult.videoId, label as string);
+            await handleMatchVideoPostUploadSteps(uploadResult.videoId, label as string, matchKeyObject);
 
         res.json({
             ok: true,

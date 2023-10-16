@@ -17,6 +17,8 @@ import path from "path";
 import sanitizeFilename from "sanitize-filename";
 import { type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
 import { type YouTubePostUploadSteps } from "@src/models/YouTubePostUploadSteps";
+import { TheBlueAllianceTrustedRepo } from "@src/repos/TheBlueAllianceTrustedRepo";
+import type MatchKey from "@src/models/MatchKey";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
     const port = EnvVars.Port;
@@ -181,8 +183,9 @@ export async function getPlaylistIdForVideoLabel(label: string): Promise<string 
  * Handles post-upload steps for a match video, such as adding it to a playlist.
  * @param videoId The ID of the uploaded video on YouTube
  * @param videoLabel The label (NOT case-sensitive) of the match video
+ * @param matchKey The match key of the match that the video is for
  */
-export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabel: string):
+export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabel: string, matchKey: MatchKey):
     Promise<YouTubePostUploadSteps> {
     // Make video labels more flexible by not requiring them to match case
     const lowercasedVideoLabel = videoLabel.toLowerCase();
@@ -196,11 +199,39 @@ export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabe
             logger.err(`Failed to add video ${videoId} to playlist ${playlistId}`);
         }
     } else {
-        logger.err(`No playlist ID found for video label ${lowercasedVideoLabel}`);
+        addToPlaylistSuccess = true;
+        logger.warn(`No playlist ID found for video label ${lowercasedVideoLabel}`);
+    }
+
+    const { linkVideosOnTheBlueAlliance } = await getSettings();
+    const {
+        theBlueAllianceTrustedApiAuthId: authId,
+        theBlueAllianceTrustedApiAuthSecret: authSecret,
+    } = await getSecrets();
+
+    let linkOnTbaSuccess = false;
+    if (linkVideosOnTheBlueAlliance) {
+        if (authId && authSecret) {
+            const tbaTrustedRepo = new TheBlueAllianceTrustedRepo(authId, authSecret);
+            try {
+                await tbaTrustedRepo.postMatchVideo(matchKey, videoId);
+                linkOnTbaSuccess = true;
+            } catch (e) {
+                logger.err(`Failed to post match video ${videoId} to The Blue Alliance: ${e}`);
+            }
+        } else {
+            logger.err("Failed to post match video to The Blue Alliance: missing auth ID or auth secret. If " +
+                "you don't want to associate match videos on The Blue Alliance. Go to Settings in the client and " +
+                "disable the 'Link match videos on TBA' feature.");
+        }
+    } else {
+        linkOnTbaSuccess = true;
+        logger.info(`Skipping linking video ${videoId} for match ${matchKey.matchKey}, setting is disabled`);
     }
 
     return {
         addToYouTubePlaylist: addToPlaylistSuccess,
+        linkOnTheBlueAlliance: linkOnTbaSuccess,
     };
 }
 
