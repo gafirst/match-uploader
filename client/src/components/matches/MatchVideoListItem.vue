@@ -15,6 +15,11 @@
              color="error"
              size="large"
       />
+      <VIcon v-else-if="video.uploaded && !matchStore.postUploadStepsSucceeded(video)"
+             icon="mdi-alert"
+             color="warning"
+             size="large"
+      />
       <VIcon v-else-if="video.uploaded"
              icon="mdi-cloud-check-variant"
              color="success"
@@ -82,7 +87,28 @@ const uploadStatus = computed(() => {
 });
 
 const subtitle = computed(() => {
-  return `${uploadStatus.value} | ${props.video.path}`;
+  let postUploadStatus = "";
+  let playlistStatus = "";
+  let tbaStatus = "";
+  if (props.video.postUploadSteps) {
+    const playlist = props.video.postUploadSteps.addToYouTubePlaylist;
+    const tba = props.video.postUploadSteps.linkOnTheBlueAlliance;
+
+    if (playlist && tba) {
+      postUploadStatus = "Post-upload steps completed | ";
+    } else {
+      if (!playlist) {
+        playlistStatus = "Add to YouTube playlist failed | ";
+      }
+
+      if (!tba) {
+        tbaStatus = "TBA link failed | ";
+      }
+      postUploadStatus = `${playlistStatus}${tbaStatus}`;
+    }
+  }
+
+  return `${uploadStatus.value} | ${postUploadStatus}${props.video.path}`;
 });
 </script>
 <style scoped>

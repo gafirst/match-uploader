@@ -1,1 +1,11 @@
-{"eventName":"Demo Event","eventTbaCode":"","videoSearchDirectory":"./videos","googleClientId":"","googleAuthStatus":"Not started", "sandboxModeEnabled": true, "playoffsType":"Double elimination playoff", "youTubeVideoPrivacy": "private"}
+{
+  "eventName": "Demo Event",
+  "eventTbaCode": "",
+  "videoSearchDirectory": "./videos",
+  "googleClientId": "",
+  "googleAuthStatus": "Not started",
+  "sandboxModeEnabled": true,
+  "playoffsType": "Double elimination playoff",
+  "youTubeVideoPrivacy": "private",
+  "linkVideosOnTheBlueAlliance": false
+}

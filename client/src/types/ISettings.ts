@@ -10,6 +10,7 @@ export interface ISettings {
   googleAuthStatus: string,
   sandboxModeEnabled: boolean,
   youTubeVideoPrivacy: string,
+  linkVideosOnTheBlueAlliance: boolean;
   [key: string]: string | boolean,
 }
 

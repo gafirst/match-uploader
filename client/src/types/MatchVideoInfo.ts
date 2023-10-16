@@ -8,4 +8,8 @@ export interface MatchVideoInfo {
     uploadError: string | null;
     youTubeVideoId: string | null;
     youTubeVideoUrl: string | null;
+    postUploadSteps: {
+      addToYouTubePlaylist: boolean;
+      linkOnTheBlueAlliance: boolean;
+    } | null;
 }

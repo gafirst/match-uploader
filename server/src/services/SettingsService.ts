@@ -48,6 +48,8 @@ export async function getObfuscatedSecrets(): Promise<ISecretSettingsHidden> {
     googleRefreshToken: false,
     googleTokenExpiry: false,
     theBlueAllianceReadApiKey: false,
+    theBlueAllianceTrustedApiAuthId: false,
+    theBlueAllianceTrustedApiAuthSecret: false,
   };
 
   for (const key in secrets) {

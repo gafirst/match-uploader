@@ -3,5 +3,7 @@ export interface IObfuscatedSecrets {
     googleAccessToken: boolean,
     googleRefreshToken: boolean,
     theBlueAllianceReadApiKey: boolean,
+    theBlueAllianceTrustedApiAuthId: boolean,
+    theBlueAllianceTrustedApiAuthSecret: boolean,
     [key: string]: boolean,
 }

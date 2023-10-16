@@ -103,6 +103,7 @@ export const useMatchStore = defineStore("match", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        matchKey: selectedMatchKey.value,
         videoPath: video.path,
         videoTitle: video.videoTitle,
         label: video.videoLabel ?? "Unlabeled",
@@ -118,6 +119,7 @@ export const useMatchStore = defineStore("match", () => {
       video.uploaded = true;
       video.youTubeVideoId = result.videoId;
       video.youTubeVideoUrl = `https://www.youtube.com/watch?v=${result.videoId}`;
+      video.postUploadSteps = result.postUploadSteps;
       video.uploadError = "";
     } else {
       // Catches if the server returns parameter validation errors
@@ -183,8 +185,16 @@ export const useMatchStore = defineStore("match", () => {
   }
 
   const allowMatchUpload = computed(() => {
-    return uploadInProgress.value && matchVideos.value.length || !descriptionLoading.value || description.value;
+    return !uploadInProgress.value
+      && matchVideos.value.length
+      && !descriptionLoading.value
+      && description.value
+      && !allMatchVideosUploaded.value;
   });
+
+  function postUploadStepsSucceeded (video: MatchVideoInfo): boolean {
+    return !!video.postUploadSteps?.addToYouTubePlaylist && !!video.postUploadSteps?.linkOnTheBlueAlliance;
+  }
 
   return {
     advanceMatch,
@@ -199,6 +209,7 @@ export const useMatchStore = defineStore("match", () => {
     matchVideos,
     matchVideosLoading,
     matches,
+    postUploadStepsSucceeded,
     selectMatch,
     selectedMatchKey,
     uploadInProgress,

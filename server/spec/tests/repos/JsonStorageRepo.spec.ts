@@ -9,6 +9,9 @@ const sampleSettings: ISettings = {
   videoSearchDirectory: "./videos",
   googleAuthStatus: "",
   googleClientId: "",
+  playoffsType: "Double elimination playoff",
+  sandboxModeEnabled: false,
+  youTubeVideoPrivacy: "private",
 };
 
 describe("readSettingsJson", () => {

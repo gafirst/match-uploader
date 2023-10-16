@@ -7,6 +7,7 @@ export interface ISettings {
     playoffsType: string,
     sandboxModeEnabled: boolean,
     youTubeVideoPrivacy: string,
+    linkVideosOnTheBlueAlliance: boolean;
 }
 
 export type SettingsKey = keyof ISettings;
@@ -17,6 +18,8 @@ export interface ISecretSettings {
     googleRefreshToken: string,
     googleTokenExpiry: string,
     theBlueAllianceReadApiKey: string,
+    theBlueAllianceTrustedApiAuthId: string,
+    theBlueAllianceTrustedApiAuthSecret: string,
     [key: string]: string,
 }
 
