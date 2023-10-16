@@ -12,6 +12,7 @@ const sampleSettings: ISettings = {
   playoffsType: "Double elimination playoff",
   sandboxModeEnabled: false,
   youTubeVideoPrivacy: "private",
+  linkVideosOnTheBlueAlliance: false,
 };
 
 describe("readSettingsJson", () => {
