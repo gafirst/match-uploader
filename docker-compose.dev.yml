@@ -1,0 +1,11 @@
+services:
+  match_uploader_dev:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 8080:8080
+    volumes:
+      - ./server/settings:/home/node/app/server/settings
+      - ./server/env:/home/node/app/server/env
+      - ./server/videos:/home/node/app/server/videos

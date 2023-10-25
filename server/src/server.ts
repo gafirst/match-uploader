@@ -30,7 +30,13 @@ if (EnvVars.NodeEnv === NodeEnvs.Dev) {
 
 // Security
 if (EnvVars.NodeEnv === NodeEnvs.Production) {
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        upgradeInsecureRequests: null,
+      },
+    },
+  }));
 }
 
 // Add APIs, must be after middleware
