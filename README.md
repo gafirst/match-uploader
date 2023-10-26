@@ -49,6 +49,7 @@ ci(github): Add automatic release workflow
 docs(readme): Add release instructions
 refactor(server): Move video upload to separate module
 build(docker): Add docker-compose file
+fix(client): Fix bug when uploading videos
 ```
 
 The exact format required is based on the Angular commit message format. See 
