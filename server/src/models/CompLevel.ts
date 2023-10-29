@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+import { type FrcApiTournamentLevel } from "@src/models/frcEvents/frcTournamentLevel";
+
 /**
  * Represents the competition level of a match.
  */
@@ -44,6 +46,36 @@ export function abbreviatedCompLevel(compLevel: CompLevel): string {
             return "sf";
         case CompLevel.Final:
             return "f";
+        default:
+            throw new Error(`Comp level ${compLevel} is invalid.`);
+    }
+}
+
+export function toFrcApiTournamentLevel(compLevel: CompLevel): FrcApiTournamentLevel {
+    switch (compLevel) {
+        case CompLevel.Qualification:
+            return "qual";
+        case CompLevel.Quarterfinal:
+            return "playoff";
+        case CompLevel.Semifinal:
+            return "playoff";
+        case CompLevel.Final:
+            return "playoff";
+        default:
+            throw new Error(`Comp level ${compLevel} is invalid.`);
+    }
+}
+
+export function toFrcEventsUrlTournamentLevel(compLevel: CompLevel): string {
+    switch (compLevel) {
+        case CompLevel.Qualification:
+            return "qualifications";
+        case CompLevel.Quarterfinal:
+            return "playoffs";
+        case CompLevel.Semifinal:
+            return "playoffs";
+        case CompLevel.Final:
+            return "playoffs";
         default:
             throw new Error(`Comp level ${compLevel} is invalid.`);
     }

@@ -7,5 +7,6 @@
   "sandboxModeEnabled": true,
   "playoffsType": "Double elimination playoff",
   "youTubeVideoPrivacy": "private",
-  "linkVideosOnTheBlueAlliance": false
+  "linkVideosOnTheBlueAlliance": false,
+  "useFrcEventsApi": false
 }

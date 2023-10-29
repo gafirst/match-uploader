@@ -3,6 +3,7 @@
           color="error"
           variant="tonal"
           :rounded="0"
+          density="comfortable"
           icon="mdi-alert-circle"
   >
     <template v-slot:text>

@@ -5,6 +5,13 @@
   >
     {{ matchListStore.error }}
   </VAlert>
+
+  <VRow class="mb-1">
+    <VCol>
+      <MatchDataAttribution />
+    </VCol>
+  </VRow>
+
   <!--
   Note: this component may be laggy when running in development, but in production builds the performance
   should become significantly better.
@@ -31,7 +38,7 @@
       >
         Refresh
       </VBtn>
-      <VBtn v-if="matchStore.selectedMatchKey"
+      <VBtn v-if="!settingsStore.settings?.useFrcEventsApi && matchStore.selectedMatchKey"
             prepend-icon="mdi-open-in-new"
             variant="outlined"
             class="ml-2"
@@ -71,9 +78,13 @@
 import {useMatchStore} from "@/stores/match";
 import {useMatchListStore} from "@/stores/matchList";
 import {onMounted} from "vue";
+import FrcEventsWarning from "@/components/alerts/FrcEventsWarning.vue";
+import {useSettingsStore} from "@/stores/settings";
+import MatchDataAttribution from "@/components/matches/MatchDataAttribution.vue";
 
 const matchStore = useMatchStore();
 const matchListStore = useMatchListStore();
+const settingsStore = useSettingsStore();
 
 onMounted(() => {
   matchListStore.getMatchList();
