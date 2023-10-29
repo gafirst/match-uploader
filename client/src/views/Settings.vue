@@ -89,8 +89,7 @@
                 variant="tonal"
                 class="mt-4 mb-4"
         >
-          Before you can enter your TBA trusted API auth ID and secret, you need to enable this feature using the
-          toggle above.
+          Some settings are hidden because linking match videos on TBA is disabled. Enable the feature to see them.
         </VAlert>
 
         <AutosavingTextInput v-if="
@@ -116,6 +115,50 @@
                              input-type="password"
                              setting-type="secret"
                              :help-text="settingsStore.obfuscatedSecrets?.theBlueAllianceTrustedApiAuthId ?
+                               'Current value hidden' :
+                               ''"
+        />
+
+        <h2 class="mt-4">
+          FRC Events API
+        </h2>
+        <p class="mt-4">
+          If match data is unavailable on The Blue Alliance, it may be available on the FRC Events API. You can check
+          if data is available on
+          <a href="https://frc-events.firstinspires.org/">https://frc-events.firstinspires.org/</a> and request API
+          credentials at
+          <a href="https://frc-events.firstinspires.org/services/API">
+            https://frc-events.firstinspires.org/services/API
+          </a>.
+        </p>
+        <p class="mt-4 mb-2">
+          To compute the API key, base64 encode the text <code>username:AuthorizationKey</code> and then
+          paste it below.
+        </p>
+
+        <p class="mt-4">Retrieve match data from FRC Events</p>
+        <AutosavingBtnSelectGroup :choices="['On', 'Off']"
+                                  :default-value="settingsStore.settings?.useFrcEventsApi ? 'On' : 'Off'"
+                                  :loading="savingFrcEventsApiKey"
+                                  @on-choice-selected="saveFrcEventsApiKey"
+        />
+
+        <VAlert v-if="!settingsStore.settings?.useFrcEventsApi"
+                color="info"
+                variant="tonal"
+                class="mt-4 mb-4"
+        >
+          Some settings are hidden because FRC Events integration is disabled. Enable the feature to see them.
+        </VAlert>
+        <AutosavingTextInput v-else
+                             :key="`frcEventsApiKey-${dataRefreshKey}`"
+                             :on-submit="submit"
+                             initial-value=""
+                             name="frcEventsApiKey"
+                             label="Base64-encoded FRC Events API key"
+                             input-type="password"
+                             setting-type="secret"
+                             :help-text="settingsStore.obfuscatedSecrets?.frcEventsApiKey ?
                                'Current value hidden' :
                                ''"
         />
@@ -300,6 +343,16 @@ const tbaReadApiKeyHelpText = computed((): string => {
 
   return baseText;
 });
+
+// TODO(Evan): Move into its own component
+const savingFrcEventsApiKey = ref(false);
+
+async function saveFrcEventsApiKey(value: string): Promise<void> {
+  savingFrcEventsApiKey.value = true;
+  await submit("useFrcEventsApi", value === "On", "setting");
+  await refreshData(false);
+  savingFrcEventsApiKey.value = false;
+}
 
 </script>
 

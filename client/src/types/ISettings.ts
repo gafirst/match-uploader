@@ -11,6 +11,7 @@ export interface ISettings {
   sandboxModeEnabled: boolean,
   youTubeVideoPrivacy: string,
   linkVideosOnTheBlueAlliance: boolean;
+  useFrcEventsApi: boolean;
   [key: string]: string | boolean,
 }
 

@@ -4,7 +4,7 @@ import { type IReq, type IRes } from "@src/routes/types/types";
 import {
     generateMatchVideoDescription,
     getLocalVideoFilesForMatch,
-    getTbaMatchList,
+    getMatchList,
 } from "@src/services/MatchesService";
 import { matchedData, param, validationResult } from "express-validator";
 import MatchKey from "@src/models/MatchKey";
@@ -18,14 +18,14 @@ export const matchesRouter = Router();
 
 matchesRouter.get(
     Paths.Matches.List,
-    getMatchList,
+    getEventMatchList,
 );
 
-async function getMatchList(req: IReq, res: IRes): Promise<void> {
+async function getEventMatchList(req: IReq, res: IRes): Promise<void> {
     const { playoffsType: playoffsTypeRaw } = await getSettings();
     const playoffsType = playoffsTypeRaw as PlayoffsType;
 
-    const matchList = (await getTbaMatchList()).map((match) => {
+    const matchList = (await getMatchList()).map((match) => {
         return {
             key: match.key,
             verboseName: capitalizeFirstLetter(

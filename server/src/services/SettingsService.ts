@@ -50,6 +50,7 @@ export async function getObfuscatedSecrets(): Promise<ISecretSettingsHidden> {
     theBlueAllianceReadApiKey: false,
     theBlueAllianceTrustedApiAuthId: false,
     theBlueAllianceTrustedApiAuthSecret: false,
+    frcEventsApiKey: false,
   };
 
   for (const key in secrets) {

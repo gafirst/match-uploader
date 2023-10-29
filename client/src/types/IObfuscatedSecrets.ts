@@ -5,5 +5,6 @@ export interface IObfuscatedSecrets {
     theBlueAllianceReadApiKey: boolean,
     theBlueAllianceTrustedApiAuthId: boolean,
     theBlueAllianceTrustedApiAuthSecret: boolean,
+    frcEventsApiKey: boolean,
     [key: string]: boolean,
 }

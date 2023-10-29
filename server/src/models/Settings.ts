@@ -8,6 +8,7 @@ export interface ISettings {
     sandboxModeEnabled: boolean,
     youTubeVideoPrivacy: string,
     linkVideosOnTheBlueAlliance: boolean;
+    useFrcEventsApi: boolean;
 }
 
 export type SettingsKey = keyof ISettings;
@@ -20,6 +21,7 @@ export interface ISecretSettings {
     theBlueAllianceReadApiKey: string,
     theBlueAllianceTrustedApiAuthId: string,
     theBlueAllianceTrustedApiAuthSecret: string,
+    frcEventsApiKey: string,
     [key: string]: string,
 }
 

@@ -2,6 +2,7 @@
   <VAlert v-if="!playlistsStore.isFirstLoad && !playlistsStore.playlists?.length"
           color="info"
           variant="tonal"
+          density="comfortable"
           :rounded="props.rounded ?? 0"
           icon="mdi-upload-off"
   >
