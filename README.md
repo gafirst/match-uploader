@@ -2,7 +2,9 @@
 
 Match Uploader is a tool to help upload FRC match videos to YouTube in a fast, consistent manner.
 
-Match team and score data is provided by [The Blue Alliance](https://www.thebluealliance.com).
+Data source attributions:
+- [Powered by The Blue Alliance](https://www.thebluealliance.com)
+- [Event Data provided by _FIRST_](https://frc-events.firstinspires.org/services/API)
 
 ## Production usage
 
