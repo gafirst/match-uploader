@@ -8,7 +8,7 @@ import { asTbaMatchSimple, getFrcApiMatchNumber, isFrcScoredMatch } from "@src/m
 import logger from "jet-logger";
 import { type FrcApiTournamentLevel } from "@src/models/frcEvents/frcTournamentLevel";
 import type MatchKey from "@src/models/MatchKey";
-import { CompLevel, toFrcApiTournamentLevel } from "@src/models/CompLevel";
+import { toFrcApiTournamentLevel } from "@src/models/CompLevel";
 
 export class FrcEventsRepo {
     private readonly apiKey: string;

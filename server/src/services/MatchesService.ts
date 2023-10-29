@@ -11,7 +11,7 @@ import { type TbaFrcTeam } from "@src/models/theBlueAlliance/tbaFrcTeam";
 import { FrcEventsRepo } from "@src/repos/FrcEventsRepo";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
-import { toFrcApiTournamentLevel, toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
+import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
     const settings = await getSettings();

@@ -7,7 +7,8 @@
           icon="mdi-alert-outline"
   >
     <template v-slot:text>
-      <strong>Using FRC Events API.</strong> This is not recommended unless match data is unavailable on The Blue Alliance.
+      <strong>Using FRC Events API.</strong> This is not recommended unless match data is unavailable on The Blue
+      Alliance.
     </template>
   </VAlert>
 </template>
