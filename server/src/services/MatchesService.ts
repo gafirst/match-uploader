@@ -12,7 +12,6 @@ import { FrcEventsRepo } from "@src/repos/FrcEventsRepo";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
 import { CompLevel, toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
-import logger from "jet-logger";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
     const { eventName, videoSearchDirectory } = await getSettings();
