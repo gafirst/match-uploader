@@ -1,19 +1,6 @@
-/* globals describe expect expectAsync it */
 import mockFs from "mock-fs";
-import { type ISettings } from "@src/models/Settings";
 import { readSettingsJson } from "@src/repos/JsonStorageRepo";
-
-const sampleSettings: ISettings = {
-  eventName: "Example Event",
-  eventTbaCode: "2023gacmp",
-  videoSearchDirectory: "./videos",
-  googleAuthStatus: "",
-  googleClientId: "",
-  playoffsType: "Double elimination playoff",
-  sandboxModeEnabled: false,
-  youTubeVideoPrivacy: "private",
-  linkVideosOnTheBlueAlliance: false,
-};
+import { sampleSettings } from "../util";
 
 describe("readSettingsJson", () => {
   it("should throw if settings file doesn't exist", async () => {

@@ -11,16 +11,15 @@ import { type TbaFrcTeam } from "@src/models/theBlueAlliance/tbaFrcTeam";
 import { FrcEventsRepo } from "@src/repos/FrcEventsRepo";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
-import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
+import { CompLevel, toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
-    const settings = await getSettings();
+    const { eventName, videoSearchDirectory } = await getSettings();
     const match = new Match(matchKey);
     const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);
     const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
-    const eventName = settings.eventName;
 
-    const files = await getFilesMatchingPattern(settings.videoSearchDirectory, `${videoFileMatchingName}*`);
+    const files = await getFilesMatchingPattern(videoSearchDirectory, `${videoFileMatchingName}*`);
     const parseVideoLabelsRegex = /^[A-Za-z]+ (\d{1,3})\s?([A-Za-z\s]*)\..*$/;
 
     return files.filter(file => {
@@ -34,12 +33,19 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
         // Pulls the actual match number out of the file name using the 2nd capture group in parseVideoLabelsRegex
         const fileMatchNumber = proposedVideoLabel[1];
 
-        // Filter out this file if the match number in the file name doesn't match the match we want to get videos for
-        if (!fileMatchNumber || Number.parseInt(fileMatchNumber, 10) !== match.key.matchNumber) {
+        if (!fileMatchNumber) {
             return false;
         }
 
-        return true;
+        // In double eliminations, playoff matches (before finals) have their sequence number in the set number, not
+        // the match number
+        if (match.key.playoffsType === PlayoffsType.DoubleElimination && match.key.compLevel === CompLevel.Semifinal) {
+            return Number.parseInt(fileMatchNumber, 10) === match.key.setNumber;
+        }
+
+        // Otherwise, check that when parsed as a number, the match number in the file name matches the match for which
+        // we are finding videos
+        return Number.parseInt(fileMatchNumber, 10) === match.key.matchNumber;
     }).map((file) => {
         const proposedVideoLabel = parseVideoLabelsRegex.exec(file);
         let videoLabel: string | null = null;
