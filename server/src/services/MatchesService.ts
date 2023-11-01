@@ -27,17 +27,12 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
         const proposedVideoLabel = parseVideoLabelsRegex.exec(file);
 
         // Filter out this file if the pattern is incorrect
-        logger.info(`proposedVideoLabel: ${proposedVideoLabel}`);
         if (!proposedVideoLabel || proposedVideoLabel.length < 3) {
             return false;
         }
 
         // Pulls the actual match number out of the file name using the 2nd capture group in parseVideoLabelsRegex
         const fileMatchNumber = proposedVideoLabel[1];
-
-        logger.info(`fileMatchNumber: ${fileMatchNumber}`);
-        logger.info(`match.key.matchNumber: ${match.key.matchNumber}`);
-        logger.info(`match.key.setNumber: ${match.key.setNumber}`);
 
         if (!fileMatchNumber) {
             return false;
