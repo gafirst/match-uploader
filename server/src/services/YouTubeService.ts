@@ -21,10 +21,10 @@ import { TheBlueAllianceTrustedRepo } from "@src/repos/TheBlueAllianceTrustedRep
 import type MatchKey from "@src/models/MatchKey";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
-    const port = EnvVars.Port;
-    const includePort = port !== "80" && port !== "443";
+    const port = EnvVars.port;
+    const includePort = port !== 80 && port !== 443;
     const portString = includePort ? `:${port}` : "";
-    return `${requestProtocol}://${EnvVars.Host}${portString}${FullPaths.YouTube.Auth.Callback}`;
+    return `${requestProtocol}://${EnvVars.host}${portString}${FullPaths.YouTube.Auth.Callback}`;
 }
 
 export async function getGoogleOAuth2Client(requestProtocol: string): Promise<OAuth2Client> {

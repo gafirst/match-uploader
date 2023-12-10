@@ -11,8 +11,8 @@ import { type YouTubePlaylists } from "@src/models/YouTubePlaylists";
 
 export async function getSettings(): Promise<ISettings> {
   return await readSettingsJson<ISettings>(
-      EnvVars.SettingsLocations.SettingsFile,
-      EnvVars.SettingsLocations.SettingsTemplateFile,
+      EnvVars.settingsLocations.settingsFile,
+      EnvVars.settingsLocations.settingsTemplateFile,
   );
 }
 
@@ -26,7 +26,7 @@ export async function setSetting(key: SettingsKey, value: string): Promise<void>
     valueToSave = !!JSON.parse(value);
   }
 
-  return await writeSettingsJson<ISettings>(EnvVars.SettingsLocations.SettingsFile, {
+  return await writeSettingsJson<ISettings>(EnvVars.settingsLocations.settingsFile, {
     ...currentSettings,
     [key]: valueToSave,
   });
@@ -34,8 +34,8 @@ export async function setSetting(key: SettingsKey, value: string): Promise<void>
 
 export async function getSecrets(): Promise<ISecretSettings> {
   return await readSettingsJson<ISecretSettings>(
-      EnvVars.SettingsLocations.SecretsFile,
-      EnvVars.SettingsLocations.SecretsTemplateFile,
+      EnvVars.settingsLocations.secretsFile,
+      EnvVars.settingsLocations.secretsTemplateFile,
   );
 }
 
@@ -65,7 +65,7 @@ export async function getObfuscatedSecrets(): Promise<ISecretSettingsHidden> {
 export async function setSecret(key: SecretSettingsKey, value: string): Promise<void> {
   const currentSecrets = await getSecrets();
 
-  return await writeSettingsJson<ISecretSettings>(EnvVars.SettingsLocations.SecretsFile, {
+  return await writeSettingsJson<ISecretSettings>(EnvVars.settingsLocations.secretsFile, {
     ...currentSecrets,
     [key]: value,
   });
@@ -73,8 +73,8 @@ export async function setSecret(key: SecretSettingsKey, value: string): Promise<
 
 export async function getYouTubePlaylists(): Promise<YouTubePlaylists> {
   return await readSettingsJson<YouTubePlaylists>(
-      EnvVars.SettingsLocations.YouTubePlaylistsFile,
-      EnvVars.SettingsLocations.YouTubePlaylistsTemplateFile,
+      EnvVars.settingsLocations.youTubePlaylistsFile,
+      EnvVars.settingsLocations.youTubePlaylistsTemplateFile,
   );
 }
 
@@ -83,7 +83,7 @@ export async function setYouTubePlaylist(videoLabel: string,
                                          playlistName: string | null = null): Promise<void> {
     const currentPlaylists = await getYouTubePlaylists();
 
-    return await writeSettingsJson<YouTubePlaylists>(EnvVars.SettingsLocations.YouTubePlaylistsFile, {
+    return await writeSettingsJson<YouTubePlaylists>(EnvVars.settingsLocations.youTubePlaylistsFile, {
         ...currentPlaylists,
         [videoLabel]: {
           id: playlistId,
@@ -98,5 +98,5 @@ export async function deleteYouTubePlaylistMapping(videoLabel: string): Promise<
   // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
   delete currentPlaylists[videoLabel];
 
-  return await writeSettingsJson<YouTubePlaylists>(EnvVars.SettingsLocations.YouTubePlaylistsFile, currentPlaylists);
+  return await writeSettingsJson<YouTubePlaylists>(EnvVars.settingsLocations.youTubePlaylistsFile, currentPlaylists);
 }
