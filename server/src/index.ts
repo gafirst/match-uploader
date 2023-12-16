@@ -12,7 +12,11 @@ export let io: SocketIOServer;
 appPromise.then(app => {
     // https://stackoverflow.com/a/12237273
     const server = http.createServer(app);
-    io = new SocketIOServer(server);
+    io = new SocketIOServer(server, {
+        cors: {
+            origin: "http://localhost:3001", // FIXME: figure out how this works in prod
+        },
+    });
 
     server.setTimeout(900000); // https://stackoverflow.com/a/52944570 FIXME - test again
 

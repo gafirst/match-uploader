@@ -27,6 +27,11 @@ const navItems = ref<INavItem[]>([
     icon: "mdi-cloud-upload-outline",
   },
   {
+    title: "Worker queue",
+    to: "/worker",
+    icon: "mdi-tray-full",
+  },
+  {
     title: "Settings",
     to: "/settings",
     icon: "mdi-cog",

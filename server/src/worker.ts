@@ -64,7 +64,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error(err);
+    logger.err(err);
     throw Error("Worker exiting because an error was encountered");
 });
