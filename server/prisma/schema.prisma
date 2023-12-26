@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// FIXME: Remember to update the migration file
+// npx
+// prisma migrate diff --from-empty --to-schema-datamodel pri
+// sma/schema.prisma --script > prisma/migrations/0_init/migr
+// ation.sql
+model WorkerJob {
+  jobId    String    @id
+  workerId String?
+  task     String
+  queue    String?
+  payload  Json
+  title    String
+  status   JobStatus @default(PENDING)
+  error    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum JobStatus {
+  // Job has not been run yet
+  PENDING
+  // Job is in progress
+  STARTED
+  // Job failed but can be retried
+  FAILED_RETRYABLE
+  // Job has permanently failed and will not be retried
+  FAILED
+  // Job completed successfully.
+  COMPLETED
+}
