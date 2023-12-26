@@ -15,7 +15,7 @@
 import {useSettingsStore} from "@/stores/settings";
 
 const settingsStore = useSettingsStore();
-settingsStore.getSettings();
+settingsStore.getSettings(); // FIXME: We should probably load this on app init
 
 interface IProps {
   rounded?: number;
