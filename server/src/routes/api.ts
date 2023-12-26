@@ -5,15 +5,23 @@ import { matchesRouter } from "@src/routes/matches";
 import { settingsRouter } from "@src/routes/settings";
 import { youTubeRouter } from "@src/routes/youtube";
 import { graphileWorkerUtils } from "@src/server";
+import { workerRouter } from "@src/routes/worker";
+import { queueJob } from "@src/services/WorkerService";
 
 const apiRouter = Router();
+// FIXME: Remove this
 apiRouter.get("/test", async (request, response) => {
-   await graphileWorkerUtils.addJob("uploadVideo", { video: "test" });
+   await queueJob("Test job",
+       "addTbaAssociation",
+       { video: "test" },
+       {
+       });
    return response.json("ok");
 });
 
 apiRouter.use(Paths.Matches.Base, matchesRouter);
 apiRouter.use(Paths.Settings.Base, settingsRouter);
+apiRouter.use(Paths.Worker.Base, workerRouter);
 apiRouter.use(Paths.YouTube.Base, youTubeRouter);
 
 export default apiRouter;

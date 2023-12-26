@@ -1,4 +1,3 @@
-import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import path from "path";
 import helmet from "helmet";
@@ -17,8 +16,12 @@ import { NodeEnvs } from "@src/constants/NodeEnvs";
 import { RouteError } from "@src/util/http";
 
 import { makeWorkerUtils, type WorkerUtils } from "graphile-worker";
+import { PrismaClient } from "@prisma/client";
 
 const app = express();
+
+export const prisma = new PrismaClient();
+
 export let graphileWorkerUtils: WorkerUtils;
 
 // This is some rigamarole to handle the fact that makeWorkerUtils is needed to make the workerUtils singleton but is

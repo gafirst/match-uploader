@@ -4,6 +4,7 @@ import logger from "jet-logger";
 import { type Socket, io } from "socket.io-client";
 import { type DefaultEventsMap } from "socket.io/dist/typed-events";
 import EnvVars from "@src/constants/EnvVars";
+import { addTbaAssociation } from "@src/tasks/addTbaAssociation";
 
 /**
  * Watches certain worker events and forwards them to a Socket.IO socket. Note that event
@@ -31,7 +32,10 @@ function configureWorkerEvents(socketClient: Socket<DefaultEventsMap, DefaultEve
             workerId: worker.workerId,
             jobId: job.id,
             jobName: job.task_identifier,
+            attempts: job.attempts,
+            maxAttempts: job.max_attempts,
             payload: job.payload,
+            error,
             success: !error,
         });
     });
@@ -41,12 +45,13 @@ async function main(): Promise<void> {
     // Run a worker to execute jobs:
     const runner = await run({
         connectionString: EnvVars.db.connectionString,
-        concurrency: 5,
+        concurrency: 5, // TODO: Add environment variable to make this adjustable
         // Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
         noHandleSignals: false,
         pollInterval: 1000,
         taskList: {
             uploadVideo,
+            addTbaAssociation,
         },
     });
 

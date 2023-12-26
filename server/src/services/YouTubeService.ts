@@ -19,6 +19,9 @@ import { type YouTubeVideoUploadError, type YouTubeVideoUploadSuccess } from "@s
 import { type YouTubePostUploadSteps } from "@src/models/YouTubePostUploadSteps";
 import { TheBlueAllianceTrustedRepo } from "@src/repos/TheBlueAllianceTrustedRepo";
 import type MatchKey from "@src/models/MatchKey";
+import { queueJob } from "@src/services/WorkerService";
+import { UPLOAD_VIDEO } from "@src/tasks/types/tasks";
+import { type WorkerJob } from "@prisma/client";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
     const port = EnvVars.port;
@@ -85,6 +88,7 @@ export async function getYouTubeApiClient(): Promise<youtube_v3.Youtube> {
     });
 
     // If we get back updated tokens from the YouTube API, store the updated tokens and expiry date
+    // TODO: This should probably be `once` instead of `on`
     oauth2Client.on("tokens", async (tokens) => {
         logger.info("Received new tokens from YouTube API");
         if (tokens.access_token) {
@@ -235,10 +239,25 @@ export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabe
     };
 }
 
+export async function queueYouTubeVideoUpload(title: string,
+                                              description: string,
+                                              videoPath: string,
+                                              privacy: YouTubeVideoPrivacy,
+): Promise<WorkerJob> {
+    return await queueJob(title, UPLOAD_VIDEO, {
+        title,
+        description,
+        videoPath,
+        privacy,
+    }, {
+        queueName: UPLOAD_VIDEO,
+    });
+}
+
 /**
  * Uploads a video to YouTube.
  *
- * Be careful: Every call to this YouTube API costs 1600 quota units
+ * Be careful: Every call to this function (and by extension, YouTube API) costs 1600 quota units
  *
  * @param title
  * @param description
@@ -276,7 +295,7 @@ export async function uploadYouTubeVideo(title: string,
             },
         },
         media: {
-            body: fs.createReadStream(path.join(videoSearchDirectory, videoPath)),
+            body: fs.createReadStream(path.join(videoSearchDirectory, videoPath)), // FIXME: We need to confirm that the file actually exists to avoid crashing the worker if it doesn't
         },
     };
 
