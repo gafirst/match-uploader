@@ -54,7 +54,7 @@
             :disabled="!matchStore.allowMatchUpload"
             @click="matchStore.uploadVideos"
       >
-        {{ matchStore.uploadInProgress ? "Uploading..." : "Upload all" }}
+        {{ matchStore.uploadInProgress ? "Uploading..." : "Queue all" }}
       </VBtn>
       <SandboxModeAlert class="mt-4" :rounded="4" />
       <PrivateUploads class="mt-4" :rounded="4" />

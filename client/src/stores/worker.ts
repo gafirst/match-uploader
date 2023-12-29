@@ -1,24 +1,31 @@
 import {socket} from "@/socket";
 import {acceptHMRUpdate, defineStore} from "pinia";
-import {ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
+import {WorkerJobStatus} from "@/types/WorkerJob";
+import {success} from "semantic-release-major-tag";
 
+// TODO: types in separate file
 type WorkerEvent = "worker:job:created" | "worker:job:start" | "worker:job:complete" | "unknown";
 
-
 interface WorkerJobEvent {
-  id: string;
+  jobId: string;
   event: WorkerEvent;
   jobName: string;
-  jobId: string;
   statusDescription: string;
 }
 
 interface WorkerJob {
   jobId: string;
-  workerId: string;
+  workerId: string | null;
   task: string;
   title: string;
-  status: string;
+  status: WorkerJobStatus;
+  error: string | null;
+  attempts: number;
+  maxAttempts: number;
+  youTubeVideoId: string | null;
+  addedToYouTubePlaylist: boolean | null;
+  linkedOnTheBlueAlliance: boolean | null;
 }
 
 export const useWorkerStore = defineStore("worker", () => {
@@ -31,6 +38,7 @@ export const useWorkerStore = defineStore("worker", () => {
     console.log("isConnected changed to", newValue);
   });
 
+  // FIXME
   function addEvent(data: any) {
     if (!data || !data.event || !data.jobId || !data.jobName) {
       return;
@@ -38,7 +46,6 @@ export const useWorkerStore = defineStore("worker", () => {
 
     const event: WorkerJobEvent = {
       event: data.event || "unknown",
-      id: `${data.jobId}/${data.event}`,
       jobName: data.jobName,
       jobId: data.jobId,
       statusDescription: data.success ? "success" : "error",
@@ -47,9 +54,34 @@ export const useWorkerStore = defineStore("worker", () => {
     events.value = [event, ...events.value];
   }
 
-  const jobs = ref<WorkerJob[]>([]);
+  const jobs = ref<Map<string, WorkerJob>>(new Map<string, WorkerJob>());
+
+  const jobsList = computed(() => {
+    return Array.from(jobs.value.values());
+  });
+
   const jobsLoading = ref(false);
   const jobsError = ref("");
+
+  /**
+   * Return the job's current status if it exists, otherwise return false
+   *
+   * @param jobId
+   * @param status
+   */
+  function jobHasStatus(jobId: string | null, status: WorkerJobStatus): boolean {
+    if (!jobId) {
+      return false;
+    }
+
+    const job = jobs.value.get(jobId);
+
+    if (!job) {
+      return false;
+    }
+
+    return job.status === status;
+  }
 
   async function loadJobs() {
     // Load jobs by fetching from /api/v1/worker/jobs
@@ -64,34 +96,80 @@ export const useWorkerStore = defineStore("worker", () => {
       return;
     }
 
-    jobs.value = (await jobsResult.json()) as WorkerJob[];
+    const jobsResultJson = await jobsResult.json(); // TODO: check type
+    const jobsMap = new Map<string, WorkerJob>();
+
+    for (const job of jobsResultJson) {
+      jobsMap.set(job.jobId, job);
+    }
+
+    jobs.value = jobsMap;
     jobsLoading.value = false;
   }
 
-  // TODO: Fix up types
-  async function updateJobStatus(jobId: string, status: string) {
-    const index = jobs.value.findIndex((job: WorkerJob) => job.jobId === jobId);
+  // TODO: Maybe this can be simplified
+  // TOOD: Better typing
+  async function updateJobStatus({
+                                   jobId,
+                                   jobName,
+                                   attempts,
+                                   maxAttempts,
+                                   error,
+                                   status,
+                                   title,
+                                   workerId,
+                                  linkedOnTheBlueAlliance,
+                                  addedToYouTubePlaylist,
+                                  youTubeVideoId,
+                                 }: {
+    jobId: string,
+    jobName: string,
+    title: string,
+    workerId: string,
+    attempts: number,
+    maxAttempts: number,
+    status: WorkerJobStatus
+    youTubeVideoId: string | null,
+    addedToYouTubePlaylist: boolean | null,
+    linkedOnTheBlueAlliance: boolean | null,
+    error: string | null,
+  }) {
+    let job = jobs.value.get(jobId);
 
-    if (index === -1) {
-      console.log("Job not found"); // TODO: in this case, create the job
-      addJob(jobId, "unknown", "unknown");
-      return;
+    if (!job) {
+      console.log("Job not found");
+      job = await addJob(jobId, jobName, "unknown");
     }
 
-    jobs.value[index].status = status;
+    job.attempts = attempts;
+    job.maxAttempts = maxAttempts;
+    job.status = status;
+    job.title = title;
+    job.workerId = workerId;
+    job.youTubeVideoId = youTubeVideoId;
+    job.addedToYouTubePlaylist = addedToYouTubePlaylist;
+    job.linkedOnTheBlueAlliance = linkedOnTheBlueAlliance;
+    job.error = error;
   }
 
   // TODO: Cleanup
-  async function addJob(jobId: string, jobName: string, title: string) {
+  async function addJob(jobId: string, jobName: string, title: string): Promise<WorkerJob> {
     const job: WorkerJob = {
       jobId,
-      workerId: "",
+      workerId: null,
       task: jobName,
       title,
-      status: "PENDING",
+      status: WorkerJobStatus.PENDING,
+      attempts: 0,
+      maxAttempts: 0, // FIXME
+      error: null,
+      addedToYouTubePlaylist: null,
+      linkedOnTheBlueAlliance: null,
+      youTubeVideoId: null,
     };
 
-    jobs.value = [job, ...jobs.value];
+    jobs.value.set(jobId, job);
+    return job;
   }
 
   /**
@@ -110,23 +188,23 @@ export const useWorkerStore = defineStore("worker", () => {
       isConnected.value = false;
     });
 
-    socket.on("worker", (payload) => {
-      console.log("Received worker payload!!!", payload);
+    // TODO: type checking through socketio
+    socket.on("worker", async (payload) => {
+      console.log(`worker | event: ${payload.event}`, payload);
       addEvent(payload);
 
       switch (payload.event) {
         case "worker:job:created":
           console.log("Job created");
-          addJob(payload.jobId, payload.jobName, payload.title); // FIXME
+          await addJob(payload.workerJob.jobId, payload.workerJob.jobName, payload.workerJob.title); // FIXME: Update to be more like status update function, or perhaps combine
           break;
         case "worker:job:start":
           console.log("Job started");
-          updateJobStatus(payload.jobId, "STARTED"); // FIXME
+          await updateJobStatus(payload.workerJob); // FIXME: Update function since it just accepts the netire payload
           break;
         case "worker:job:complete":
           console.log("Job completed");
-          // TODO: completed event needs to include the new status
-          updateJobStatus(payload.jobId, payload.success ? "COMPLETED" : "FAILED"); // FIXME
+          await updateJobStatus(payload.workerJob); // FIXME
           break;
       }
     });
@@ -136,7 +214,9 @@ export const useWorkerStore = defineStore("worker", () => {
     bindEvents,
     events,
     isConnected,
+    jobHasStatus,
     jobs,
+    jobsList,
     jobsLoading,
     jobsError,
     loadJobs,

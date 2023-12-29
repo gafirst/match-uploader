@@ -1,6 +1,6 @@
 <template>
   <VRow>
-    <VCol cols="12" md="5">
+    <VCol>
       <h1>Worker queue</h1>
 
       <h2>Pending jobs</h2>
@@ -8,11 +8,11 @@
         Loading...
         <!-- TODO: make this a spinner -->
       </p>
-      <VAlert v-if="!workerStore.jobs.length">
+      <VAlert v-if="!workerStore.jobsList.length">
         <p>No pending, started, or retryable failed jobs currently</p>
       </VAlert>
       <VList>
-        <div v-for="job in workerStore.jobs" :key="job.jobId">
+        <div v-for="job in workerStore.jobsList" :key="job.jobId">
           <VListItem :title="`${job.task} - ${job.title}`"
                      :subtitle="`ID: ${job.jobId} | Status: ${job.status.toLowerCase()}`"
           >
@@ -33,7 +33,7 @@
         <p>No worker events</p>
       </VAlert>
       <VList>
-        <div v-for="event in workerStore.events" :key="event.id">
+        <div v-for="event in workerStore.events" :key="`${event.event}-${event.jobId}`">
           <div v-if="event.event === 'worker:job:created'">
             <VListItem :title="`${event.jobName} created`"
                        :subtitle="`Job ID: ${event.jobId}`"

@@ -2,11 +2,14 @@ import {acceptHMRUpdate, defineStore} from "pinia";
 import {computed, ref} from "vue";
 import {MatchVideoInfo} from "@/types/MatchVideoInfo";
 import {useSettingsStore} from "@/stores/settings";
+import {useWorkerStore} from "@/stores/worker";
+import {WorkerJobStatus} from "@/types/WorkerJob";
 
 export const useMatchStore = defineStore("match", () => {
   // Note: Variables intended to be exported to be used elsewhere must be returned from this function!
   const matches = ref([]);
   const settingsStore = useSettingsStore();
+  const workerStore = useWorkerStore();
   const selectedMatchKey = ref<string | null>(null);
 
   const uploadInProgress = ref(false);
@@ -86,12 +89,16 @@ export const useMatchStore = defineStore("match", () => {
   }
 
   const allMatchVideosUploaded = computed(() => {
-    return matchVideos.value.length > 0 && matchVideos.value.every(video => video.uploaded);
+    // FIXME
+    return matchVideos.value.length > 0 &&
+      matchVideos.value.every(
+        video => workerStore.jobHasStatus(video.workerJobId, WorkerJobStatus.COMPLETED),
+      );
   });
 
   // TODO: cleanup types
   async function uploadVideo(video: MatchVideoInfo): Promise<any> {
-    video.uploadInProgress = true;
+    video.isRequestingJob = true;
 
     if (!settingsStore.settings?.youTubeVideoPrivacy) {
         throw new Error("Unable to upload video: YouTube video privacy setting is undefined");
@@ -116,22 +123,24 @@ export const useMatchStore = defineStore("match", () => {
     console.log("result", result);
 
     if (response.ok) {
-      video.uploaded = true;
-      video.youTubeVideoId = result.videoId;
-      video.youTubeVideoUrl = `https://www.youtube.com/watch?v=${result.videoId}`;
-      video.postUploadSteps = result.postUploadSteps;
-      video.uploadError = "";
+      video.workerJobId = result.workerJob.jobId; // TODO: Add better type checking here
+      // TODO: are we going to miss any of this?
+      // video.uploaded = true;
+      // video.youTubeVideoId = result.videoId;
+      // video.youTubeVideoUrl = `https://www.youtube.com/watch?v=${result.videoId}`;
+      // video.postUploadSteps = result.postUploadSteps;
+      // video.uploadError = "";
     } else {
       // Catches if the server returns parameter validation errors
       if (result.errors) {
         console.log("errors", result.errors);
-        video.uploadError = result.errors.map((error: any) => error.msg).join(", ");
+        video.jobCreationError = result.errors.map((error: any) => error.msg).join(", ");
       } else {
-        video.uploadError = result.error;
+        video.jobCreationError = result.error;
       }
     }
 
-    video.uploadInProgress = false;
+    video.isRequestingJob = false;
     return result;
   }
 
@@ -193,6 +202,7 @@ export const useMatchStore = defineStore("match", () => {
   });
 
   function postUploadStepsSucceeded (video: MatchVideoInfo): boolean {
+    // FIXME
     return !!video.postUploadSteps?.addToYouTubePlaylist && !!video.postUploadSteps?.linkOnTheBlueAlliance;
   }
 
