@@ -16,14 +16,25 @@ datasource db {
 // sma/schema.prisma --script > prisma/migrations/0_init/migr
 // ation.sql
 model WorkerJob {
-  jobId    String    @id
+  jobId    String  @id
   workerId String?
   task     String
-  queue    String?
-  payload  Json
   title    String
-  status   JobStatus @default(PENDING)
+  queue    String?
+  payload  Json?
   error    String?
+
+  status      JobStatus @default(PENDING)
+  attempts    Int       @default(0)
+  maxAttempts Int
+
+  // This is a bit of a "temporary" hack to address the fact that with a worker queue, we can't store return results
+  // in the same way. Since we also don't want to model the entire Match > Label > Job hierarchy in the database yet,
+  // this is a reasonable compromise between jankiness and functionality to keep us moving forward.
+  // Maybe in the future we could replace this with a single reference to the video or match the job relates to.
+  youTubeVideoId          String?
+  addedToYouTubePlaylist  Boolean?
+  linkedOnTheBlueAlliance Boolean?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
