@@ -3,6 +3,9 @@ import {uploadYouTubeVideo} from "@src/services/YouTubeService";
 import {YouTubeVideoPrivacy} from "@src/models/YouTubeVideoPrivacy";
 import {isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess} from "@src/models/YouTubeVideoUploadResult";
 import {JobHelpers} from "graphile-worker";
+import {prisma} from "@src/worker";
+import {JobStatus, Prisma} from "@prisma/client";
+import {UPLOAD_VIDEO} from "@src/tasks/types/tasks";
 
 export interface UploadVideoTaskPayload {
     title: string;
@@ -23,7 +26,7 @@ function assertIsUploadVideoTaskPayload(payload: unknown): asserts payload is Up
     }
 }
 
-export async function uploadVideo(payload: unknown, { logger }: JobHelpers): Promise<void> {
+export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers): Promise<void> {
     assertIsUploadVideoTaskPayload(payload);
 
     const settings = await getSettings();
@@ -34,6 +37,25 @@ export async function uploadVideo(payload: unknown, { logger }: JobHelpers): Pro
 
     if (isYouTubeVideoUploadSuccess(uploadResult)) {
         logger.info(`Successfully uploaded video ${payload.title} with ID ${uploadResult.videoId}`);
+
+        await prisma.workerJob.upsert({
+            where: {
+                jobId: job.id,
+            },
+            create: {
+                jobId: job.id,
+                task: UPLOAD_VIDEO,
+                title: payload.title, // TODO: is this the right title?
+                status: JobStatus.STARTED,
+                youTubeVideoId: uploadResult.videoId,
+                attempts: 1,
+                maxAttempts: 1, // attempts / maxAttempts may be wrong here (though the create case of this upsert
+                // should be rare), but it'll get fixed by worker events in any case
+            },
+            update: {
+                youTubeVideoId: uploadResult.videoId,
+            }
+        });
         // TODO
         // const postUploadStepsResult =
         //     await handleMatchVideoPostUploadSteps(uploadResult.videoId, label as string, matchKeyObject);

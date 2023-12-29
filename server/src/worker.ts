@@ -2,9 +2,11 @@ import { uploadVideo } from "@src/tasks/uploadVideo";
 import { type Runner, run } from "graphile-worker";
 import logger from "jet-logger";
 import { type Socket, io } from "socket.io-client";
-import { type DefaultEventsMap } from "socket.io/dist/typed-events";
 import EnvVars from "@src/constants/EnvVars";
 import { addTbaAssociation } from "@src/tasks/addTbaAssociation";
+import { PrismaClient } from "@prisma/client";
+
+export const prisma = new PrismaClient();
 
 /**
  * Watches certain worker events and forwards them to a Socket.IO socket. Note that event
@@ -16,18 +18,27 @@ import { addTbaAssociation } from "@src/tasks/addTbaAssociation";
  * @param socketClient The Socket.IO socket client
  * @param runner The graphile-worker runner
  */
-function configureWorkerEvents(socketClient: Socket<DefaultEventsMap, DefaultEventsMap>, runner: Runner): void {
+function configureWorkerEvents(socketClient: Socket, runner: Runner): void {
     runner.events.on("job:start", ({ worker, job }) => {
-        socketClient.emit(`worker:job:start`, {
+        socketClient.emit("worker:job:start", {
             workerId: worker.workerId,
             jobId: job.id,
             jobName: job.task_identifier,
+            attempts: job.attempts,
+            maxAttempts: job.max_attempts,
             payload: job.payload,
         });
     });
 
     runner.events.on("job:complete", ({ worker, job, error }) => {
         logger.info("Job complete");
+
+        let stringifiedError: string | null = null;
+
+        if (error instanceof Error) {
+            stringifiedError = error.toString();
+        }
+
         socketClient.emit(`worker:job:complete`, {
             workerId: worker.workerId,
             jobId: job.id,
@@ -35,7 +46,7 @@ function configureWorkerEvents(socketClient: Socket<DefaultEventsMap, DefaultEve
             attempts: job.attempts,
             maxAttempts: job.max_attempts,
             payload: job.payload,
-            error,
+            error: stringifiedError,
             success: !error,
         });
     });
@@ -55,7 +66,7 @@ async function main(): Promise<void> {
         },
     });
 
-    const socketClient = io("http://localhost:3000"); // FIXME
+    const socketClient: Socket = io("http://localhost:3000"); // FIXME (don't hardcode server url)
     socketClient.connect();
     configureWorkerEvents(socketClient, runner);
 

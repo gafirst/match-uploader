@@ -239,11 +239,24 @@ export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabe
     };
 }
 
+/**
+ * Queues a job to upload a video to YouTube.
+ *
+ * @param title
+ * @param description
+ * @param videoPath
+ * @param privacy
+ * @param matchKey
+ * @param label
+ */
 export async function queueYouTubeVideoUpload(title: string,
                                               description: string,
                                               videoPath: string,
                                               privacy: YouTubeVideoPrivacy,
+                                              matchKey: MatchKey,
+                                              label: string,
 ): Promise<WorkerJob> {
+    const jobKey = `${UPLOAD_VIDEO}:${matchKey.matchKey}:${label}`;
     return await queueJob(title, UPLOAD_VIDEO, {
         title,
         description,
@@ -251,6 +264,9 @@ export async function queueYouTubeVideoUpload(title: string,
         privacy,
     }, {
         queueName: UPLOAD_VIDEO,
+        maxAttempts: 2,
+        jobKey, // TODO: Not sure this is a good idea, the replacement algorithm is complicated combined with our
+        // shadow table for job status
     });
 }
 
@@ -259,6 +275,8 @@ export async function queueYouTubeVideoUpload(title: string,
  *
  * Be careful: Every call to this function (and by extension, YouTube API) costs 1600 quota units
  *
+ * @deprecated Use queueYouTubeVideoUpload to upload using a worker job instead
+ * FIXME: Remove this function once it's no longer used anywhere
  * @param title
  * @param description
  * @param videoPath

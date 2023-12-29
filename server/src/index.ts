@@ -6,13 +6,15 @@ import { appPromise } from "./server";
 import { Server as SocketIOServer } from "socket.io";
 import http from "http";
 import { configureSocketIoEventForwarding } from "@src/util/ws";
+import { type ClientToServerEvents, type ServerToClientEvents } from "./tasks/types/events";
 
 const SERVER_START_MSG = `Express server started on port: ${EnvVars.port}`;
 export let io: SocketIOServer;
+
 appPromise.then(app => {
     // https://stackoverflow.com/a/12237273
     const server = http.createServer(app);
-    io = new SocketIOServer(server, {
+    io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents>(server, {
         cors: {
             origin: "http://localhost:3001", // FIXME: figure out how this works in prod
         },
