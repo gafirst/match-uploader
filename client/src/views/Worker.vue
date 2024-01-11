@@ -33,26 +33,27 @@
         <p>No worker events</p>
       </VAlert>
       <VList>
-        <div v-for="event in workerStore.events" :key="`${event.event}-${event.jobId}`">
-          <div v-if="event.event === 'worker:job:created'">
-            <VListItem :title="`${event.jobName} created`"
+        <div v-for="event in workerStore.events" :key="`${event.workerEvent}-${workerStore.jobs.get(event.jobId)?.jobId}`">
+          <div v-if="event.workerEvent === WORKER_JOB_CREATED">
+            <VListItem :title="`${workerStore.jobs.get(event.jobId)?.title} created`"
                        :subtitle="`Job ID: ${event.jobId}`"
                        prepend-icon="mdi-progress-upload"
             />
           </div>
-          <div v-else-if="event.event === 'worker:job:start'">
-            <VListItem :title="`${event.jobName} started`"
+          <div v-else-if="event.workerEvent === WORKER_JOB_START">
+            <VListItem :title="`${workerStore.jobs.get(event.jobId)?.title} started`"
                        :subtitle="`Job ID: ${event.jobId}`"
                        prepend-icon="mdi-progress-upload"
             />
           </div>
-          <div v-else-if="event.event === 'worker:job:complete'">
+          <div v-else-if="event.workerEvent === WORKER_JOB_COMPLETE">
             <VListItem>
-              <VListItemTitle>{{ event.jobName }} finished</VListItemTitle>
-              <VListItemSubtitle>Result: {{ event.statusDescription }} | Job ID: {{ event.jobId }}</VListItemSubtitle>
+              <VListItemTitle>{{ workerStore.jobs.get(event.jobId)?.title }} finished</VListItemTitle>
+              <!--               FIXME: add better error handling for null status below -->
+              <VListItemSubtitle>Result: {{ workerJobStatusToUiString(workerStore.jobs.get(event.jobId)?.status ?? WorkerJobStatus.PENDING) }} | Job ID: {{ event.jobId }}</VListItemSubtitle>
               <template v-slot:prepend>
-                <VIcon v-if="event.statusDescription === 'success'" color="success">mdi-check-circle</VIcon>
-                <VIcon v-else :color="event.statusDescription">mdi-alert</VIcon>
+                <VIcon v-if="workerStore.jobHasStatus(event.jobId, WorkerJobStatus.COMPLETED)" color="success">mdi-check-circle</VIcon>
+                <VIcon v-else :color="error">mdi-alert</VIcon>
               </template>
             </VListItem>
           </div>
@@ -63,6 +64,13 @@
 </template>
 <script lang="ts" setup>
 import {useWorkerStore} from "@/stores/worker";
+import {
+  WORKER_JOB_COMPLETE,
+  WORKER_JOB_CREATED,
+  WORKER_JOB_START,
+  WorkerJobStatus,
+  workerJobStatusToUiString,
+} from "@/types/WorkerJob";
 
 const workerStore = useWorkerStore();
 workerStore.loadJobs(); // FIXME: We should probably load this on app init

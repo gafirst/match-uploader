@@ -54,6 +54,7 @@
             :disabled="!matchStore.allowMatchUpload"
             @click="matchStore.uploadVideos"
       >
+        <!--        FIXME: Queue all should not submit another job if one video is in progress. in other words, Queue All should change to Queue Remainder if some videos have jobs already-->
         {{ matchStore.uploadInProgress ? "Uploading..." : "Queue all" }}
       </VBtn>
       <SandboxModeAlert class="mt-4" :rounded="4" />
