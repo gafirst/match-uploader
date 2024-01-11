@@ -4,7 +4,9 @@ FROM node:18-bookworm-slim as base
 # - https://www.digitalocean.com/community/tutorials/how-to-build-a-node-js-application-with-docker
 # - https://snyk.io/blog/choosing-the-best-node-js-docker-image/
 
-RUN mkdir -p /home/node/app/client/node_modules && \
+RUN apt-get update -y &&  \
+    apt-get install -y openssl &&  \
+    mkdir -p /home/node/app/client/node_modules && \
     mkdir -p /home/node/app/server/node_modules && \
     chown -R node:node /home/node/app
 
@@ -33,6 +35,10 @@ WORKDIR /home/node/app/server
 COPY server/package*.json .
 COPY server/yarn.lock .
 
+# Prisma generates the Prisma client in its post-install script, so we need this directory around before running yarn
+# install
+COPY server/prisma ./prisma
+
 USER node
 RUN yarn install --frozen-lockfile
 
@@ -48,6 +54,9 @@ WORKDIR /home/node/app/server
 
 COPY server/package*.json .
 COPY server/yarn.lock .
+# Prisma generates the Prisma client in its post-install script, so we need this directory around before running yarn
+# install
+COPY server/prisma ./prisma
 
 USER node
 RUN yarn install --frozen-lockfile --prod
@@ -70,9 +79,3 @@ COPY server/settings/*.example.json .
 WORKDIR /home/node/app/server
 EXPOSE 8080
 CMD ["yarn", "start"]
-
-#
-#COPY --chown=node:node . .
-#
-#EXPOSE 8080
-#CMD [ "yarn", "start" ]
