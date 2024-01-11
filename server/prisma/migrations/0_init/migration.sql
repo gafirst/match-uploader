@@ -3,18 +3,22 @@ CREATE TYPE "JobStatus" AS ENUM ('PENDING', 'STARTED', 'FAILED_RETRYABLE', 'FAIL
 
 -- CreateTable
 CREATE TABLE "WorkerJob" (
-    "id" SERIAL NOT NULL,
-    "workerId" TEXT,
     "jobId" TEXT NOT NULL,
+    "workerId" TEXT,
     "task" TEXT NOT NULL,
-    "queue" TEXT,
-    "payload" JSONB NOT NULL,
     "title" TEXT NOT NULL,
-    "status" "JobStatus" NOT NULL,
+    "queue" TEXT,
+    "payload" JSONB,
     "error" TEXT,
+    "status" "JobStatus" NOT NULL DEFAULT 'PENDING',
+    "attempts" INTEGER NOT NULL DEFAULT 0,
+    "maxAttempts" INTEGER NOT NULL,
+    "youTubeVideoId" TEXT,
+    "addedToYouTubePlaylist" BOOLEAN,
+    "linkedOnTheBlueAlliance" BOOLEAN,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "WorkerJob_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "WorkerJob_pkey" PRIMARY KEY ("jobId")
 );
 
