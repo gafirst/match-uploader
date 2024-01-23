@@ -1,9 +1,35 @@
 services:
-  match_uploader:
+  web:
+# FIXME: Double-check that containers start in correct order when starting with no DB at all
     image: ghcr.io/gafirst/match-uploader:latest
     ports:
       - 8080:8080
+    env_file:
+      - ./server/env/production.env
     volumes:
      - ./server/settings:/home/node/app/server/settings
      - ./server/env:/home/node/app/server/env
      - ./server/videos:/home/node/app/server/videos
+    depends_on:
+      - db
+  worker:
+    image: ghcr.io/gafirst/match-uploader:latest
+    command: yarn start:worker
+    volumes:
+     - ./server/settings:/home/node/app/server/settings
+     - ./server/env:/home/node/app/server/env
+     - ./server/videos:/home/node/app/server/videos
+    env_file:
+      - ./server/env/production.env
+    depends_on:
+      - db
+  db:
+    image: postgres:16-bookworm
+    shm_size: '256mb' # https://github.com/docker-library/docs/blob/d94174bea5222aa95674ac156b710648a186afb8/postgres/README.md#caveats#caveats
+    env_file:
+      - ./server/env/production.env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

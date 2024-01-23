@@ -21,4 +21,3 @@ CREATE TABLE "WorkerJob" (
 
     CONSTRAINT "WorkerJob_pkey" PRIMARY KEY ("jobId")
 );
-

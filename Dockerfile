@@ -1,5 +1,5 @@
 FROM node:18-bookworm-slim as base
-# TODO: update to Node 20
+# TODO(#76): update to Node 20
 # References:
 # - https://www.digitalocean.com/community/tutorials/how-to-build-a-node-js-application-with-docker
 # - https://snyk.io/blog/choosing-the-best-node-js-docker-image/

@@ -12,6 +12,7 @@ import {
     WORKER_JOB_START,
 } from "@src/tasks/types/events";
 import { type Socket } from "socket.io";
+import { isPrismaClientKnownRequestError } from "@src/util/prisma";
 
 /**
  * Queues a job and creates a WorkerJob record in the database.
@@ -64,20 +65,33 @@ async function handleWorkerJobStart(data: ClientToServerEvents[typeof WORKER_JOB
         logger.warn(`Dropping invalid worker:job:start event: ${JSON.stringify(data)}`);
         return;
     }
-    // TODO: What if the job doesn't exist here?
-    await prisma.workerJob.update({
-        where: {
-            jobId: data.jobId,
-        },
-        data: {
-            status: JobStatus.STARTED,
-            workerId: data.workerId,
-        },
-    });
+
+    try {
+        await prisma.workerJob.update({
+            where: {
+                jobId: data.jobId,
+            },
+            data: {
+                status: JobStatus.STARTED,
+                error: null,
+                workerId: data.workerId,
+            },
+        });
+    } catch (e: unknown) {
+        if (isPrismaClientKnownRequestError(e, "P2025")) {
+            logger.warn(`Could not update match-uploader WorkerJob table for job with ID ${data.jobId}: ` +
+              "Job is not already present in the table (this is likely to cause jobs to be stuck in PENDING when they" +
+              " should be STARTED)");
+        } else {
+            logger.warn(`Could not update match-uploader WorkerJob table for job with ID ${data.jobId}: ` +
+              `${JSON.stringify(e)} (this is likely to cause jobs to be stuck in PENDING when they should ` +
+              "should be STARTED)");
+        }
+    }
 }
 
 async function handleWorkerJobComplete(data: ClientToServerEvents[typeof WORKER_JOB_COMPLETE]): Promise<void> {
-    // Because we're receiving websocket data from a client, we can't be 100% sure the data truly matches the typing
+    // Because we're receiving websocket data from a client, we can't be certain the data matches the typing
     if (!isWorkerJobCompleteEvent(data)) {
         logger.warn(`Dropping invalid worker:job:complete event: ${JSON.stringify(data)}`);
         return;
@@ -93,7 +107,7 @@ async function handleWorkerJobComplete(data: ClientToServerEvents[typeof WORKER_
         }
     }
 
-    // TODO: What if the job doesn't exist?
+    // FIXME: Catch RecordNotFound exception
     await prisma.workerJob.update({
         where: {
             jobId: data.jobId,
@@ -135,12 +149,9 @@ export async function processWorkerEvent(
             });
         }
 
-        // Log an error if we couldn't find the job
         if (workerJob) {
             socket.broadcast.emit("worker", {
                 event,
-                // TODO:I think we don't need to pass the raw object?
-                // ...data,
                 workerJob,
             });
         } else {

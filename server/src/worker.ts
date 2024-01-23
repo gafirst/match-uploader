@@ -3,7 +3,6 @@ import { type Runner, run } from "graphile-worker";
 import logger from "jet-logger";
 import { type Socket, io } from "socket.io-client";
 import EnvVars from "@src/constants/EnvVars";
-import { addTbaAssociation } from "@src/tasks/addTbaAssociation";
 import { PrismaClient } from "@prisma/client";
 
 export const prisma = new PrismaClient();
@@ -37,6 +36,9 @@ function configureWorkerEvents(socketClient: Socket, runner: Runner): void {
 
         if (error instanceof Error) {
             stringifiedError = error.toString();
+        } else if (error) {
+            logger.warn(`Unable to stringify error for job:complete event of job ${job.id}`);
+            logger.warn(error);
         }
 
         socketClient.emit(`worker:job:complete`, {
@@ -56,17 +58,18 @@ async function main(): Promise<void> {
     // Run a worker to execute jobs:
     const runner = await run({
         connectionString: EnvVars.db.connectionString,
-        concurrency: 5, // TODO: Add environment variable to make this adjustable
+        concurrency: 5,
         // Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
         noHandleSignals: false,
         pollInterval: 1000,
         taskList: {
             uploadVideo,
-            addTbaAssociation,
         },
     });
 
-    const socketClient: Socket = io("http://localhost:3000"); // FIXME (don't hardcode server url)
+    // FIXME: Need to be able to configure server URL and port. localhost:PORT for dev, web:PORT for default Docker Compose setup
+    const socketClient: Socket = io("http://localhost:3000");
+    logger.info("Connecting to localhost:8080");
     socketClient.connect();
     configureWorkerEvents(socketClient, runner);
 

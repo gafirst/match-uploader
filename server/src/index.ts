@@ -20,7 +20,7 @@ appPromise.then(app => {
         },
     });
 
-    server.setTimeout(900000); // https://stackoverflow.com/a/52944570 FIXME - test again
+    server.setTimeout(900000); // https://stackoverflow.com/a/52944570
 
     io.on("connection", socket => {
        logger.info(`Socket connected: ${socket.id}`);

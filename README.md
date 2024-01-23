@@ -41,15 +41,15 @@ details to note:
 
 With the worker, a video upload will now create a new job. Here are the possible statuses a job can have:
 
-| Status | Description |
-| ------ | ----------- |
-| Pending | The job is waiting to be processed by the worker. (To ensure videos upload in the correct order, video uploads are processed serially in the order they are queued, one at a time.) |
-| Running | The worker is actively handling the job. Logs are visible via the worker container, e.g., `docker compose logs --follow worker` |
+| Status             | Description |
+|--------------------| ----------- |
+| Pending            | The job is waiting to be processed by the worker. (To ensure videos upload in the correct order, video uploads are processed serially in the order they are queued, one at a time.) |
+| Started            | The worker is actively handling the job. Logs are visible via the worker container, e.g., `docker compose logs --follow worker` |
 | Failed (retryable) | An error occurred while handling the job. The job still has at least one more attempt remaining and will be retried. |
-| Completed | The job has finished successfully. |
-| Failed | An error occurred while handling the job. The job has no more attempts remaining and will not be retried. |
+| Completed          | The job has finished successfully. |
+| Failed             | An error occurred while handling the job. The job has no more attempts remaining and will not be retried. |
 
-A normal job lifecycle is to go from Pending to Running to Completed.
+A normal job lifecycle is to go from Pending to Started to Completed.
 
 ## Local development
 
@@ -63,6 +63,14 @@ Install some baseline dependencies:
 
 - To run the server: `cd server && yarn run dev`
 - In a separate terminal, run the client: `cd client && yarn run dev`
+
+### Database migrations
+
+The server uses Prisma to manage our database. Check out the [Prisma docs](https://www.prisma.io/docs/) and `server/prisma`
+for more information.
+
+Migrations are automatically run when the server starts in the production Docker Compose setup. If you change the database
+as part of a change, be sure to include a migration that can run on startup to apply changes for existing users.
 
 ## Releases
 

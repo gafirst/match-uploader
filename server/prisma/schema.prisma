@@ -10,11 +10,7 @@ datasource db {
   url      = env("DB_CONNECTION_STRING")
 }
 
-// FIXME: Remember to update the migration file
-// npx
-// prisma migrate diff --from-empty --to-schema-datamodel pri
-// sma/schema.prisma --script > prisma/migrations/0_init/migr
-// ation.sql
+// npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
 model WorkerJob {
   jobId    String  @id
   workerId String?

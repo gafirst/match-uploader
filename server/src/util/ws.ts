@@ -1,7 +1,6 @@
 import { type Socket } from "socket.io";
 import {
     type ClientToServerEvents,
-    ServerToClientEvents,
     WORKER_JOB_COMPLETE,
     WORKER_JOB_START,
 } from "@src/tasks/types/events";
@@ -18,8 +17,6 @@ export function configureSocketIoEventForwarding(socket: Socket): void {
         WORKER_JOB_START,
         WORKER_JOB_COMPLETE,
     ];
-
-    const broadcastChannelName = "worker";
 
     eventsToForward.forEach((event: keyof ClientToServerEvents) => {
         socket.on(event, async (data: ClientToServerEvents[typeof event]) => {

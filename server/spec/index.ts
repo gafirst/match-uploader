@@ -57,7 +57,7 @@ void (async () => {
   if (!!execResp) {
     const info = await execResp;
     if (info.overallStatus === "passed") {
-      logger.info("All tested passed");
+      logger.info("All tests passed");
     } else {
       logger.err("One or more tests failed");
     }
