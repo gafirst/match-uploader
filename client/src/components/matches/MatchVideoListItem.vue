@@ -1,58 +1,21 @@
 <template>
-  <VListItem :title="video.videoTitle"
-             class="text-wrap"
-  >
-    <VListItemSubtitle class="text-wrap force-text-wrap">
-      {{ subtitle }}
-    </VListItemSubtitle>
+  <VListItem>
+    <VListItemTitle class="text-wrap">{{ video.videoTitle }}</VListItemTitle>
+    <VListItemSubtitle class="text-wrap force-text-wrap">{{ subtitle }}</VListItemSubtitle>
     <template v-slot:prepend>
-      <VIcon v-if="video.isRequestingJob"
-             icon="mdi-loading mdi-spin"
-             size="large"
-      />
-      <VIcon v-else-if="!!video.jobCreationError"
-             icon="mdi-alert-circle-outline"
-             color="error"
-             size="large"
-      />
-      <!-- FIXME -->
-      <VIcon v-else-if="video.uploaded && !matchStore.postUploadStepsSucceeded(video)"
-             icon="mdi-alert"
-             color="warning"
-             size="large"
-      />
-      <VIcon v-else-if="workerStore.jobHasStatus(video.workerJobId, WorkerJobStatus.COMPLETED)"
-             icon="mdi-cloud-check-variant"
-             color="success"
-             size="large"
-      />
-      <VIcon v-else-if="workerStore.jobHasStatus(video.workerJobId, WorkerJobStatus.FAILED)"
-             icon="mdi-alert"
-             color="error"
-             size="large"
-      />
-      <VIcon v-else-if="workerStore.jobHasStatus(video.workerJobId, WorkerJobStatus.STARTED)"
-             icon="mdi-loading mdi-spin"
-             size="large"
-      />
-      <VIcon v-else-if="workerStore.jobHasStatus(video.workerJobId, WorkerJobStatus.PENDING)"
-             icon="mdi-tray-full"
-             size="large"
-      />
-      <VIcon v-else
-             icon="mdi-progress-upload"
+      <VIcon :icon="icon.icon"
+             :color="icon.color"
              size="large"
       />
     </template>
     <template v-slot:append>
-      <!-- TODO: Don't hardcode url like this -->
-      <VBtn v-if="video.workerJobId && workerStore.jobs.get(video.workerJobId)?.youTubeVideoId"
+      <VBtn v-if="videoJob?.youTubeVideoId"
             variant="text"
             icon="mdi-open-in-new"
-            :href="`https://www.youtube.com/watch?v=${workerStore.jobs.get(video.workerJobId)?.youTubeVideoId}`"
+            :href="`https://www.youtube.com/watch?v=${videoJob?.youTubeVideoId}`"
             target="_blank"
       />
-      <VBtn v-else-if="!!video.jobCreationError || (video.workerJobId && workerStore.jobs.get(video.workerJobId)?.status === 'FAILED')"
+      <VBtn v-else-if="!!video.jobCreationError || (videoJob?.status === WorkerJobStatus.FAILED)"
             variant="text"
             prepend-icon="mdi-refresh"
             :disabled="matchStore.uploadInProgress"
@@ -73,12 +36,12 @@
 </template>
 
 <script lang="ts" setup>
-import {MatchVideoInfo} from "@/types/MatchVideoInfo";
-import {computed} from "vue";
-import {useMatchStore} from "@/stores/match";
-import {useWorkerStore} from "@/stores/worker";
-import {capitalizeFirstLetter} from "@/util/capitalize";
-import {WorkerJobStatus} from "@/types/WorkerJob";
+import { MatchVideoInfo } from "@/types/MatchVideoInfo";
+import { computed } from "vue";
+import { useMatchStore } from "@/stores/match";
+import { useWorkerStore } from "@/stores/worker";
+import { capitalizeFirstLetter } from "@/util/capitalize";
+import { WorkerJobStatus } from "@/types/WorkerJob";
 
 const matchStore = useMatchStore();
 const workerStore = useWorkerStore();
@@ -129,27 +92,97 @@ const subtitle = computed(() => {
   let postUploadStatus = "";
   let playlistStatus = "";
   let tbaStatus = "";
-  // FIXME
-  if (props.video.postUploadSteps) {
-    const playlist = props.video.postUploadSteps.addToYouTubePlaylist;
-    const tba = props.video.postUploadSteps.linkOnTheBlueAlliance;
 
-    if (playlist && tba) {
-      postUploadStatus = "Post-upload steps completed | ";
-    } else {
-      if (!playlist) {
-        playlistStatus = "Add to YouTube playlist failed | ";
-      }
+  if (props.video.workerJobId) {
+    const job = workerStore.jobs.get(props.video.workerJobId);
+    if (job && job.status === WorkerJobStatus.COMPLETED) {
+      const playlist = job.addedToYouTubePlaylist;
+      const tba = job.linkedOnTheBlueAlliance;
 
-      if (!tba) {
-        tbaStatus = "TBA link failed | ";
+      if (playlist && tba) {
+        postUploadStatus = "Post-upload steps completed | ";
+      } else {
+        if (!playlist) {
+          playlistStatus = "Add to YouTube playlist failed | ";
+        }
+
+        if (!tba) {
+          tbaStatus = "TBA link failed | ";
+        }
+        postUploadStatus = `${playlistStatus}${tbaStatus}`;
       }
-      postUploadStatus = `${playlistStatus}${tbaStatus}`;
     }
   }
-  // end FIXME
 
   return `${uploadStatus.value} | ${postUploadStatus}${props.video.path}`;
+});
+
+const icon = computed((): {
+  icon: string;
+  color: string;
+} => {
+  if (props.video.isRequestingJob) {
+    return {
+      icon: "mdi-loading mdi-spin",
+      color: "",
+    };
+  }
+
+  if (props.video.jobCreationError) {
+    return {
+      icon: "mdi-alert-circle",
+      color: "error",
+    };
+  }
+
+  if (props.video.workerJobId) {
+    if (workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.COMPLETED)) {
+      if (!matchStore.postUploadStepsSucceeded(props.video)) {
+        return {
+          icon: "mdi-alert-circle",
+          color: "warning",
+        };
+      }
+      return {
+        icon: "mdi-cloud-check-variant",
+        color: "success",
+      };
+    }
+
+    if (workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.FAILED)) {
+      return {
+        icon: "mdi-alert-circle-outline",
+        color: "error",
+      };
+    }
+
+    if (workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.STARTED)) {
+      return {
+        icon: "mdi-loading mdi-spin",
+        color: "",
+      };
+    }
+
+    if (workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.PENDING)) {
+      return {
+        icon: "mdi-tray-full",
+        color: "",
+      };
+    }
+  }
+
+  return {
+    icon: "mdi-progress-upload",
+    color: "",
+  };
+});
+
+const videoJob = computed(() => {
+  if (props.video.workerJobId) {
+    return workerStore.jobs.get(props.video.workerJobId);
+  }
+
+  return null;
 });
 </script>
 <style scoped>

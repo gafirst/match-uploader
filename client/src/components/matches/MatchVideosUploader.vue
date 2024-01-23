@@ -48,14 +48,14 @@
       >
         All videos uploaded!
       </VAlert>
-      <VBtn :color="settingsStore.settings?.sandboxModeEnabled ? 'warning' : 'success'"
+      <VBtn v-if="showQueueAllBtn"
             size="large"
-            :prepend-icon="matchStore.uploadInProgress ? 'mdi-loading mdi-spin' : ''"
+            :color="queueAllBtnColor"
+            :prepend-icon="queueAllBtnIcon"
             :disabled="!matchStore.allowMatchUpload"
             @click="matchStore.uploadVideos"
       >
-        <!--        FIXME: Queue all should not submit another job if one video is in progress. in other words, Queue All should change to Queue Remainder if some videos have jobs already-->
-        {{ matchStore.uploadInProgress ? "Uploading..." : "Queue all" }}
+        {{ queueAllBtnText }}
       </VBtn>
       <SandboxModeAlert class="mt-4" :rounded="4" />
       <PrivateUploads class="mt-4" :rounded="4" />
@@ -69,8 +69,34 @@ import MatchVideoListItem from "@/components/matches/MatchVideoListItem.vue";
 import {useSettingsStore} from "@/stores/settings";
 import SandboxModeAlert from "@/components/alerts/SandboxModeAlert.vue";
 import PrivateUploads from "@/components/alerts/PrivateUploads.vue";
+import QueueAllVideosBtn from "@/components/matches/QueueAllVideosBtn.vue";
+import { computed } from "vue";
 
 const matchStore = useMatchStore();
 const settingsStore = useSettingsStore();
 
+const showQueueAllBtn = computed(() => {
+  return !matchStore.allMatchVideosUploaded;
+});
+
+const queueAllBtnColor = computed(() => {
+  if (settingsStore.settings?.sandboxModeEnabled || settingsStore.settings?.youTubeVideoPrivacy !== "public") {
+    return "warning";
+  }
+  return "success";
+});
+
+const queueAllBtnIcon = computed(() => {
+  if (matchStore.uploadInProgress) {
+    return "mdi-loading mdi-spin";
+  }
+  return "";
+});
+
+const queueAllBtnText = computed(() => {
+  if (matchStore.uploadInProgress) {
+    return "Uploading...";
+  }
+  return "Queue all";
+});
 </script>

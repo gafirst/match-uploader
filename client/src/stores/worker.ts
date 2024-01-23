@@ -4,10 +4,10 @@ import {computed, ref, watch} from "vue";
 import {
   isWorkerEvent,
   isWorkerJobCompleteEvent, isWorkerJobCreatedEvent,
-  isWorkerJobStartEvent, WorkerEvent, WorkerEvents,
+  isWorkerJobStartEvent, WORKER_JOB_CREATED, WorkerEvent, WorkerEvents,
   WorkerJob,
   WorkerJobEvent,
-  WorkerJobStatus,
+  WorkerJobStatus, workerJobStatusAsNumber,
 } from "@/types/WorkerJob";
 
 export const useWorkerStore = defineStore("worker", () => {
@@ -35,8 +35,38 @@ export const useWorkerStore = defineStore("worker", () => {
     return Array.from(jobs.value.values());
   });
 
+  function jobUpdatedAtSortDirection(job1Status: WorkerJobStatus, job2Status: WorkerJobStatus): number {
+    if (job1Status === job2Status) {
+      // Statuses to show the oldest jobs first
+      const sortAscending = [WorkerJobStatus.PENDING, WorkerJobStatus.STARTED,  WorkerJobStatus.FAILED_RETRYABLE];
+      if (sortAscending.includes(job1Status)) {
+        return 1;
+      }
+
+      return -1;
+    }
+
+    return 0;
+  }
+
+  const jobsListAsQueue = computed(() => {
+    return jobsList.value.sort((job1: WorkerJob, job2: WorkerJob) => {
+      return workerJobStatusAsNumber(job1.status) - workerJobStatusAsNumber(job2.status) ||
+        ((new Date(job1.updatedAt).getTime() - new Date(job2.updatedAt).getTime()) *
+          jobUpdatedAtSortDirection(job1.status, job2.status));
+    });
+  });
+
   const jobsLoading = ref(false);
   const jobsError = ref("");
+
+  function jobsInStatus(statuses: WorkerJobStatus | WorkerJobStatus[]) {
+    if (!Array.isArray(statuses)) {
+      statuses = [statuses];
+    }
+
+    return jobsList.value.filter((job) => statuses.includes(job.status));
+  }
 
   const jobCountsByStatus = computed(() => {
     const statsMap = new Map<WorkerJobStatus, number>([
@@ -55,8 +85,7 @@ export const useWorkerStore = defineStore("worker", () => {
   });
 
   const numFailedJobs = computed(() => {
-    return (jobCountsByStatus.value.get(WorkerJobStatus.FAILED) ?? 0) +
-        (jobCountsByStatus.value.get(WorkerJobStatus.FAILED_RETRYABLE) ?? 0);
+    return (jobCountsByStatus.value.get(WorkerJobStatus.FAILED) ?? 0);
   });
 
   /**
@@ -65,18 +94,21 @@ export const useWorkerStore = defineStore("worker", () => {
    * @param jobId
    * @param status
    */
-  function jobHasStatus(jobId: string | null, status: WorkerJobStatus): boolean {
+  function jobHasStatus(jobId: string | null, status: WorkerJobStatus | WorkerJobStatus[]): boolean {
+    if (!Array.isArray(status)) {
+      status = [status];
+    }
+
     if (!jobId) {
       return false;
     }
 
     const job = jobs.value.get(jobId);
-
     if (!job) {
       return false;
     }
 
-    return job.status === status;
+    return status.includes(job.status);
   }
 
   async function loadJobs() {
@@ -101,58 +133,42 @@ export const useWorkerStore = defineStore("worker", () => {
     jobsLoading.value = false;
   }
 
-  // TODO: Maybe this can be simplified
-  // TOOD: Better typing
-  async function updateJobStatus({
-                                   jobId,
-                                   attempts,
-                                   maxAttempts,
-                                   error,
-                                   status,
-                                   title,
-                                   workerId,
-                                   task,
-                                  linkedOnTheBlueAlliance,
-                                  addedToYouTubePlaylist,
-                                  youTubeVideoId,
-                                 }: WorkerJob) {
-    let job = jobs.value.get(jobId);
+  async function createOrUpdateJob(event: WorkerEvent, workerJob: WorkerJob) {
+    let storedJob = jobs.value.get(workerJob.jobId);
 
-    if (!job) {
-      console.log("Job not found");
-      job = await addJob(jobId, jobName, "unknown"); // FIXME
+    if (!storedJob) {
+      addJob(workerJob);
+      storedJob = jobs.value.get(workerJob.jobId);
     }
 
-    job.attempts = attempts;
-    job.maxAttempts = maxAttempts;
-    job.status = status;
-    job.title = title;
-    job.task = task;
-    job.workerId = workerId;
-    job.youTubeVideoId = youTubeVideoId;
-    job.addedToYouTubePlaylist = addedToYouTubePlaylist;
-    job.linkedOnTheBlueAlliance = linkedOnTheBlueAlliance;
-    job.error = error;
+    // Don't update if the job status transition would be invalid (e.g., completed -> started, failed -> started)
+    if (storedJob && storedJob.status === WorkerJobStatus.COMPLETED && workerJob.status === WorkerJobStatus.STARTED) {
+      console.warn(`Ignoring ${event} event because of invalid status transition: completed -> started`, {
+        storedJob, workerJob,
+      });
+      return;
+    }
+
+    if (storedJob && storedJob.status === WorkerJobStatus.FAILED && workerJob.status === WorkerJobStatus.STARTED) {
+      console.warn(`Ignoring ${event} event because of invalid status transition: failed -> started`, {
+        storedJob, workerJob,
+      });
+      return;
+    }
+
+    if (storedJob && storedJob.status === WorkerJobStatus.COMPLETED && workerJob.status === WorkerJobStatus.FAILED) {
+      console.warn(`Ignoring ${event} event because of invalid status transition: completed -> failed`, {
+        storedJob, workerJob,
+      });
+      return;
+    }
+
+    addEvent(event, workerJob);
+    jobs.value.set(workerJob.jobId, workerJob);
   }
 
-  // TODO: Cleanup
-  async function addJob(jobId: string, jobName: string, title: string): Promise<WorkerJob> {
-    const job: WorkerJob = {
-      jobId,
-      workerId: null,
-      task: jobName,
-      title,
-      status: WorkerJobStatus.PENDING,
-      attempts: 0,
-      maxAttempts: 0, // FIXME
-      error: null,
-      addedToYouTubePlaylist: null,
-      linkedOnTheBlueAlliance: null,
-      youTubeVideoId: null,
-    };
-
-    jobs.value.set(jobId, job);
-    return job;
+  function addJob(workerJob: WorkerJob) {
+    jobs.value.set(workerJob.jobId, workerJob);
   }
 
   /**
@@ -171,29 +187,17 @@ export const useWorkerStore = defineStore("worker", () => {
       isConnected.value = false;
     });
 
-    // TODO: type checking through socketio
     socket.on("worker", async (payload) => {
-      console.log(`worker | event: ${payload.event}`, payload);
-
-      // TODO: support worker:job:created
-
       if (!isWorkerEvent(payload)) {
-        console.log("Ignoring invalid worker event", payload);
+        console.warn("Ignoring invalid worker event", payload);
         return;
       }
 
-      addEvent(payload.event, payload.workerJob);
-
-      // FIXME: be careful about not regressing job statuses, ex completed -> started
-      if (isWorkerJobCreatedEvent(payload)) {
-        // FIXME: Update to be more like status update function, or perhaps combine
-        await addJob(payload.workerJob.jobId, payload.workerJob.task, payload.workerJob.title);
-      } else if (isWorkerJobStartEvent(payload)) {
-        await updateJobStatus(payload.workerJob); // FIXME
-      } else if (isWorkerJobCompleteEvent(payload)) {
-        await updateJobStatus(payload.workerJob); // FIXME
+      if (isWorkerJobCreatedEvent(payload) || isWorkerJobStartEvent(payload) || isWorkerJobCompleteEvent(payload)) {
+        console.log(`Worker event: ${payload.event}`, payload);
+        await createOrUpdateJob(payload.event, payload.workerJob);
       } else {
-        console.log("Ignoring unknown worker event", payload);
+        console.warn("Ignoring unknown worker event", payload);
       }
     });
   }
@@ -205,9 +209,11 @@ export const useWorkerStore = defineStore("worker", () => {
     jobCountsByStatus,
     jobHasStatus,
     jobs,
-    jobsList,
-    jobsLoading,
     jobsError,
+    jobsList,
+    jobsListAsQueue,
+    jobsLoading,
+    jobsInStatus,
     loadJobs,
     numFailedJobs,
   };

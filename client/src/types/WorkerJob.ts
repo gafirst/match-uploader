@@ -6,11 +6,28 @@ export type WorkerEvent = typeof WORKER_JOB_CREATED | typeof WORKER_JOB_START | 
 
 
 export enum WorkerJobStatus {
-  PENDING = "PENDING",
+  PENDING= "PENDING",
   STARTED = "STARTED",
   COMPLETED = "COMPLETED",
   FAILED = "FAILED",
   FAILED_RETRYABLE = "FAILED_RETRYABLE",
+}
+
+/**
+ * Converts WorkerJobStatus to a number, suitable for sorting in a queue order
+ *
+ * @param status
+ */
+export function workerJobStatusAsNumber(status: WorkerJobStatus) {
+  const outputMap: Record<WorkerJobStatus, number> = {
+    [WorkerJobStatus.STARTED]: 0,
+    [WorkerJobStatus.FAILED_RETRYABLE]: 1,
+    [WorkerJobStatus.PENDING]: 2,
+    [WorkerJobStatus.FAILED]: 3,
+    [WorkerJobStatus.COMPLETED]: 4,
+  };
+
+  return outputMap[status];
 }
 
 /**
@@ -41,6 +58,8 @@ export interface WorkerJob {
   youTubeVideoId: string | null;
   addedToYouTubePlaylist: boolean | null;
   linkedOnTheBlueAlliance: boolean | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface WorkerEvents<EventName extends WorkerEvent> {
@@ -61,7 +80,9 @@ function isWorkerJob(x: unknown): x is WorkerJob {
     "maxAttempts" in x &&
     "youTubeVideoId" in x &&
     "addedToYouTubePlaylist" in x &&
-    "linkedOnTheBlueAlliance" in x;
+    "linkedOnTheBlueAlliance" in x &&
+    "createdAt" in x &&
+    "updatedAt" in x;
 }
 
 export function isWorkerEvent(x: unknown): x is WorkerEvents<WorkerEvent> {

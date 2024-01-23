@@ -304,7 +304,7 @@ async function savePlayoffMatchType(value: string): Promise<void> {
   savingPlayoffMatchType.value = false;
 }
 
-// TODO(Evan): Move into its own component
+// TODO: Move into its own component
 const savingSandboxMode = ref(false);
 
 async function saveSandboxMode(value: string): Promise<void> {
@@ -314,7 +314,7 @@ async function saveSandboxMode(value: string): Promise<void> {
   savingSandboxMode.value = false;
 }
 
-// TODO(Evan): Move into its own component
+// TODO: Move into its own component
 const savingUploadPrivacy = ref(false);
 
 async function saveUploadPrivacy(value: string): Promise<void> {
@@ -324,7 +324,7 @@ async function saveUploadPrivacy(value: string): Promise<void> {
   savingUploadPrivacy.value = false;
 }
 
-// TODO(Evan): Move into its own component
+// TODO: Move into its own component
 const savingTbaLinkVideos = ref(false);
 
 async function saveTbaLinkVideos(value: string): Promise<void> {
@@ -344,7 +344,7 @@ const tbaReadApiKeyHelpText = computed((): string => {
   return baseText;
 });
 
-// TODO(Evan): Move into its own component
+// TODO: Move into its own component
 const savingFrcEventsApiKey = ref(false);
 
 async function saveFrcEventsApiKey(value: string): Promise<void> {

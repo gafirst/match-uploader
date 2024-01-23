@@ -14,7 +14,7 @@
     <NavDrawer />
     <VMain>
       <GlobalAlerts />
-      <VContainer>
+      <VContainer fluid class="ml-0 mr-0">
         <RouterView />
       </VContainer>
     </VMain>
