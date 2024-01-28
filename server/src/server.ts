@@ -36,11 +36,13 @@ export const appPromise = makeWorkerUtils({
   app.use(express.urlencoded({ extended: true }));
 
   // Show routes called in console during development
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   if (EnvVars.nodeEnv === NodeEnvs.Dev) {
     app.use(morgan("dev"));
   }
 
   // Security
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   if (EnvVars.nodeEnv === NodeEnvs.Production) {
     app.use(helmet({
       contentSecurityPolicy: {
@@ -72,6 +74,7 @@ export const appPromise = makeWorkerUtils({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     next: NextFunction,
   ) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
     if (EnvVars.nodeEnv !== NodeEnvs.Test) {
       logger.err(err, true);
     }
