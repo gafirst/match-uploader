@@ -12,3 +12,8 @@ html {
 body {
     font-family: ClearSans, sans-serif !important;
 }
+
+/* https://stackoverflow.com/a/59769716 */
+.force-text-wrap {
+    -webkit-line-clamp: unset !important;
+}

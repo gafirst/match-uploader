@@ -56,6 +56,7 @@ function configureWorkerEvents(socketClient: Socket, runner: Runner): void {
 
 async function main(): Promise<void> {
     // Run a worker to execute jobs:
+
     const runner = await run({
         connectionString: EnvVars.db.connectionString,
         concurrency: 5,
@@ -67,9 +68,13 @@ async function main(): Promise<void> {
         },
     });
 
-    // FIXME: Need to be able to configure server URL and port. localhost:PORT for dev, web:PORT for default Docker Compose setup
-    const socketClient: Socket = io("http://localhost:3000");
-    logger.info("Connecting to localhost:8080");
+    const socketClient: Socket = io(EnvVars.worker.webServerUrl);
+    logger.info(`Connecting to Socket.IO server at ${EnvVars.worker.webServerUrl}`);
+    socketClient.on("connect_error", (error) => {
+        logger.err("Socket.IO client connection error:");
+        logger.err(error);
+    });
+
     socketClient.connect();
     configureWorkerEvents(socketClient, runner);
 

@@ -149,6 +149,14 @@ export const useWorkerStore = defineStore("worker", () => {
       return;
     }
 
+    console.log("Stored job.status", storedJob?.status, "workerJob.status", workerJob.status, "event", event);
+    if (storedJob && storedJob.status === WorkerJobStatus.STARTED && workerJob.status === WorkerJobStatus.PENDING) {
+      console.warn(`Ignoring ${event} event because of invalid status transition: started -> pending`, {
+        storedJob, workerJob,
+      });
+      return;
+    }
+
     if (storedJob && storedJob.status === WorkerJobStatus.FAILED && workerJob.status === WorkerJobStatus.STARTED) {
       console.warn(`Ignoring ${event} event because of invalid status transition: failed -> started`, {
         storedJob, workerJob,

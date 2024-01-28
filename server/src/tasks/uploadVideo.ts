@@ -6,15 +6,14 @@ import {
 } from "@src/models/YouTubeVideoUploadResult";
 import { type JobHelpers } from "graphile-worker";
 import { prisma } from "@src/worker";
-import { JobStatus } from "@prisma/client";
-import { UPLOAD_VIDEO } from "@src/tasks/types/tasks";
-import { uploadYouTubeVideo } from "@src/repos/YouTubeRepo";
-import { handleMatchVideoPostUploadSteps } from "@src/services/YouTubeService";
+import { handleMatchVideoPostUploadSteps, uploadYouTubeVideo } from "@src/repos/YouTubeRepo";
 import MatchKey from "@src/models/MatchKey";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
 import { isPrismaClientKnownRequestError } from "@src/util/prisma";
-import logger from "jet-logger";
 
+// This file runs on the worker, not the server. This means that functions in this file should not
+// depend on anything in YouTubeService.ts or directly or indirectly depend on anything in server/src/index.ts (e.g.,
+// WorkerService.ts), as this causes the Express server to run on the worker
 export interface UploadVideoTaskPayload {
     title: string;
     description: string;

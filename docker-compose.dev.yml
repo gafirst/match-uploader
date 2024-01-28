@@ -1,7 +1,10 @@
 # TODO: Docker Compose development setup
 services:
   db:
+    extends:
+      file: docker-compose.yml
+      service: db
     ports:
       - 5432:5432
     env_file:
-      - development.env
+      - ./server/env/development.env

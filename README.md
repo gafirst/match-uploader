@@ -8,17 +8,71 @@ Data source attributions:
 
 ## Production usage
 
-Get started quickly using our Docker image:
-```bash
-docker compose up
-```
+To get started:
 
-Required volumes for the Docker image:
+1. Clone this repo locally. You don't actually need the source code, but it's the easiest way to get the directory structure for the required Docker volumes.
+2. Copy [`server/env/production.env.example`](server/env/production.env.example) to `server/env/production.env` and
+   fill in the values using the descriptions in [Environment variables](#environment-variables) below.
+3. Adjust `docker-compose.yml` as needed (additional details in comments on the relevant lines):
+   1. Set the port you want to access the web client on by editing the `port` property on the `web` container
+   2. Adjust the path to your videos directory by editing the `volumes` property on the `web` container
+4. Run `docker compose up` to start the containers.
+   1. If there's a new version of Match Uploader available, you can pull the latest version by running `docker compose pull` before `docker compose up`.
+   2. The first time you run Match Uploader, Docker containers are pulled and database migrations are run. This can take a few minutes.
+   3. On a successful startup, everything should be ready to go once you see the `worker` container log `INFO: Worker connected and looking for jobs...`
+   4. These `db` container log messages are safe to ignore:
+      1. `database system is shut down` and `server stopped` as long as there is activity after.
+      2. `ERROR:  relation "graphile_worker.migrations" does not exist at character 93` (unsure why this is logged, but this is related to the worker library Match Uploader uses, Graphile, and does not seem to be problematic)
+      3. `could not receive data from client: Connection reset by peer`
+   5. The `worker` container may log `Failed to read crontab file '/home/node/app/server/crontab'; cron is disabled`; you can ignore this.
+5. Open the web client at [http://localhost](http://localhost) (or whatever port you set in step 3.1).
+
+### Docker Compose setup in-depth
+
+#### Docker containers
+
+The Docker compose file actually runs 3 containers. You'll need all of them running to use Match Uploader. The
+containers should be started in this order (the default Docker Compose setup provided can do this for you):
+
+1. **db:** A Postgres database, primarily used for storing information about worker jobs
+2. **web:** Includes the backend server as well as the frontend web client
+3. **worker:** A worker that asynchronously handles jobs such as video uploads
+
+#### Environment variables
+
+For simplicity, and to keep secrets out of `docker-compose.yml`, all 3 containers mentioned above will
+pull environment variables from the `production.env` file. As a result, not all containers use all the environment variables,
+and you need to provide values for database information in two places. There are some additional environment variables
+defined in the file that are not specified below; please leave those intact.
+
+> [!IMPORTANT]  
+> You **must** define both the `POSTGRES_*` environment variables and the `DB_CONNECTION_STRING` environment variable.
+> The `db` container uses the `POSTGRES_*` environment variables to set up the database configuration, while the `web` and
+> `worker` containers use the `DB_CONNECTION_STRING` environment variable to connect to the database.
+
+| Variable              | Description                                                                                                                                                                                                                                                        | Sample value                                                                                                                                                                                                                                                                                                                                |
+|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `PORT`                  | Determines the port the backend server runs on _inside of its container_. (To change the external container port, you'd want to edit the `port` property on the `web` container in `docker-compose.yml`.)                                                          | Leave set to default: `8080`                                                                                                                                                                                                                                                                                                                |
+| `POSTGRES_DB`           | Used by the `db` container. The name of the Postgres database to create.                                                                                                                                                                                           | Leave set to default: `match_uploader`                                                                                                                                                                                                                                                                                                      |
+| `POSTGRES_USER`         | Used by the `db` container. Determines the username of the user created to access the Postgres server, so you can put anything here as long as you use the same value in `DB_CONNECTION_STRING`.                                                                   | Leave set to default: `match_uploader`                                                                                                                                                                                                                                                                                                      |
+| `POSTGRES_PASSWORD`     | Used by the `db` container. Determines the password of the user created to access the Postgres server, so you can put anything here as long as you use the same value in `DB_CONNECTION_STRING`.                                                                   | Pick any random string to use as a password                                                                                                                                                                                                                                                                                                 |
+| `DB_CONNECTION_STRING`  | Used by the `web` and `worker` containers. Connection string to connect to the PostgreSQL server.                                                                                                                                                                  | Recommended value: `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}` (replace values with environment variables already defined; `POSTGRES_HOST` with the default Match Uploader Docker Compose configuration would be `db`; `POSTGRES_PORT` should be the default Postgres port, `5432`) |
+| `WORKER_WEB_SERVER_URL` | Used by the `worker` container. The URL (include protocol, domain, and port) where the backend server can be reached from within the `worker` container. This value is provided to Socket.IO to connect to the WebSocket server hosted out of the `web` container. | Leave set to default: `http://web:8080`                                                                                                                                                                                                                                                                    |
+
+#### Docker volumes
+
+There are 3 required Docker volumes for the `web` and `worker` containers:
 - **Videos:** Mount your local videos directory as a volume to `/home/node/app/server/videos`
+- **Environment variables:** Server environment variables located in `/home/node/app/server/env`
+  - Make a copy of [`server/env/production.env.example`](server/env/production.env.example) and fill in the values.
+    Descriptions of what you need to fill in are in the table below.
 - **Settings:** Mount a directory to persist settings files to `/home/node/app/server/settings`
   - You can leave the directory empty initially and Match Uploader will create settings files for you
 
-Example of how to provide these volumes are in [`docker-compose.yml`](docker-compose.yml).
+Examples of how to provide these volumes are in [`docker-compose.yml`](docker-compose.yml).
+
+The Postgres container requires a volume to persist the database in. You can generally leave the default setup for this;
+Docker will create a volume for you.
 
 ### Worker
 

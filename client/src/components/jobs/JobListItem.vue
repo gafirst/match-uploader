@@ -1,59 +1,98 @@
 <template>
-  <!-- FIXME: 1) can we merge this with MatchVideoListItem somehow, 2) this needs to show post-upload step statuses -->
+  <!-- TODO: 1) can we merge this with MatchVideoListItem? https://github.com/gafirst/match-uploader/issues/83 -->
   <VListItem>
     <VListItemTitle class="text-wrap">
       <strong>#{{ job.jobId }}</strong> {{ job.task }}: {{ job.title }}
     </VListItemTitle>
-    <VListItemSubtitle>{{ subtitle }}</VListItemSubtitle>
+    <VListItemSubtitle class="text-wrap force-text-wrap">{{ subtitle }}</VListItemSubtitle>
     <template v-slot:prepend>
-      <VIcon :color="iconColor" :icon="icon" />
+      <VIcon :color="icon.color" :icon="icon.icon" />
+    </template>
+    <template v-slot:append>
+      <VBtn v-if="job.youTubeVideoId"
+            variant="text"
+            icon="mdi-open-in-new"
+            :href="`https://www.youtube.com/watch?v=${job.youTubeVideoId}`"
+            target="_blank"
+      />
     </template>
   </VListItem>
 </template>
 <script lang="ts" setup>
-import {WorkerJob, WorkerJobStatus, workerJobStatusToUiString} from "@/types/WorkerJob";
-import {computed} from "vue";
-import {capitalizeFirstLetter} from "@/util/capitalize";
+import { WorkerJob, WorkerJobStatus, workerJobStatusToUiString } from "@/types/WorkerJob";
+import { computed } from "vue";
+import { capitalizeFirstLetter } from "@/util/capitalize";
 
 const props = defineProps<{
   job: WorkerJob
 }>();
 
-// TODO: jobs within same status should be ordered by priority, then run_at if PENDING. Else updated_at
 const subtitle = computed(() => {
   let baseSubtitle = capitalizeFirstLetter(workerJobStatusToUiString(props.job.status));
   if (props.job.error) {
     return `${baseSubtitle} | ${props.job.error}`;
   }
-  return baseSubtitle;
+
+  let postUploadStatus = "";
+  let playlistStatus = "";
+  let tbaStatus = "";
+  if (props.job && props.job.status === WorkerJobStatus.COMPLETED) {
+    const playlist = props.job.addedToYouTubePlaylist;
+    const tba = props.job.linkedOnTheBlueAlliance;
+
+    if (playlist && tba) {
+      postUploadStatus = "Post-upload steps succeeded";
+    } else {
+      if (!playlist) {
+        playlistStatus = "Add to YouTube playlist failed";
+      }
+
+      if (!tba) {
+        tbaStatus = `${playlistStatus ? " | ": ""}TBA link failed`;
+      }
+
+      postUploadStatus = `${playlistStatus}${tbaStatus}`;
+    }
+  }
+
+  return `${baseSubtitle}${postUploadStatus ? " | ": ""}${postUploadStatus}`;
 });
 
+// Merge the icon and iconColor computed properties into a single object (duplicate the logic here). call it `icon`
 const icon = computed(() => {
-  if (props.job.status === WorkerJobStatus.COMPLETED) {
-    return "mdi-cloud-check-variant";
+  if (props.job.status === WorkerJobStatus.COMPLETED &&
+    (!props.job.addedToYouTubePlaylist || !props.job.linkedOnTheBlueAlliance)) {
+    return {
+      icon: "mdi-alert-circle",
+      color: "warning",
+    };
+  } else if (props.job.status === WorkerJobStatus.COMPLETED) {
+    return {
+      icon: "mdi-cloud-check-variant",
+      color: "success",
+    };
   } else if (props.job.status === WorkerJobStatus.FAILED) {
-    return "mdi-alert-circle";
+    return {
+      icon: "mdi-alert-circle",
+      color: "error",
+    };
   } else if (props.job.status === WorkerJobStatus.FAILED_RETRYABLE) {
-    return "mdi-cloud-refresh-variant";
+    return {
+      icon: "mdi-cloud-refresh-variant",
+      color: "warning",
+    };
   } else if (props.job.status === WorkerJobStatus.STARTED) {
-    return "mdi-loading mdi-spin";
+    return {
+      icon: "mdi-loading mdi-spin",
+      color: "",
+    };
   }
 
   // Pending
-  return "mdi-progress-upload";
-});
-
-const iconColor = computed(() => {
-  if (props.job.status === "COMPLETED") {
-    return "success";
-  } else if (props.job.status === "FAILED") {
-    return "error";
-  } else if (props.job.status === "FAILED_RETRYABLE") {
-    return "warning";
-  }
-
-  // Pending, started
-  return "";
+  return {
+    icon: "mdi-progress-upload",
+    color: "",
+  };
 });
 
 </script>

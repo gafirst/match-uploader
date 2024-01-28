@@ -16,7 +16,7 @@ appPromise.then(app => {
     const server = http.createServer(app);
     io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents>(server, {
         cors: {
-            origin: "http://localhost:3001", // FIXME: figure out how this works in prod
+            origin: "http://localhost:3001", // This resolves CORS issues during local development
         },
     });
 

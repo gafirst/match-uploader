@@ -15,7 +15,7 @@
             :href="`https://www.youtube.com/watch?v=${videoJob?.youTubeVideoId}`"
             target="_blank"
       />
-      <VBtn v-else-if="!!video.jobCreationError || (videoJob?.status === WorkerJobStatus.FAILED)"
+      <VBtn v-else-if="!!video.jobCreationError || videoJob?.status === WorkerJobStatus.FAILED"
             variant="text"
             prepend-icon="mdi-refresh"
             :disabled="matchStore.uploadInProgress"
@@ -93,6 +93,7 @@ const subtitle = computed(() => {
   let playlistStatus = "";
   let tbaStatus = "";
 
+  // Check out JobListItem.vue as well, where there's some duplicated logic for displaying post-upload step statusesgit
   if (props.video.workerJobId) {
     const job = workerStore.jobs.get(props.video.workerJobId);
     if (job && job.status === WorkerJobStatus.COMPLETED) {
@@ -100,7 +101,7 @@ const subtitle = computed(() => {
       const tba = job.linkedOnTheBlueAlliance;
 
       if (playlist && tba) {
-        postUploadStatus = "Post-upload steps completed | ";
+        postUploadStatus = "Post-upload steps succeeded | ";
       } else {
         if (!playlist) {
           playlistStatus = "Add to YouTube playlist failed | ";
@@ -185,9 +186,3 @@ const videoJob = computed(() => {
   return null;
 });
 </script>
-<style scoped>
-/* https://stackoverflow.com/a/59769716 */
-.force-text-wrap {
-  -webkit-line-clamp: unset !important;
-}
-</style>

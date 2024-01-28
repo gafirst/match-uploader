@@ -1,19 +1,32 @@
 services:
   web:
-# FIXME: Double-check that containers start in correct order when starting with no DB at all
-    image: ghcr.io/gafirst/match-uploader:latest
+#    image: ghcr.io/gafirst/match-uploader:latest FIXME
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
     ports:
-      - 8080:8080
+      - 80:8080 # host:container. Change `host` to change the port Match Uploader is accessible on from the host machine
     env_file:
       - ./server/env/production.env
     volumes:
      - ./server/settings:/home/node/app/server/settings
      - ./server/env:/home/node/app/server/env
-     - ./server/videos:/home/node/app/server/videos
+     - ./server/videos:/home/node/app/server/videos # Adjust the first part of this value (e.g., `./server/videos`) to change the videos directory Match Uploader looks in to find videos to upload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-LI", "http://localhost:8080"] # Based on https://stackoverflow.com/a/57433225
+      interval: 2s
+      timeout: 5s
+      retries: 10
     depends_on:
-      - db
+      db:
+        condition: service_healthy # https://stackoverflow.com/a/55835081
   worker:
-    image: ghcr.io/gafirst/match-uploader:latest
+#    image: ghcr.io/gafirst/match-uploader:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
     command: yarn start:worker
     volumes:
      - ./server/settings:/home/node/app/server/settings
@@ -22,7 +35,10 @@ services:
     env_file:
       - ./server/env/production.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy # https://stackoverflow.com/a/55835081
+      web:
+        condition: service_healthy
   db:
     image: postgres:16-bookworm
     shm_size: '256mb' # https://github.com/docker-library/docs/blob/d94174bea5222aa95674ac156b710648a186afb8/postgres/README.md#caveats#caveats
@@ -30,6 +46,10 @@ services:
       - ./server/env/production.env
     volumes:
       - db_data:/var/lib/postgresql/data
-
+    healthcheck: # https://stackoverflow.com/a/55835081
+      test: [ "CMD-SHELL", "pg_isready -U match_uploader" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
 volumes:
   db_data:

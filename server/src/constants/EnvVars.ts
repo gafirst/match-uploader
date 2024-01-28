@@ -7,6 +7,7 @@
 const requiredEnvVars = [
     "HOST",
     "DB_CONNECTION_STRING",
+    "WORKER_WEB_SERVER_URL",
 ];
 
 // Print all missing env vars
@@ -32,5 +33,8 @@ export default {
     },
     db: {
         connectionString: process.env.DB_CONNECTION_STRING,
+    },
+    worker: {
+        webServerUrl: process.env.WORKER_WEB_SERVER_URL ?? "",
     },
 } as const;

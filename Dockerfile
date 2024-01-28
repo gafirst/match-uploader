@@ -5,7 +5,7 @@ FROM node:18-bookworm-slim as base
 # - https://snyk.io/blog/choosing-the-best-node-js-docker-image/
 
 RUN apt-get update -y &&  \
-    apt-get install -y openssl &&  \
+    apt-get install -y curl openssl &&  \
     mkdir -p /home/node/app/client/node_modules && \
     mkdir -p /home/node/app/server/node_modules && \
     chown -R node:node /home/node/app
@@ -70,12 +70,21 @@ USER node
 COPY --from=build_client_prod /home/node/app/client/dist ./client/dist
 
 COPY --from=build_server_prod /home/node/app/server/dist ./server/dist
+COPY --from=build_server_prod /home/node/app/server/prisma ./server/prisma
 COPY --from=build_server_prod /home/node/app/server/package.json ./server/package.json
 COPY --from=run_server_prod /home/node/app/server/node_modules ./server/node_modules
 
 WORKDIR /home/node/app/server/settings
-COPY server/settings/*.example.json .
+COPY --chown=node:node server/settings/*.example.json .
+
+WORKDIR /home/node/app/server/env
+COPY --chown=node:node server/env/production.env.example .
 
 WORKDIR /home/node/app/server
+USER root
+RUN chown -R node:node /home/node/app/server/settings && \
+    chown -R node:node /home/node/app/server/env
+
+USER node
 EXPOSE 8080
 CMD ["yarn", "start"]
