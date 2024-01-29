@@ -194,8 +194,7 @@ export async function generateMatchVideoDescription(match: Match, eventName: str
     const redTeams = getTeamsInMatch(matchInfo.alliances.red.team_keys);
     const blueTeams = getTeamsInMatch(matchInfo.alliances.blue.team_keys);
 
-    // https://github.com/gafirst/match-uploader/issues/18
-    // TODO: We really shouldn't hardcode this here. The issue above will fix that.
+    // TODO(#18): We really shouldn't hardcode this here. The issue above will fix that.
     return dedent`${eventName} - ${capitalizeFirstLetter(match.verboseMatchName)}
     
     Red (teams ${redTeams}) - ${redScore}

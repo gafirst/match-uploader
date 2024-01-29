@@ -17,5 +17,9 @@ module.exports = {
                 "code": 120,
             }
         ],
+        "no-warning-comments": ["warn", {
+            "terms": ["fixme"],
+            "location": "anywhere",
+        }],
     },
 }

@@ -1,11 +1,10 @@
+# TODO: Docker Compose development setup
 services:
-  match_uploader_dev:
-    build:
-      dockerfile: Dockerfile
-      context: .
+  db:
+    extends:
+      file: docker-compose.yml
+      service: db
     ports:
-      - 8080:8080
-    volumes:
-      - ./server/settings:/home/node/app/server/settings
-      - ./server/env:/home/node/app/server/env
-      - ./server/videos:/home/node/app/server/videos
+      - 5432:5432
+    env_file:
+      - ./server/env/development.env

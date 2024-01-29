@@ -52,7 +52,7 @@
   <VRow class="mt-0">
     <VCol>
       <VBtn v-if="matchStore.selectedMatchKey"
-            :variant="!matchStore.allMatchVideosUploaded ? 'outlined' : undefined"
+            :variant="!matchStore.allMatchVideosQueued ? 'outlined' : undefined"
             :disabled="matchStore.uploadInProgress"
             @click="matchStore.advanceMatch"
       >

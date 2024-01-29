@@ -1,8 +1,7 @@
 <template>
   <VRow>
-    <VCol cols="12" md="5">
-      <h1 class="mb-2">Upload match</h1>
-
+    <VCol cols="12" md="4">
+      <h1>Upload match</h1>
       <VAlert v-if="!!error"
               color="error"
       >
@@ -19,7 +18,7 @@
       </h2>
       <MatchDescription />
     </VCol>
-    <VCol cols="12" md="7">
+    <VCol cols="12" :md="videosMdColWidth">
       <h2 class="mb-2">Videos</h2>
       <VRow>
         <VSheet class="d-flex flex-wrap">
@@ -58,11 +57,18 @@
         </VCol>
       </VRow>
     </VCol>
+    <VCol v-if="workerStore.jobsList.length"
+          cols="12"
+          md="4"
+    >
+      <h2>Worker queue</h2>
+      <JobsList :jobs-list="workerStore.jobsListAsQueue" />
+    </VCol>
   </VRow>
 </template>
 
 <script lang="ts" setup>
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import MatchSelector from "@/components/matches/MatchSelector.vue";
 import MatchVideosUploader from "@/components/matches/MatchVideosUploader.vue";
 import {useMatchStore} from "@/stores/match";
@@ -72,11 +78,24 @@ import MissingMatchVideosHelp from "@/components/help/MissingMatchVideosHelp.vue
 import {usePlaylistsStore} from "@/stores/playlists";
 import UploadErrors from "@/components/help/UploadErrors.vue";
 import MissingPlaylistMapping from "@/components/help/MissingPlaylistMapping.vue";
+import JobsList from "@/components/jobs/JobsList.vue";
+import {useWorkerStore} from "@/stores/worker";
 
 const error = ref("");
 
 const matchStore = useMatchStore();
 const playlistStore = usePlaylistsStore();
+const workerStore = useWorkerStore();
+workerStore.loadJobs();
+
+const videosMdColWidth = computed(() => {
+  if (workerStore.jobsList.length) {
+    return 4;
+  } else {
+    return 6;
+  }
+});
+
 </script>
 
 <style>

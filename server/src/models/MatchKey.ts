@@ -51,7 +51,7 @@ class MatchKey {
     private generateMatchKey(includeEventInfo = true): string {
         // TODO: We should add tests to ensure this value is correct
         const compLevel = abbreviatedCompLevel(this.compLevel);
-        const setNumber = this.setNumber === null ? "" : this.setNumber;
+        const setNumber = this.setNumber ?? "";
 
         const eventInfo = includeEventInfo ? `${this.year}${this.eventCode}_` : "";
 

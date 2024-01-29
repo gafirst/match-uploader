@@ -1,12 +1,15 @@
-import {acceptHMRUpdate, defineStore} from "pinia";
-import {computed, ref} from "vue";
-import {MatchVideoInfo} from "@/types/MatchVideoInfo";
-import {useSettingsStore} from "@/stores/settings";
+import { acceptHMRUpdate, defineStore } from "pinia";
+import { computed, ref } from "vue";
+import { MatchVideoInfo } from "@/types/MatchVideoInfo";
+import { useSettingsStore } from "@/stores/settings";
+import { useWorkerStore } from "@/stores/worker";
+import { WorkerJobStatus } from "@/types/WorkerJob";
 
 export const useMatchStore = defineStore("match", () => {
   // Note: Variables intended to be exported to be used elsewhere must be returned from this function!
   const matches = ref([]);
   const settingsStore = useSettingsStore();
+  const workerStore = useWorkerStore();
   const selectedMatchKey = ref<string | null>(null);
 
   const uploadInProgress = ref(false);
@@ -40,14 +43,6 @@ export const useMatchStore = defineStore("match", () => {
       console.error(`Unable to advance match: selected match key ${selectedMatchKey.value} didn't match regex or was `
           + "missing match number in capture groups");
     }
-    //
-    // // Get the first part of the match key (everything before the number)
-    // const matchKeyPrefix = selectedMatchKey.value?.match(/^[A-Z]+/)![0];
-    //
-    // // Combine the prefix, incremented number, and suffix to get the next match key
-    // const nextMatchKey = `${matchKeyPrefix}${matchNumber}`;
-    // // Select the next match
-    // await selectMatch(nextMatchKey);
   }
 
   const matchVideos = ref<MatchVideoInfo[]>([]);
@@ -85,13 +80,21 @@ export const useMatchStore = defineStore("match", () => {
     matchVideosLoading.value = false;
   }
 
-  const allMatchVideosUploaded = computed(() => {
-    return matchVideos.value.length > 0 && matchVideos.value.every(video => video.uploaded);
+  const allMatchVideosQueued = computed(() => {
+    return matchVideos.value.length > 0 &&
+      matchVideos.value.every(video => !!video.workerJobId);
   });
 
-  // TODO: cleanup types
+  const allMatchVideosUploaded = computed(() => {
+    return matchVideos.value.length > 0 &&
+      matchVideos.value.every(
+        video => workerStore.jobHasStatus(video.workerJobId,[WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED]),
+      );
+  });
+
   async function uploadVideo(video: MatchVideoInfo): Promise<any> {
-    video.uploadInProgress = true;
+    video.isRequestingJob = true;
+    video.jobCreationError = null;
 
     if (!settingsStore.settings?.youTubeVideoPrivacy) {
         throw new Error("Unable to upload video: YouTube video privacy setting is undefined");
@@ -112,26 +115,32 @@ export const useMatchStore = defineStore("match", () => {
       }),
     });
 
+    if (!response.ok) {
+      video.jobCreationError = `API error (${response.status} ${response.statusText}): Unable to create job`;
+      video.isRequestingJob = false;
+      return;
+    }
+
     const result: any = await response.json();
     console.log("result", result);
 
     if (response.ok) {
-      video.uploaded = true;
-      video.youTubeVideoId = result.videoId;
-      video.youTubeVideoUrl = `https://www.youtube.com/watch?v=${result.videoId}`;
-      video.postUploadSteps = result.postUploadSteps;
-      video.uploadError = "";
+      if (result.workerJob && result.workerJob.jobId) {
+        video.workerJobId = result.workerJob.jobId;
+      } else {
+        video.jobCreationError = "Worker job ID not found in response";
+      }
     } else {
       // Catches if the server returns parameter validation errors
       if (result.errors) {
         console.log("errors", result.errors);
-        video.uploadError = result.errors.map((error: any) => error.msg).join(", ");
+        video.jobCreationError = result.errors.map((error: any) => error.msg).join(", ");
       } else {
-        video.uploadError = result.error;
+        video.jobCreationError = result.error;
       }
     }
 
-    video.uploadInProgress = false;
+    video.isRequestingJob = false;
     return result;
   }
 
@@ -189,15 +198,26 @@ export const useMatchStore = defineStore("match", () => {
       && matchVideos.value.length
       && !descriptionLoading.value
       && description.value
+      && matchVideos.value.every(video => !video.workerJobId)
       && !allMatchVideosUploaded.value;
   });
 
   function postUploadStepsSucceeded (video: MatchVideoInfo): boolean {
-    return !!video.postUploadSteps?.addToYouTubePlaylist && !!video.postUploadSteps?.linkOnTheBlueAlliance;
+    if (!video.workerJobId) {
+      return false;
+    }
+
+    const job = workerStore.jobs.get(video.workerJobId);
+    if (!job) {
+      return false;
+    }
+
+    return !!job.linkedOnTheBlueAlliance && !!job.addedToYouTubePlaylist;
   }
 
   return {
     advanceMatch,
+    allMatchVideosQueued,
     allMatchVideosUploaded,
     allowMatchUpload,
     description,

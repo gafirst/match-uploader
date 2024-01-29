@@ -18,7 +18,6 @@ export const useSettingsStore = defineStore("settings", () => {
     const error = ref("");
 
     function handleApiError(result: Response, message: string) {
-        console.log(result.ok);
         if (!result.ok) {
             error.value = `API error (${result.status} ${result.statusText}): ${message}`;
             return true;

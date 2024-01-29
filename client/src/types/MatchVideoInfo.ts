@@ -1,15 +1,11 @@
+import {WorkerJob} from "@/types/WorkerJob";
+
 export interface MatchVideoInfo {
     path: string;
     videoLabel: string | null;
     videoTitle: string;
     skipUpload: boolean;
-    uploadInProgress: boolean;
-    uploaded: boolean;
-    uploadError: string | null;
-    youTubeVideoId: string | null;
-    youTubeVideoUrl: string | null;
-    postUploadSteps: {
-      addToYouTubePlaylist: boolean;
-      linkOnTheBlueAlliance: boolean;
-    } | null;
+    workerJobId: string | null;
+    jobCreationError: string | null;
+    isRequestingJob: boolean;
 }

@@ -15,14 +15,11 @@ import {
     getAuthenticatedYouTubeChannels,
     getGoogleOAuth2RedirectUri,
     getOAuth2AuthUrl,
-    handleMatchVideoPostUploadSteps,
-    oauth2AuthCodeExchange,
-    uploadYouTubeVideo,
+    oauth2AuthCodeExchange, queueYouTubeVideoUpload,
 } from "@src/services/YouTubeService";
 import logger from "jet-logger";
 import { body, matchedData, param, validationResult } from "express-validator";
 import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
-import { isYouTubeVideoUploadError, isYouTubeVideoUploadSuccess } from "@src/models/YouTubeVideoUploadResult";
 import MatchKey from "@src/models/MatchKey";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
 
@@ -191,33 +188,46 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
 
     const matchKeyObject = MatchKey.fromString(matchKey as string, playoffsType);
 
-    const uploadResult = await uploadYouTubeVideo(videoTitle as string,
+    const workerJob = await queueYouTubeVideoUpload(videoTitle as string,
         description as string,
         videoPath as string,
         videoPrivacy as YouTubeVideoPrivacy,
-    );
+        matchKeyObject,
+        label as string,
+        );
 
-    if (isYouTubeVideoUploadSuccess(uploadResult)) {
-        const postUploadStepsResult =
-            await handleMatchVideoPostUploadSteps(uploadResult.videoId, label as string, matchKeyObject);
+    res.json({
+        ok: true,
+        workerJob,
+    });
 
-        res.json({
-            ok: true,
-            videoId: uploadResult.videoId,
-            postUploadSteps: postUploadStepsResult,
-        });
-    } else if (isYouTubeVideoUploadError(uploadResult)) {
-        res.status(500)
-            .json({
-                ok: false,
-                error: uploadResult.error,
-            });
-    } else {
-        res.status(500).json({
-            ok: false,
-            error: "An unknown error occurred while processing the YouTube video upload result",
-        });
-    }
+    // const uploadResult = await uploadYouTubeVideo(videoTitle as string,
+    //     description as string,
+    //     videoPath as string,
+    //     videoPrivacy as YouTubeVideoPrivacy,
+    // );
+    //
+    // if (isYouTubeVideoUploadSuccess(uploadResult)) {
+    //     const postUploadStepsResult =
+    //         await handleMatchVideoPostUploadSteps(uploadResult.videoId, label as string, matchKeyObject);
+    //
+    //     res.json({
+    //         ok: true,
+    //         videoId: uploadResult.videoId,
+    //         postUploadSteps: postUploadStepsResult,
+    //     });
+    // } else if (isYouTubeVideoUploadError(uploadResult)) {
+    //     res.status(500)
+    //         .json({
+    //             ok: false,
+    //             error: uploadResult.error,
+    //         });
+    // } else {
+    //     res.status(500).json({
+    //         ok: false,
+    //         error: "An unknown error occurred while processing the YouTube video upload result",
+    //     });
+    // }
 }
 
 youTubeRouter.get(

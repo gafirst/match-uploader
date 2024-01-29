@@ -35,6 +35,16 @@ const Paths = {
     Playlists: "/playlists",
     SavePlaylistMapping: "/playlistMapping/:videoLabel",
   },
+  Worker: {
+    Base: "/worker",
+    Jobs: {
+      Base: "/jobs",
+      List: "/",
+      Stats: "/stats",
+      Cancel: "/cancel",
+    },
+    ForceUnlockWorker: "/forceUnlock",
+  },
 };
 
 export type TPaths = Immutable<typeof Paths>;

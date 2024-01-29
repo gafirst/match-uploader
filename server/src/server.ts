@@ -1,4 +1,3 @@
-import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import path from "path";
 import helmet from "helmet";
@@ -16,58 +15,75 @@ import HttpStatusCodes from "@src/constants/HttpStatusCodes";
 import { NodeEnvs } from "@src/constants/NodeEnvs";
 import { RouteError } from "@src/util/http";
 
+import { makeWorkerUtils, type WorkerUtils } from "graphile-worker";
+import { PrismaClient } from "@prisma/client";
+
 const app = express();
 
-// Basic middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(EnvVars.CookieProps.Secret));
+export const prisma = new PrismaClient();
 
-// Show routes called in console during development
-if (EnvVars.NodeEnv === NodeEnvs.Dev) {
-  app.use(morgan("dev"));
-}
+export let graphileWorkerUtils: WorkerUtils;
 
-// Security
-if (EnvVars.NodeEnv === NodeEnvs.Production) {
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        upgradeInsecureRequests: null,
+// This is some rigamarole to handle the fact that makeWorkerUtils is needed to make the workerUtils singleton but is
+// an async function. See https://stackoverflow.com/a/41364294
+export const appPromise = makeWorkerUtils({
+  connectionString: EnvVars.db.connectionString,
+}).then((workerUtils) => {
+  graphileWorkerUtils = workerUtils;
+
+  // Basic middleware
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  // Show routes called in console during development
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+  if (EnvVars.nodeEnv === NodeEnvs.Dev) {
+    app.use(morgan("dev"));
+  }
+
+  // Security
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+  if (EnvVars.nodeEnv === NodeEnvs.Production) {
+    app.use(helmet({
+      contentSecurityPolicy: {
+        directives: {
+          upgradeInsecureRequests: null,
+        },
       },
-    },
-  }));
-}
-
-// Add APIs, must be after middleware
-app.use(Paths.Base, apiRouter);
-
-// Serve frontend
-app.use(express.static(path.join(__dirname, "../../client/dist")));
-
-// Serve the videos directory at /videos/video-file.mp4
-app.use("/videos", express.static(path.join(__dirname, "../videos")));
-
-app.get("*", (request, response) => {
-  response.sendFile(path.join(__dirname, "../../client/dist", "index.html"));
-});
-
-// Add error handler
-app.use((
-  err: Error,
-  _: Request,
-  res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next: NextFunction,
-) => {
-  if (EnvVars.NodeEnv !== NodeEnvs.Test) {
-    logger.err(err, true);
+    }));
   }
-  let status = HttpStatusCodes.BAD_REQUEST;
-  if (err instanceof RouteError) {
-    status = err.status;
-  }
-  return res.status(status).json({ error: err.message });
-});
 
-export default app;
+  // Add APIs, must be after middleware
+  app.use(Paths.Base, apiRouter);
+
+  // Serve frontend
+  app.use(express.static(path.join(__dirname, "../../client/dist")));
+
+  // Serve the videos directory at /videos/video-file.mp4
+  app.use("/videos", express.static(path.join(__dirname, "../videos")));
+
+  app.get("*", (request, response) => {
+    response.sendFile(path.join(__dirname, "../../client/dist", "index.html"));
+  });
+
+  // Add error handler
+  app.use((
+    err: Error,
+    _: Request,
+    res: Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    next: NextFunction,
+  ) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+    if (EnvVars.nodeEnv !== NodeEnvs.Test) {
+      logger.err(err, true);
+    }
+    let status = HttpStatusCodes.BAD_REQUEST;
+    if (err instanceof RouteError) {
+      status = err.status;
+    }
+    return res.status(status).json({ error: err.message });
+  });
+
+  return app;
+});
