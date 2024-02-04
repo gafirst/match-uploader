@@ -84,8 +84,9 @@
                   <code>{{ settingsStore.settings?.eventName ?? "Loading..." }}</code>)
                 </li>
                 <li>
-                  <code>capitalizedVerboseMatchName</code> - the full form of the match name, such as
-                  <code>Qualification Match 1</code> or <code>Playoff Match 3 (R1)</code>
+                  <code>capitalizedVerboseMatchName</code> - the full form of the match name with the first letter of
+                  each word capitalized (example: <code>Qualification Match 1</code> or
+                  <code>Playoff Match 3 (R1)</code>)
                 </li>
                 <li>
                   <code>redTeams</code> - red alliance team numbers separated by a comma and a space (example:
@@ -98,8 +99,8 @@
                 <li><code>redScore</code> - red alliance match score (if available) (example: <code>21</code>)</li>
                 <li><code>blueScore</code> - blue alliance match score (if available) (example: <code>21</code>)</li>
                 <li>
-                  <code>matchDetailsSite</code> - either "The Blue Alliance" or "FRC Events" depending on the currently
-                  selected match data source
+                  <code>matchDetailsSite</code> - either <code>The Blue Alliance</code> or <code>FRC Events</code>
+                  depending on the currently selected match data source
                 </li>
                 <li>
                   <code>matchUrl</code> <strong>(contains URL)</strong> - URL where full match results can be viewed
