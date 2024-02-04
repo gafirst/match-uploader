@@ -56,6 +56,76 @@
                                   @on-choice-selected="saveUploadPrivacy"
         />
 
+        <h2 class="mb-1">Video description template</h2>
+        <VExpansionPanels class="mb-4">
+          <VExpansionPanel>
+            <VExpansionPanelTitle>Description template syntax/variables</VExpansionPanelTitle>
+            <VExpansionPanelText>
+              <ul class="ml-4">
+                <li>
+                  This description template will be rendered using
+                  <a href="https://mustache.github.io/mustache.5.html">Mustache</a>.
+                </li>
+                <li>Enclose variables (except URLs) inside <code v-pre>{{ two curly braces }}</code></li>
+                <li>
+                  If a variable is noted as <code>(contains URL)</code>, it should be enclosed inside
+                  <code v-pre>{{{ three curly braces }}}</code> so that Mustache won't escape them.
+                </li>
+                <li>
+                  <code v-pre>{{! comment }}</code> - Two curly braces followed by an exclamation point denotes a
+                  comment that will not be rendered in the final description.
+                </li>
+              </ul>
+              <br />
+              <p>Available variables:</p>
+              <ul class="ml-4">
+                <li>
+                  <code>eventName</code> - Value of the event name setting (current value:
+                  <code>{{ settingsStore.settings?.eventName ?? "Loading..." }}</code>)
+                </li>
+                <li>
+                  <code>capitalizedVerboseMatchName</code> - the full form of the match name, such as
+                  <code>Qualification Match 1</code> or <code>Playoff Match 3 (R1)</code>
+                </li>
+                <li>
+                  <code>redTeams</code> - red alliance team numbers separated by a comma and a space (example:
+                  <code>1234, 1234, 1234</code>)
+                </li>
+                <li>
+                  <code>blueTeams</code> - blue alliance team numbers separated by a comma and a space (example:
+                  <code>1234, 1234, 1234</code>)
+                </li>
+                <li><code>redScore</code> - red alliance match score (if available) (example: <code>21</code>)</li>
+                <li><code>blueScore</code> - blue alliance match score (if available) (example: <code>21</code>)</li>
+                <li>
+                  <code>matchDetailsSite</code> - either "The Blue Alliance" or "FRC Events" depending on the currently
+                  selected match data source
+                </li>
+                <li>
+                  <code>matchUrl</code> <strong>(contains URL)</strong> - URL where full match results can be viewed
+                  (links to The Blue Alliance or FRC Events depending on the currently selected match data source)
+                  (example: <code>https://www.thebluealliance.com/match/2023gaalb_sf1m1</code> or
+                  <code>https://frc-events.firstinspires.org/2023/gaalb/playoffs/3</code>)
+                </li>
+                <li>
+                  <code>matchUploaderAttribution</code> <strong>(contains URL)</strong> - the text <code>Uploaded using
+                    https://github.com/gafirst/match-uploader</code>
+                </li>
+              </ul>
+            </VExpansionPanelText>
+          </VExpansionPanel>
+        </VExpansionPanels>
+        <!--        FIXME: Add save function -->
+        <AutosavingTextInput :key="`descriptionTemplate-${dataRefreshKey}`"
+                             :on-submit="submit"
+                             :initial-value="settingsStore.descriptionTemplate ?? undefined"
+                             name="descriptionTemplate"
+                             label="Template for YouTube video descriptions"
+                             input-type="textarea"
+                             setting-type="descriptionTemplate"
+                             help-text=""
+        />
+
         <h2 class="mt-4">The Blue Alliance (TBA)</h2>
         <h3>Read API</h3>
         <AutosavingTextInput :key="`theBlueAllianceReadApiKey-${dataRefreshKey}`"

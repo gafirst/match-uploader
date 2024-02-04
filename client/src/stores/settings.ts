@@ -9,6 +9,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const settings = ref<ISettings | null>(null);
     // Whether secret values exist - not the actual secret values
     const obfuscatedSecrets = ref<IObfuscatedSecrets | null>(null);
+    const descriptionTemplate = ref<string | null>(null);
 
     const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
     const youTubeOAuth2RedirectUri = ref<string | null>(null);
@@ -46,6 +47,21 @@ export const useSettingsStore = defineStore("settings", () => {
             return;
         } else {
             obfuscatedSecrets.value = await secretsResult.json();
+        }
+
+        const descriptionResult = await fetch("/api/v1/settings/description");
+        if (handleApiError(descriptionResult, "Unable to load description template")) {
+            loading.value = false;
+            isFirstLoad.value = false;
+            return;
+        } else {
+          const result = await descriptionResult.json();
+          if (result.descriptionTemplate) {
+            descriptionTemplate.value = result.descriptionTemplate;
+          } else {
+            error.value = "No description template found in description template response";
+            console.error("No description template found in description template response:", result);
+          }
         }
 
         const [youtubeAuthStatusResult, youTubeOAuth2RedirectUriResult] = await Promise.all([
@@ -104,6 +120,7 @@ export const useSettingsStore = defineStore("settings", () => {
     }
 
     return {
+        descriptionTemplate,
         error,
         getSettings,
         isFirstLoad,
