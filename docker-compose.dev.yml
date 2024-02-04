@@ -8,3 +8,6 @@ services:
       - 5432:5432
     env_file:
       - ./server/env/development.env
+
+volumes:
+  db_data:
