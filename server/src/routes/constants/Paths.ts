@@ -12,6 +12,7 @@ const Paths = {
     List: "/",
     ListSecrets: "/secrets",
     Update: "/:name",
+    DescriptionTemplate: "/description",
   },
   Matches: {
     Base: "/matches",

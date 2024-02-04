@@ -1,17 +1,18 @@
 import type MatchKey from "@src/models/MatchKey";
 import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
-import { getSecrets, getSettings } from "@src/services/SettingsService";
+import { getDescriptionTemplate, getSecrets, getSettings } from "@src/services/SettingsService";
 import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { MatchVideoInfo } from "@src/models/MatchVideoInfo";
 import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
 import { TheBlueAllianceReadRepo } from "@src/repos/TheBlueAllianceReadRepo";
-import dedent from "dedent";
 import { type TbaFrcTeam } from "@src/models/theBlueAlliance/tbaFrcTeam";
 import { FrcEventsRepo } from "@src/repos/FrcEventsRepo";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
 import { CompLevel, toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
+import logger from "jet-logger";
+import Mustache from "mustache";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
     const { eventName, videoSearchDirectory } = await getSettings();
@@ -172,6 +173,9 @@ async function generateMatchDetailsUrl(matchKey: MatchKey): Promise<{
 }
 
 export async function generateMatchVideoDescription(match: Match, eventName: string): Promise<string> {
+    const templateString = await getDescriptionTemplate();
+    logger.info(templateString);
+
     const matchKey = match.key;
     const matchInfo = await getMatch(matchKey);
 
@@ -181,30 +185,37 @@ export async function generateMatchVideoDescription(match: Match, eventName: str
 
     const { site: matchDetailsSite, url: matchUrl } = await generateMatchDetailsUrl(matchKey);
 
-    // TODO: Don't hardcode references to GAFIRST
-    const footageSource = `Footage of the ${eventName} is provided by the GeorgiaFIRST A/V Team.`;
-    const socialMedia = "Follow us on Twitter (@GeorgiaFIRST) and Facebook " +
-        "(GeorgiaRobotics). For more information and future event schedules, visit our website: https://gafirst.org";
-    const matchUploaderAttribution = `Uploaded using https://github.com/gafirst/match-uploader`;
+    const matchUploaderAttribution = "Uploaded using https://github.com/gafirst/match-uploader";
 
-    // TODO: these really shouldn't be null because of the score check above. but we also really shouldn't render "null"
     const redScore = matchInfo.alliances.red.score;
     const blueScore = matchInfo.alliances.blue.score;
+
+    if (redScore === null) {
+        throw new Error(
+          `Match ${matchKey.matchKey} alliances.red.score property is null: ${JSON.stringify(matchInfo)}`,
+        );
+    }
+
+    if (blueScore === null) {
+        throw new Error(
+          `Match ${matchKey.matchKey} alliances.blue.score property is null: ${JSON.stringify(matchInfo)}`,
+        );
+    }
 
     const redTeams = getTeamsInMatch(matchInfo.alliances.red.team_keys);
     const blueTeams = getTeamsInMatch(matchInfo.alliances.blue.team_keys);
 
-    // TODO(#18): We really shouldn't hardcode this here. The issue above will fix that.
-    return dedent`${eventName} - ${capitalizeFirstLetter(match.verboseMatchName)}
-    
-    Red (teams ${redTeams}) - ${redScore}
-    Blue (teams ${blueTeams}) - ${blueScore}
-    
-    View this match on ${matchDetailsSite}: ${matchUrl}
-    
-    ${footageSource}
-    
-    ${socialMedia}
+    const view = {
+        eventName,
+        capitalizedVerboseMatchName: capitalizeFirstLetter(match.verboseMatchName),
+        redTeams,
+        blueTeams,
+        redScore,
+        blueScore,
+        matchDetailsSite,
+        matchUrl,
+        matchUploaderAttribution,
+    };
 
-    ${matchUploaderAttribution}`;
+    return Mustache.render(templateString, view);
 }

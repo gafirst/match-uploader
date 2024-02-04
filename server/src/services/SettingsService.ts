@@ -5,9 +5,9 @@ import {
     type SecretSettingsKey,
     type SettingsKey,
 } from "@src/models/Settings";
-import { readSettingsJson, writeSettingsJson } from "@src/repos/JsonStorageRepo";
 import EnvVars from "@src/constants/EnvVars";
 import { type YouTubePlaylists } from "@src/models/YouTubePlaylists";
+import { readSettingsJson, readTextFile, writeSettingsJson, writeTextFile } from "@src/repos/FileStorageRepo";
 
 export async function getSettings(): Promise<ISettings> {
   return await readSettingsJson<ISettings>(
@@ -99,4 +99,15 @@ export async function deleteYouTubePlaylistMapping(videoLabel: string): Promise<
   delete currentPlaylists[videoLabel];
 
   return await writeSettingsJson<YouTubePlaylists>(EnvVars.settingsLocations.youTubePlaylistsFile, currentPlaylists);
+}
+
+export async function getDescriptionTemplate(): Promise<string> {
+  return await readTextFile(
+      EnvVars.settingsLocations.youTubeDescriptionFile,
+      EnvVars.settingsLocations.youTubeDescriptionTemplateFile,
+  );
+}
+
+export async function setDescriptionTemplate(descriptionTemplate: string): Promise<void> {
+  return await writeTextFile(EnvVars.settingsLocations.youTubeDescriptionFile, descriptionTemplate);
 }
