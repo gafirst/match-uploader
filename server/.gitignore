@@ -16,3 +16,4 @@ dist/
 secrets.json
 settings.json
 playlists.json
+/settings/description.txt
