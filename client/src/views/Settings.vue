@@ -268,6 +268,7 @@
         <VAlert v-if="settingsStore.youTubeAuthState?.accessTokenStored"
                 class="mb-3"
                 color="info"
+                variant="tonal"
         >
           You already have an active YouTube connection. Please use the Reset YouTube Connection button below to
           adjust your YouTube OAuth2 client details.
