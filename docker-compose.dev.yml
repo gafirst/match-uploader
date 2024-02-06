@@ -1,5 +1,23 @@
 # TODO: Docker Compose development setup
 services:
+  web:
+    extends:
+      file: docker-compose.yml
+      service: web
+    image: !reset null
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+  worker:
+    extends:
+      file: docker-compose.yml
+      service: worker
+    image: !reset null
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
   db:
     extends:
       file: docker-compose.yml

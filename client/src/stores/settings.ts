@@ -29,7 +29,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
     async function getSettings(showLoading: boolean = true) {
         loading.value = showLoading;
-        const settingsResult = await fetch("/api/v1/settings");
+        const settingsResult = await fetch("/api/v1/settings/values");
 
         // Load settings separately from YouTube auth status and redirect URI
         if (handleApiError(settingsResult, "Unable to load settings")) {
@@ -49,7 +49,7 @@ export const useSettingsStore = defineStore("settings", () => {
             obfuscatedSecrets.value = await secretsResult.json();
         }
 
-        const descriptionResult = await fetch("/api/v1/settings/description");
+        const descriptionResult = await fetch("/api/v1/settings/descriptionTemplate");
         if (handleApiError(descriptionResult, "Unable to load description template")) {
             loading.value = false;
             isFirstLoad.value = false;
@@ -95,7 +95,7 @@ export const useSettingsStore = defineStore("settings", () => {
             await getSettings();
         }
 
-        const submitResult = await fetch(`/api/v1/settings/${settingName}`, {
+        const submitResult = await fetch(`/api/v1/settings/values/${settingName}`, {
             method: "POST",
             body: JSON.stringify({
                 value,
@@ -119,12 +119,32 @@ export const useSettingsStore = defineStore("settings", () => {
         return submitResult.ok;
     }
 
+    async function saveDescriptionTemplate(value: string) {
+      const submitResult = await fetch("/api/v1/settings/descriptionTemplate", {
+        method: "POST",
+        body: JSON.stringify({
+          descriptionTemplate: value,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!submitResult.ok) {
+        return `Error saving description template: ${submitResult.status} ${submitResult.statusText}`;
+      }
+
+      descriptionTemplate.value = value;
+      return submitResult.ok;
+    }
+
     return {
         descriptionTemplate,
         error,
         getSettings,
         isFirstLoad,
         loading,
+        saveDescriptionTemplate,
         saveSetting,
         settings,
         obfuscatedSecrets,

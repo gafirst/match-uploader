@@ -75,6 +75,7 @@ COPY --from=run_server_prod /home/node/app/server/node_modules ./server/node_mod
 
 WORKDIR /home/node/app/server/settings
 COPY --chown=node:node server/settings/*.example.json .
+COPY --chown=node:node server/settings/*.example.txt .
 
 WORKDIR /home/node/app/server/env
 COPY --chown=node:node server/env/production.env.example .

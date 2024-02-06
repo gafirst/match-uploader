@@ -116,15 +116,24 @@
             </VExpansionPanelText>
           </VExpansionPanel>
         </VExpansionPanels>
-        <!--        FIXME: Add save function -->
+        <VAlert v-if="matchStore.selectedMatchKey"
+                class="mb-4"
+                color="warning"
+        >
+          <p>
+            If you change the
+            description template here, you must press the <strong>Regenerate Description</strong> button on the
+            Upload page to update the description for the current match with the latest changes.
+          </p>
+        </VAlert>
         <AutosavingTextInput :key="`descriptionTemplate-${dataRefreshKey}`"
-                             :on-submit="submit"
+                             :on-submit="saveDescriptionTemplate"
                              :initial-value="settingsStore.descriptionTemplate ?? undefined"
                              name="descriptionTemplate"
                              label="Template for YouTube video descriptions"
                              input-type="textarea"
                              setting-type="descriptionTemplate"
-                             help-text=""
+                             help-text="Updating this value will *not* affect any currently queued videos."
         />
 
         <h2 class="mt-4">The Blue Alliance (TBA)</h2>
@@ -315,6 +324,7 @@ import {PLAYOFF_BEST_OF_3, PLAYOFF_MATCH_TYPES} from "@/types/MatchType";
 import AutosavingBtnSelectGroup from "@/components/form/AutosavingBtnSelectGroup.vue";
 import {useSettingsStore} from "@/stores/settings";
 import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.vue";
+import { useMatchStore } from "@/stores/match";
 
 // const loading = ref(true);
 const loading = computed(() => {
@@ -325,6 +335,7 @@ const loading = computed(() => {
 const error = computed(() => {
   return settingsStore.error;
 });
+const matchStore = useMatchStore();
 const settingsStore = useSettingsStore();
 // const settings = ref<ISettings | null>(null);
 // const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
@@ -367,6 +378,10 @@ onMounted(async () => {
 
 async function submit(settingName: string, value: string | boolean, settingType: SettingType) {
   return await settingsStore.saveSetting(settingName, value, settingType);
+}
+
+async function saveDescriptionTemplate(settingName: string, value: string, settingType: SettingType) {
+  return await settingsStore.saveDescriptionTemplate(value);
 }
 
 async function savePlayoffMatchType(value: string): Promise<void> {
