@@ -123,7 +123,7 @@ Project organization:
  - [`client`](client) contains all frontend code (Vue3, Typescript)
 
 Install some baseline dependencies:
-  - nodejs (v18 recommended)
+  - nodejs (version >= 20.0 required; Node 20 (LTS) is recommended)
   - yarn
 
 - To run the server: `cd server && yarn run dev`
