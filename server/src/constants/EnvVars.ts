@@ -23,6 +23,9 @@ export default {
     host: process.env.HOST,
     port: Number.parseInt(process.env.PORT ?? "0", 10),
     settingsLocations: {
+        youTubeDescriptionFile: (process.env.DESCRIPTIONS_FILE_LOCATION) ?? "./settings/description.txt",
+        youTubeDescriptionTemplateFile: (process.env.DESCRIPTIONS_TEMPLATE_FILE_LOCATION) ??
+          "./settings/description.example.txt",
         settingsFile: (process.env.SETTINGS_FILE_LOCATION) ?? "./settings/settings.json",
         settingsTemplateFile: (process.env.SETTINGS_TEMPLATE_FILE_LOCATION) ?? "./settings/settings.example.json",
         secretsFile: (process.env.SECRETS_FILE_LOCATION) ?? "./settings/secrets.json",

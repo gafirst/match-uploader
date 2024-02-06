@@ -9,9 +9,10 @@ const Paths = {
   Base: "/api/v1",
   Settings: {
     Base: "/settings",
-    List: "/",
+    List: "/values",
     ListSecrets: "/secrets",
-    Update: "/:name",
+    Update: "/values/:name",
+    DescriptionTemplate: "/descriptionTemplate",
   },
   Matches: {
     Base: "/matches",

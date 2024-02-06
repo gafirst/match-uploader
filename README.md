@@ -37,6 +37,8 @@ To get started:
    3. YouTube API setup:
       1. Scroll down to the bottom of the page to connect your YouTube channel. **Note:** This step can only be completed when the app is hosted on `localhost` or with a valid top-level domain due to Google OAuth2 app restrictions.
    4. YouTube playlist mappings: If you have playlists that you'd like match videos added to, follow the instructions in this section to set this up.
+   5. Video description template: While no warning appears for this, you should double-check that the default video
+      description template fits your needs and adjust it as needed.
 
 ### Docker Compose setup in-depth
 
@@ -121,7 +123,7 @@ Project organization:
  - [`client`](client) contains all frontend code (Vue3, Typescript)
 
 Install some baseline dependencies:
-  - nodejs (v18 recommended)
+  - nodejs (version >= 20.0 required; Node 20 (LTS) is recommended)
   - yarn
 
 - To run the server: `cd server && yarn run dev`

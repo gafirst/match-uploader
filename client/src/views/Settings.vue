@@ -56,6 +56,86 @@
                                   @on-choice-selected="saveUploadPrivacy"
         />
 
+        <h2 class="mb-1">Video description template</h2>
+        <VExpansionPanels class="mb-4">
+          <VExpansionPanel>
+            <VExpansionPanelTitle>Description template syntax/variables</VExpansionPanelTitle>
+            <VExpansionPanelText>
+              <ul class="ml-4">
+                <li>
+                  This description template will be rendered using
+                  <a href="https://mustache.github.io/mustache.5.html">Mustache</a>.
+                </li>
+                <li>Enclose variables (except URLs) inside <code v-pre>{{ two curly braces }}</code></li>
+                <li>
+                  If a variable is noted as <code>(contains URL)</code>, it should be enclosed inside
+                  <code v-pre>{{{ three curly braces }}}</code> so that Mustache won't escape them.
+                </li>
+                <li>
+                  <code v-pre>{{! comment }}</code> - Two curly braces followed by an exclamation point denotes a
+                  comment that will not be rendered in the final description.
+                </li>
+              </ul>
+              <br />
+              <p>Available variables:</p>
+              <ul class="ml-4">
+                <li>
+                  <code>eventName</code> - Value of the event name setting (current value:
+                  <code>{{ settingsStore.settings?.eventName ?? "Loading..." }}</code>)
+                </li>
+                <li>
+                  <code>capitalizedVerboseMatchName</code> - the full form of the match name with the first letter of
+                  each word capitalized (example: <code>Qualification Match 1</code> or
+                  <code>Playoff Match 3 (R1)</code>)
+                </li>
+                <li>
+                  <code>redTeams</code> - red alliance team numbers separated by a comma and a space (example:
+                  <code>1234, 1234, 1234</code>)
+                </li>
+                <li>
+                  <code>blueTeams</code> - blue alliance team numbers separated by a comma and a space (example:
+                  <code>1234, 1234, 1234</code>)
+                </li>
+                <li><code>redScore</code> - red alliance match score (if available) (example: <code>21</code>)</li>
+                <li><code>blueScore</code> - blue alliance match score (if available) (example: <code>21</code>)</li>
+                <li>
+                  <code>matchDetailsSite</code> - either <code>The Blue Alliance</code> or <code>FRC Events</code>
+                  depending on the currently selected match data source
+                </li>
+                <li>
+                  <code>matchUrl</code> <strong>(contains URL)</strong> - URL where full match results can be viewed
+                  (links to The Blue Alliance or FRC Events depending on the currently selected match data source)
+                  (example: <code>https://www.thebluealliance.com/match/2023gaalb_sf1m1</code> or
+                  <code>https://frc-events.firstinspires.org/2023/gaalb/playoffs/3</code>)
+                </li>
+                <li>
+                  <code>matchUploaderAttribution</code> <strong>(contains URL)</strong> - the text <code>Uploaded using
+                    https://github.com/gafirst/match-uploader</code>
+                </li>
+              </ul>
+            </VExpansionPanelText>
+          </VExpansionPanel>
+        </VExpansionPanels>
+        <VAlert v-if="matchStore.selectedMatchKey"
+                class="mb-4"
+                color="warning"
+        >
+          <p>
+            If you change the
+            description template here, you must press the <strong>Regenerate Description</strong> button on the
+            Upload page to update the description for the current match with the latest changes.
+          </p>
+        </VAlert>
+        <AutosavingTextInput :key="`descriptionTemplate-${dataRefreshKey}`"
+                             :on-submit="saveDescriptionTemplate"
+                             :initial-value="settingsStore.descriptionTemplate ?? undefined"
+                             name="descriptionTemplate"
+                             label="Template for YouTube video descriptions"
+                             input-type="textarea"
+                             setting-type="descriptionTemplate"
+                             help-text="Updating this value will *not* affect any currently queued videos."
+        />
+
         <h2 class="mt-4">The Blue Alliance (TBA)</h2>
         <h3>Read API</h3>
         <AutosavingTextInput :key="`theBlueAllianceReadApiKey-${dataRefreshKey}`"
@@ -198,6 +278,7 @@
         <VAlert v-if="settingsStore.youTubeAuthState?.accessTokenStored"
                 class="mb-3"
                 color="info"
+                variant="tonal"
         >
           You already have an active YouTube connection. Please use the Reset YouTube Connection button below to
           adjust your YouTube OAuth2 client details.
@@ -243,6 +324,7 @@ import {PLAYOFF_BEST_OF_3, PLAYOFF_MATCH_TYPES} from "@/types/MatchType";
 import AutosavingBtnSelectGroup from "@/components/form/AutosavingBtnSelectGroup.vue";
 import {useSettingsStore} from "@/stores/settings";
 import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.vue";
+import { useMatchStore } from "@/stores/match";
 
 // const loading = ref(true);
 const loading = computed(() => {
@@ -253,6 +335,7 @@ const loading = computed(() => {
 const error = computed(() => {
   return settingsStore.error;
 });
+const matchStore = useMatchStore();
 const settingsStore = useSettingsStore();
 // const settings = ref<ISettings | null>(null);
 // const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
@@ -295,6 +378,10 @@ onMounted(async () => {
 
 async function submit(settingName: string, value: string | boolean, settingType: SettingType) {
   return await settingsStore.saveSetting(settingName, value, settingType);
+}
+
+async function saveDescriptionTemplate(settingName: string, value: string, settingType: SettingType) {
+  return await settingsStore.saveDescriptionTemplate(value);
 }
 
 async function savePlayoffMatchType(value: string): Promise<void> {

@@ -1,6 +1,6 @@
 import mockFs from "mock-fs";
-import { readSettingsJson } from "@src/repos/JsonStorageRepo";
 import { sampleSettings } from "../util";
+import { readSettingsJson } from "@src/repos/FileStorageRepo";
 
 describe("readSettingsJson", () => {
   it("should throw if settings file doesn't exist", async () => {

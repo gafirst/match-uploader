@@ -14,7 +14,7 @@
       <h2
         class="mt-2 mb-2"
       >
-        Video metadata
+        Video description
       </h2>
       <MatchDescription />
     </VCol>

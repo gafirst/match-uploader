@@ -1,5 +1,28 @@
 <template>
-  <VTextField v-model="inputValue"
+  <!-- TODO: Autosaving textarea should be either a separate component or this should be more flexible somehow -->
+  <VTextarea v-if="inputType === 'textarea'"
+             v-model="inputValue"
+             :label="label"
+             :disabled="state === State.LOADING || !!disabled"
+             persistent-hint
+             :hint="!!error ? error: (helpText || '')"
+             :error="!!error"
+             auto-grow
+             @blur="submit()"
+  >
+    <template v-if="state !== State.READY" v-slot:append>
+      <VIcon v-if="state === State.ERROR"
+             color="error"
+             class="mr-1"
+      >
+        mdi-alert-circle-outline
+      </VIcon>
+      <VIcon v-if="state === State.SUCCESS" color="success">mdi-check</VIcon>
+      <VProgressCircular v-if="state===State.LOADING" indeterminate />
+    </template>
+  </VTextarea>
+  <VTextField v-else
+              v-model="inputValue"
               variant="underlined"
               :disabled="state === State.LOADING || !!disabled"
               :label="label"
@@ -45,8 +68,8 @@ interface IProps {
   name: string;
   label: string;
   initialValue: string|undefined;
-  inputType: "text"|"password";
-  settingType: SettingType;
+  inputType: "text"|"password"|"textarea";
+  settingType: SettingType|"descriptionTemplate";
   helpText?: string;
   disabled?: boolean;
 }
@@ -105,7 +128,7 @@ const calculatedInputType = computed(() => {
     return "password";
   }
 
-  return "text";
+  return props.inputType;
 });
 
 function togglePlaintext() {
