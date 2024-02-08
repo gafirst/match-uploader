@@ -210,10 +210,32 @@ export const useWorkerStore = defineStore("worker", () => {
     });
   }
 
+  const jobCancellationError = ref("");
+  async function cancelJob(jobId: string) {
+    jobCancellationError.value = "";
+
+    const result = await fetch("/api/v1/worker/jobs/cancel", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jobId,
+        reason: "Cancelled by user",
+      }),
+    });
+
+    if (!result.ok) {
+      jobCancellationError.value = `API error (${result.status} ${result.statusText}): Error deleting job #${jobId}`;
+    }
+  }
+
   return {
     bindEvents,
+    cancelJob,
     events,
     isConnected,
+    jobCancellationError,
     jobCountsByStatus,
     jobHasStatus,
     jobs,

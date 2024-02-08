@@ -11,9 +11,8 @@ export interface CommonEvents {
         payload: unknown;
     };
     [WORKER_JOB_COMPLETE]: {
-        workerId: string,
+        workerId: string | null,
         jobId: string,
-        jobName: string,
         attempts: number,
         maxAttempts: number,
         payload: unknown,
@@ -44,9 +43,7 @@ export function isWorkerJobStartEvent(x: unknown): x is CommonEvents[typeof WORK
 export function isWorkerJobCompleteEvent(x: unknown): x is CommonEvents[typeof WORKER_JOB_COMPLETE] {
     return typeof x === "object" &&
         x !== null &&
-        "workerId" in x &&
         "jobId" in x &&
-        "jobName" in x &&
         "attempts" in x &&
         "maxAttempts" in x &&
         "payload" in x &&
