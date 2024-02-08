@@ -53,11 +53,39 @@ export async function queueJob(jobSummary: string,
   });
 
   io.emit("worker", {
-    event: "worker:job:created",
+    event: "worker:job:created", // TODO: Use constant, change created->create
     workerJob: upsertResult,
   });
 
   return upsertResult;
+}
+
+export async function cancelJob(jobId: string, reason: string): Promise<void> {
+  const [graphileResult, workerJob] = await Promise.all([
+    graphileWorkerUtils.permanentlyFailJobs([jobId], reason),
+    prisma.workerJob.update({
+      where: {
+        jobId,
+      },
+      data: {
+        status: "FAILED",
+        error: reason,
+      },
+    }),
+  ]);
+
+  if (graphileResult.length !== 1) {
+    logger.err(`Error cancelling job with ID ${jobId}: Graphile permanent fail request did not return a job ID` +
+      " (see graphileResult below)");
+    logger.err(graphileResult);
+    throw new Error("Graphile permanent fail request was unsuccessful (check the logs for more details)");
+  }
+
+  // Manually send the WebSocket event since the job was cancelled because Graphile won't send an event in this case
+  io.emit("worker", {
+    event: WORKER_JOB_COMPLETE,
+    workerJob,
+  });
 }
 
 async function handleWorkerJobStart(data: ClientToServerEvents[typeof WORKER_JOB_START]): Promise<void> {

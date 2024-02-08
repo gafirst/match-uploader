@@ -15,17 +15,60 @@
             :href="`https://www.youtube.com/watch?v=${job.youTubeVideoId}`"
             target="_blank"
       />
+      <VBtn v-else-if="[WorkerJobStatus.PENDING, WorkerJobStatus.FAILED_RETRYABLE].includes(job.status)
+              && !showConfirmCancel"
+            variant="text"
+            color="gray"
+            icon="mdi-trash-can-outline"
+            @click="showConfirmCancel = true"
+      />
+      <VBtn v-else-if="[WorkerJobStatus.PENDING, WorkerJobStatus.FAILED_RETRYABLE].includes(job.status)
+              && showConfirmCancel"
+            variant="text"
+            prepend-icon="mdi-trash-can-outline"
+            color="error"
+            :loading="cancelJobLoading"
+            text="Cancel?"
+            @click="cancelJob"
+      />
     </template>
   </VListItem>
 </template>
 <script lang="ts" setup>
 import { WorkerJob, WorkerJobStatus, workerJobStatusToUiString } from "@/types/WorkerJob";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { capitalizeFirstLetter } from "@/util/capitalize";
+import { useWorkerStore } from "@/stores/worker";
 
 const props = defineProps<{
   job: WorkerJob
 }>();
+
+const workerStore = useWorkerStore();
+
+const showConfirmCancel = ref(false);
+const showConfirmTimeoutId = ref<number | null>(null);
+watch(showConfirmCancel, (newVal) => {
+  if (!newVal) {
+    return;
+  }
+
+  showConfirmTimeoutId.value = setTimeout(() => {
+    showConfirmCancel.value = false;
+  }, 5000) as unknown as number; // Browsers return a number from setTimeout but TypeScript is interpreting this
+  // as a Node function, see https://stackoverflow.com/a/22747243
+});
+
+const cancelJobLoading = ref(false);
+async function cancelJob() {
+  if (showConfirmTimeoutId.value) {
+    clearTimeout(showConfirmTimeoutId.value);
+  }
+  cancelJobLoading.value = true;
+  await workerStore.cancelJob(props.job.jobId);
+  cancelJobLoading.value = false;
+  showConfirmCancel.value = false;
+}
 
 const subtitle = computed(() => {
   let baseSubtitle = capitalizeFirstLetter(workerJobStatusToUiString(props.job.status));

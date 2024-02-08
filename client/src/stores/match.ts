@@ -88,7 +88,7 @@ export const useMatchStore = defineStore("match", () => {
   const allMatchVideosUploaded = computed(() => {
     return matchVideos.value.length > 0 &&
       matchVideos.value.every(
-        video => workerStore.jobHasStatus(video.workerJobId,[WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED]),
+        video => workerStore.jobHasStatus(video.workerJobId,[WorkerJobStatus.COMPLETED]),
       );
   });
 
