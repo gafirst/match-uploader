@@ -72,6 +72,16 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
             }
         }
 
+        try {
+            // paths should be like "$label/video.ext" (this is separate from the video search directory)
+            // new path would be "$label/uploaded/video.ext"
+            // --> join(path[0], "uploaded", path[1])
+            // const splitPath = payload.videoPath.split("/");
+            // await moveFile(payload.videoPath, path.join(splitPath[0], "uploaded", splitPath[1]));
+        } catch (e: unknown) {
+            logger.warn(`Unable to move video file ${payload.videoPath} to uploaded directory: ${JSON.stringify(e)}`);
+        }
+
         const postUploadStepsResult =
             await handleMatchVideoPostUploadSteps(uploadResult.videoId, payload.label, matchKeyObject);
 
@@ -85,7 +95,7 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                     linkedOnTheBlueAlliance: postUploadStepsResult.linkOnTheBlueAlliance,
                 },
             });
-        } catch (e) { // Catch the prisma update error
+        } catch (e: unknown) { // Catch the prisma update error
             if (isPrismaClientKnownRequestError(e, "P2025")) {
                 logger.warn(`Unable to record post-upload step results for job with ID ${job.id}: Job does ` +
                   "not exist in match-uploader WorkerJob table");
