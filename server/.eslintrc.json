@@ -3,6 +3,7 @@
   "plugins": [
     "@typescript-eslint"
   ],
+  "root": true,
   "extends": [
     "standard-with-typescript",
     "plugin:@typescript-eslint/recommended",
@@ -11,7 +12,8 @@
     "../.eslint/.eslintrc.js"
   ],
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.json",
+    "sourceType": "module"
   },
   "rules": {
     "no-console": "error",

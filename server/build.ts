@@ -3,25 +3,25 @@
  */
 
 import fs from "fs-extra";
-import logger from "jet-logger";
 import childProcess from "node:child_process";
+// eslint-disable-next-line node/no-unsupported-features/es-syntax
+import _logger  from "jet-logger";
+const logger  = _logger as unknown as typeof _logger;
 
 /**
  * Start
  */
-(async () => {
-  try {
-    // Remove current build
-    await remove("./dist/");
-    // Copy front-end files
-    await copy("./src/public", "./dist/public");
-    // Copy back-end files
-    await exec("tsc --build tsconfig.prod.json", "./");
-  } catch (err) {
-    logger.err(err);
-    throw new Error("Build failed with errors, see above");
-  }
-})();
+try {
+  // Remove current build
+  await remove("./dist/");
+  // Copy front-end files
+  await copy("./src/public", "./dist/public");
+  // Copy back-end files
+  await exec("tsc --build tsconfig.prod.json", "./");
+} catch (err) {
+  logger.err(err);
+  throw new Error("Build failed with errors, see above");
+}
 
 /**
  * Remove file
