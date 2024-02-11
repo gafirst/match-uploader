@@ -76,6 +76,9 @@ defined in the file that are not specified below; please leave those intact.
 
 There are 3 required Docker volumes for the `web` and `worker` containers:
 - **Videos:** Mount your local videos directory as a volume to `/home/node/app/server/videos`
+  - Within this directory, add a subdirectory for each video label (either `unlabeled` or any string you'd like).
+  - The `unlabeled` directory is used for videos that don't have a label. You can add more directories for more labels.
+  - Capitalize label directory names exactly as you want them to appear in YouTube video titles.
 - **Environment variables:** Server environment variables located in `/home/node/app/server/env`
   - Make a copy of [`server/env/production.env.example`](server/env/production.env.example) and fill in the values.
     Descriptions of what you need to fill in are described [above](#environment-variables).
