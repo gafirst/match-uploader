@@ -1,5 +1,5 @@
 # https://github.com/Shopify/task-list-checker
-name: GitHub Task List Checker
+name: pr
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
