@@ -71,10 +71,20 @@ async function moveToUploadedDirectory(
     return await fs.move(fromPath, toPath);
 }
 
+/**
+ * Checks if a video path is allowed to be uploaded
+ * @param videoPath The path to the video file
+ */
+function isAllowedUploadPath(videoPath: string): boolean {
+    return !videoPath.includes("uploaded");
+}
+
 export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers): Promise<void> {
     assertIsUploadVideoTaskPayload(payload);
 
-    // FIXME: Consider adding a check here against uploading a video that contains uploaded in its path
+    if (!isAllowedUploadPath(payload.videoPath)) {
+        throw new Error(`Video path ${payload.videoPath} may not be uploaded`);
+    }
 
     const settings = await getSettings();
     const matchKeyObject = MatchKey.fromString(payload.matchKey, payload.playoffsType as PlayoffsType);
