@@ -96,6 +96,22 @@ export async function uploadYouTubeVideo(title: string,
         };
     }
 
+    const videoPathForUpload = path.join(videoSearchDirectory, videoPath);
+
+    if (!(await fs.exists(videoPathForUpload))) {
+        return {
+            error: `File ${videoPathForUpload} does not exist`,
+        };
+    }
+
+    let uploadBody: fs.ReadStream;
+    try {
+        uploadBody = fs.createReadStream(videoPathForUpload);
+    } catch (e: unknown) {
+        return {
+            error: `Error reading file ${videoPathForUpload} for upload: ${JSON.stringify(e)}`,
+        };
+    }
     const uploadParams = {
         part: ["snippet", "status"],
         requestBody: {
@@ -109,8 +125,7 @@ export async function uploadYouTubeVideo(title: string,
             },
         },
         media: {
-            // TODO(#78): Confirm that the file actually exists first to avoid crashing the Node process otherwise
-            body: fs.createReadStream(path.join(videoSearchDirectory, videoPath)),
+            body: uploadBody,
         },
     };
 

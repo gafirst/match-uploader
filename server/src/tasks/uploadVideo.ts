@@ -4,12 +4,14 @@ import {
     isYouTubeVideoUploadError, isYouTubeVideoUploadInSandboxMode,
     isYouTubeVideoUploadSuccess,
 } from "@src/models/YouTubeVideoUploadResult";
-import { type JobHelpers } from "graphile-worker";
+import { type JobHelpers, type Logger } from "graphile-worker";
 import { prisma } from "@src/worker";
 import { handleMatchVideoPostUploadSteps, uploadYouTubeVideo } from "@src/repos/YouTubeRepo";
 import MatchKey from "@src/models/MatchKey";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
 import { isPrismaClientKnownRequestError } from "@src/util/prisma";
+import path from "path";
+import fs from "fs-extra";
 
 // This file runs on the worker, not the server. This means that functions in this file should not
 // depend on anything in YouTubeService.ts or directly or indirectly depend on anything in server/src/index.ts (e.g.,
@@ -37,6 +39,36 @@ function assertIsUploadVideoTaskPayload(payload: unknown): asserts payload is Up
     ) {
         throw new Error(`Invalid payload (missing required prop): ${JSON.stringify(payload)}`);
     }
+}
+
+/**
+ * Moves a video file from the videos directory to the uploaded directory
+ *
+ * @param logger
+ * @param videosDirectory The directory where videos are stored
+ * @param videoPath The path to the video file within the videos directory
+ * @param dryRun When true, allows testing this function by making it a no-op; the file will be moved back to its
+ *               original location after being moved to the uploaded directory
+ */
+async function moveToUploadedDirectory(
+  logger: Logger,
+  videosDirectory: string,
+  videoPath: string,
+  dryRun: boolean = false,
+): Promise<void> {
+    // Paths should be like "$label/video.ext" (this is separate from the video search directory)
+    // New path would be "$label/uploaded/video.ext"
+    const fromPath = path.join(videosDirectory, videoPath);
+    const splitPath = videoPath.split("/");
+    const toPath = path.join(videosDirectory, splitPath[0], "uploaded", splitPath[1]);
+
+    if (dryRun) {
+        await fs.move(fromPath, toPath);
+        return await fs.move(toPath, fromPath);
+    }
+
+    logger.info(`Moving video file ${fromPath} to uploaded directory ${toPath}`);
+    return await fs.move(fromPath, toPath);
 }
 
 export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers): Promise<void> {
@@ -73,13 +105,9 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
         }
 
         try {
-            // paths should be like "$label/video.ext" (this is separate from the video search directory)
-            // new path would be "$label/uploaded/video.ext"
-            // --> join(path[0], "uploaded", path[1])
-            // const splitPath = payload.videoPath.split("/");
-            // await moveFile(payload.videoPath, path.join(splitPath[0], "uploaded", splitPath[1]));
+            await moveToUploadedDirectory(logger, settings.videoSearchDirectory, payload.videoPath);
         } catch (e: unknown) {
-            logger.warn(`Unable to move video file ${payload.videoPath} to uploaded directory: ${JSON.stringify(e)}`);
+            logger.error(`Unable to move video file ${payload.videoPath} to uploaded directory: ${JSON.stringify(e)}`);
         }
 
         const postUploadStepsResult =
@@ -109,6 +137,9 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
         throw new Error(uploadResult.error);
     } else if (isYouTubeVideoUploadInSandboxMode(uploadResult)) {
         logger.info(`Successfully uploaded video ${payload.title} in sandbox mode`);
+
+        await moveToUploadedDirectory(logger, settings.videoSearchDirectory, payload.videoPath, true);
+
         try {
             await prisma.workerJob.update({
                 where: {

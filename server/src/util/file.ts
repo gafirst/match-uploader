@@ -1,4 +1,5 @@
 import { getSystemErrorName } from "util";
+import fs, { PathLike } from "fs-extra";
 
 interface IErrorObj {
   errno: number;

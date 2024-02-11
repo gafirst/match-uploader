@@ -1,7 +1,7 @@
 import { type PathLike } from "fs";
 import fastGlob from "fast-glob";
 import logger from "jet-logger";
-import { isFileDoesNotExistError } from "@src/util/file.ts";
+import { isFileDoesNotExistError } from "@src/util/file";
 import { copyFile, readFile, writeFile } from "fs/promises";
 
 const DEFAULT_ENCODING = "utf-8";

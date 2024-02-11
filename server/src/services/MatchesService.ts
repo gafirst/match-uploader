@@ -10,8 +10,7 @@ import { type TbaFrcTeam } from "@src/models/theBlueAlliance/tbaFrcTeam";
 import { FrcEventsRepo } from "@src/repos/FrcEventsRepo";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
-import { CompLevel, toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
-import logger from "jet-logger";
+import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 import Mustache from "mustache";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
@@ -21,15 +20,15 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
     const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
 
     const files = await getFilesMatchingPattern(videoSearchDirectory, `**/${videoFileMatchingName}.*`, 2);
+    const uploadedFiles = await getFilesMatchingPattern(
+      videoSearchDirectory,
+      `**/uploaded/${videoFileMatchingName}.*`,
+      3);
 
-    return files.filter(filePath => {
-        // Ignore files that are not within a subdirectory (do not contain a path separator)
-        if (!filePath.includes("/")) {
-            return false;
-        }
-
-        return true;
-    }).map(filePath => {
+    files.push(...uploadedFiles);
+    return files
+      .filter(filePath => filePath.includes("/")) // Files must be within a subdirectory
+      .map(filePath => {
         // Video label is the first part of the file path
         const proposedVideoLabel = filePath.split("/")[0];
         let videoLabel: string | null = null;
@@ -46,7 +45,9 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
             videoTitle = `${matchTitleName} - ${videoLabel} - ${eventName}`;
         }
 
-        return new MatchVideoInfo(filePath, videoLabel, videoTitle);
+        const isUploaded = filePath.includes("uploaded");
+
+        return new MatchVideoInfo(filePath, videoLabel, videoTitle, isUploaded);
     });
 }
 

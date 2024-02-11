@@ -8,7 +8,7 @@
              size="large"
       />
     </template>
-    <template v-slot:append>
+    <template v-if="!video.isUploaded" v-slot:append>
       <VBtn v-if="videoJob?.youTubeVideoId"
             variant="text"
             icon="mdi-open-in-new"
@@ -53,6 +53,10 @@ interface IProps {
 const props = defineProps<IProps>();
 
 const uploadStatus = computed(() => {
+  if (props.video.isUploaded) {
+    return "Uploaded";
+  }
+
   if (props.video.isRequestingJob) {
     return "Creating job";
   }
@@ -122,6 +126,13 @@ const icon = computed((): {
   icon: string;
   color: string;
 } => {
+  if (props.video.isUploaded) {
+    return {
+      icon: "mdi-cloud-check-variant",
+      color: "success",
+    };
+  }
+
   if (props.video.isRequestingJob) {
     return {
       icon: "mdi-loading mdi-spin",

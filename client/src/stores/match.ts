@@ -85,11 +85,18 @@ export const useMatchStore = defineStore("match", () => {
       matchVideos.value.every(video => !!video.workerJobId);
   });
 
+  function videoIsUploaded(video: MatchVideoInfo): boolean {
+    return video.isUploaded || workerStore.jobHasStatus(video.workerJobId,[WorkerJobStatus.COMPLETED]);
+  }
+
   const allMatchVideosUploaded = computed(() => {
     return matchVideos.value.length > 0 &&
-      matchVideos.value.every(
-        video => workerStore.jobHasStatus(video.workerJobId,[WorkerJobStatus.COMPLETED]),
-      );
+      matchVideos.value.every(video => videoIsUploaded(video));
+  });
+
+  const someMatchVideosUploaded = computed(() => {
+    return matchVideos.value.length > 0 &&
+      matchVideos.value.some(video => videoIsUploaded(video));
   });
 
   async function uploadVideo(video: MatchVideoInfo): Promise<any> {
@@ -153,7 +160,9 @@ export const useMatchStore = defineStore("match", () => {
   async function uploadVideos(): Promise<void> {
     uploadInProgress.value = true;
     for (const video of matchVideos.value) {
-      await uploadVideo(video);
+      if (!video.isUploaded) {
+        await uploadVideo(video);
+      }
     }
     uploadInProgress.value = false;
   }
@@ -232,6 +241,7 @@ export const useMatchStore = defineStore("match", () => {
     postUploadStepsSucceeded,
     selectMatch,
     selectedMatchKey,
+    someMatchVideosUploaded,
     uploadInProgress,
     uploadSingleVideo,
     uploadVideos,
