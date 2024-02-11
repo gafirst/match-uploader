@@ -1,5 +1,5 @@
-import type MatchKey from "@src/models/MatchKey";
-import { CompLevel } from "@src/models/CompLevel";
+import type MatchKey from "#src/models/MatchKey.ts";
+import { CompLevel } from "#src/models/CompLevel.ts";
 
 export class Match {
     key: MatchKey;

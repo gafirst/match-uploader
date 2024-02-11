@@ -6,14 +6,14 @@ import logger from "jet-logger";
 
 import "express-async-errors";
 
-import apiRouter from "@src/routes/api";
-import Paths from "@src/routes/constants/Paths";
+import apiRouter from "#src/routes/api;
+import Paths from "#src/routes/constants/Paths;
 
-import EnvVars from "@src/constants/EnvVars";
-import HttpStatusCodes from "@src/constants/HttpStatusCodes";
+import EnvVars from "#src/constants/EnvVars;
+import HttpStatusCodes from "#src/constants/HttpStatusCodes;
 
-import { NodeEnvs } from "@src/constants/NodeEnvs";
-import { RouteError } from "@src/util/http";
+import { NodeEnvs } from "#src/constants/NodeEnvs;
+import { RouteError } from "#src/util/http;
 
 import { makeWorkerUtils, type WorkerUtils } from "graphile-worker";
 import { PrismaClient } from "@prisma/client";

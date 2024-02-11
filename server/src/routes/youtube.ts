@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { type IReq, type IRes } from "@src/routes/types/types";
+import { type IReq, type IRes } from "#src/routes/types/types.ts";
 import {
     deleteYouTubePlaylistMapping,
     getSecrets,
@@ -8,20 +8,20 @@ import {
     setSecret,
     setSetting,
     setYouTubePlaylist,
-} from "@src/services/SettingsService";
-import Paths from "@src/routes/constants/Paths";
+} from "#src/services/SettingsService.ts";
+import Paths from "#src/routes/constants/Paths.ts";
 import {
     cachePlaylistNames,
     getAuthenticatedYouTubeChannels,
     getGoogleOAuth2RedirectUri,
     getOAuth2AuthUrl,
     oauth2AuthCodeExchange, queueYouTubeVideoUpload,
-} from "@src/services/YouTubeService";
+} from "#src/services/YouTubeService.ts";
 import logger from "jet-logger";
 import { body, matchedData, param, validationResult } from "express-validator";
-import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
-import MatchKey from "@src/models/MatchKey";
-import { type PlayoffsType } from "@src/models/PlayoffsType";
+import { type YouTubeVideoPrivacy } from "#src/models/YouTubeVideoPrivacy.ts";
+import MatchKey from "#src/models/MatchKey.ts";
+import { type PlayoffsType } from "#src/models/PlayoffsType.ts";
 
 export const youTubeRouter = Router();
 export const youTubeAuthRouter = Router();

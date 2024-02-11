@@ -1,14 +1,14 @@
 import {
     type TbaMatchesSimpleApiResponse,
     type TbaMatchSimple,
-} from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
-import { isObject } from "@src/util/isObject";
-import { type FrcScoredMatchesResponse } from "@src/models/frcEvents/frcScoredMatchesResponse";
-import { asTbaMatchSimple, getFrcApiMatchNumber, isFrcScoredMatch } from "@src/models/frcEvents/frcScoredMatch";
+} from "#src/models/theBlueAlliance/tbaMatchesSimpleApiResponse.ts";
+import { isObject } from "#src/util/isObject.ts";
+import { type FrcScoredMatchesResponse } from "#src/models/frcEvents/frcScoredMatchesResponse.ts";
+import { asTbaMatchSimple, getFrcApiMatchNumber, isFrcScoredMatch } from "#src/models/frcEvents/frcScoredMatch.ts";
 import logger from "jet-logger";
-import { type FrcApiTournamentLevel } from "@src/models/frcEvents/frcTournamentLevel";
-import type MatchKey from "@src/models/MatchKey";
-import { toFrcApiTournamentLevel } from "@src/models/CompLevel";
+import { type FrcApiTournamentLevel } from "#src/models/frcEvents/frcTournamentLevel.ts";
+import type MatchKey from "#src/models/MatchKey.ts";
+import { toFrcApiTournamentLevel } from "#src/models/CompLevel.ts";
 
 export class FrcEventsRepo {
     private readonly apiKey: string;

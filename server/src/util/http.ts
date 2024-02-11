@@ -2,7 +2,7 @@
  * Miscellaneous shared classes go here.
  */
 
-import type HttpStatusCodes from "@src/constants/HttpStatusCodes";
+import type HttpStatusCodes from "#src/constants/HttpStatusCodes.ts";
 
 /**
  * Error with status code and message

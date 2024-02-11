@@ -1,10 +1,10 @@
 import { Router } from "express";
-import Paths from "@src/routes/constants/Paths";
-import { type IReq, type IRes } from "@src/routes/types/types";
-import { graphileWorkerUtils, prisma } from "@src/server";
+import Paths from "#src/routes/constants/Paths.ts";
+import { type IReq, type IRes } from "#src/routes/types/types.ts";
+import { graphileWorkerUtils, prisma } from "#src/server.ts";
 import { body, matchedData, param, validationResult } from "express-validator";
 import { JobStatus } from "@prisma/client";
-import { cancelJob } from "@src/services/WorkerService";
+import { cancelJob } from "#src/services/WorkerService.ts";
 
 export const workerRouter = Router();
 export const workerJobsRouter = Router();

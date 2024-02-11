@@ -2,7 +2,7 @@
  * Express router paths
  */
 
-import { type Immutable } from "@src/util/Immutable";
+import { type Immutable } from "#src/util/Immutable.ts";
 
 // Start all paths with a /, even if empty
 const Paths = {

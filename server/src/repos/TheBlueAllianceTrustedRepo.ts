@@ -1,4 +1,4 @@
-import type MatchKey from "@src/models/MatchKey";
+import type MatchKey from "@src/models/MatchKey.ts";
 import crypto from "crypto";
 import logger from "jet-logger";
 

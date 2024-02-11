@@ -4,10 +4,10 @@ import {
     type ISettings,
     type SecretSettingsKey,
     type SettingsKey,
-} from "@src/models/Settings";
-import EnvVars from "@src/constants/EnvVars";
-import { type YouTubePlaylists } from "@src/models/YouTubePlaylists";
-import { readSettingsJson, readTextFile, writeSettingsJson, writeTextFile } from "@src/repos/FileStorageRepo";
+} from "#src/models/Settings.ts";
+import EnvVars from "#src/constants/EnvVars.ts";
+import { type YouTubePlaylists } from "#src/models/YouTubePlaylists.ts";
+import { readSettingsJson, readTextFile, writeSettingsJson, writeTextFile } from "#src/repos/FileStorageRepo.ts";
 
 export async function getSettings(): Promise<ISettings> {
   return await readSettingsJson<ISettings>(

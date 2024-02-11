@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import Paths from "./constants/Paths";
-import { matchesRouter } from "@src/routes/matches";
-import { settingsRouter } from "@src/routes/settings";
-import { youTubeRouter } from "@src/routes/youtube";
-import { workerRouter } from "@src/routes/worker";
+import Paths from "./constants/Paths.ts";
+import { matchesRouter } from "#src/routes/matches.ts";
+import { settingsRouter } from "#src/routes/settings.ts";
+import { youTubeRouter } from "#src/routes/youtube.ts";
+import { workerRouter } from "#src/routes/worker.ts";
 
 const apiRouter = Router();
 

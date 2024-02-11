@@ -1,8 +1,8 @@
-import { type FrcTeam } from "@src/models/frcEvents/frcTeam";
-import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
-import { type TbaWinningAlliance } from "@src/models/theBlueAlliance/tbaWinningAlliance";
-import { type TbaCompLevel } from "@src/models/theBlueAlliance/tbaCompLevel";
-import { CompLevel } from "@src/models/CompLevel";
+import { type FrcTeam } from "#src/models/frcEvents/frcTeam.ts";
+import { type TbaMatchSimple } from "#src/models/theBlueAlliance/tbaMatchesSimpleApiResponse.ts";
+import { type TbaWinningAlliance } from "#src/models/theBlueAlliance/tbaWinningAlliance.ts";
+import { type TbaCompLevel } from "#src/models/theBlueAlliance/tbaCompLevel.ts";
+import { CompLevel } from "#src/models/CompLevel.ts";
 
 export interface FrcScoredMatch {
     tournamentLevel: string;

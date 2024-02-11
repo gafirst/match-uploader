@@ -1,18 +1,18 @@
 import { auth, youtube, type youtube_v3 } from "@googleapis/youtube";
-import { getSecrets, getSettings, getYouTubePlaylists, setSecret } from "@src/services/SettingsService";
+import { getSecrets, getSettings, getYouTubePlaylists, setSecret } from "#src/services/SettingsService.ts";
 import logger from "jet-logger";
-import type { YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
+import type { YouTubeVideoPrivacy } from "#src/models/YouTubeVideoPrivacy.ts";
 import type {
     YouTubeVideoUploadError,
     YouTubeVideoUploadInSandboxMode,
     YouTubeVideoUploadSuccess,
-} from "@src/models/YouTubeVideoUploadResult";
+} from "#src/models/YouTubeVideoUploadResult.ts";
 import sanitizeFilename from "sanitize-filename";
 import fs from "fs-extra";
 import path from "path";
-import type MatchKey from "@src/models/MatchKey";
-import type { YouTubePostUploadSteps } from "@src/models/YouTubePostUploadSteps";
-import { TheBlueAllianceTrustedRepo } from "@src/repos/TheBlueAllianceTrustedRepo";
+import type MatchKey from "#src/models/MatchKey.ts";
+import type { YouTubePostUploadSteps } from "#src/models/YouTubePostUploadSteps.ts";
+import { TheBlueAllianceTrustedRepo } from "#src/repos/TheBlueAllianceTrustedRepo.ts";
 
 // Functions in this file should not depend on anything in YouTubeService.ts or
 // directly or indirectly depend on anything in server/src/index.ts (e.g., WorkerService.ts), as this

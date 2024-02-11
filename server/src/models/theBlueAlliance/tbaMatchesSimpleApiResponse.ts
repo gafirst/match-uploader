@@ -1,6 +1,6 @@
-import { type TbaAlliance } from "@src/models/theBlueAlliance/tbaAlliance";
-import { type TbaWinningAlliance } from "@src/models/theBlueAlliance/tbaWinningAlliance";
-import { type TbaCompLevel } from "@src/models/theBlueAlliance/tbaCompLevel";
+import { type TbaAlliance } from "#src/models/theBlueAlliance/tbaAlliance.ts";
+import { type TbaWinningAlliance } from "#src/models/theBlueAlliance/tbaWinningAlliance.ts";
+import { type TbaCompLevel } from "#src/models/theBlueAlliance/tbaCompLevel.ts";
 
 export type TbaMatchesSimpleApiResponse = TbaMatchSimple[];
 export type TbaMatchSimpleApiResponse = TbaMatchSimple;

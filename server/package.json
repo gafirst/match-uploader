@@ -1,15 +1,17 @@
 {
   "name": "server",
   "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
   "scripts": {
-    "build": "npx ts-node build.ts",
+    "build": "node --no-warnings --enable-source-maps --loader ts-node/esm src/build.ts",
     "lint": "npx eslint --ext .ts src/ spec/",
     "lint:fix": "npx eslint --fix --ext .ts src/ spec/",
     "lint:ci": "npx eslint --max-warnings=0 --output-file eslint_report.json --format json --ext .ts src/ spec/",
     "start": "npx prisma migrate deploy && node -r module-alias/register ./dist --env=production",
     "start:worker": "node -r module-alias/register ./dist/worker.js --env=production",
     "dev": "nodemon",
-    "dev:worker": "nodemon --exec \"./node_modules/.bin/ts-node --files -r tsconfig-paths/register ./src/worker.ts\"",
+    "dev:worker": "nodemon --exec \"./node_modules/.bin/ts-node --esm --files -r tsconfig-paths/register ./src/worker.ts\"",
     "test": "nodemon --config ./spec/nodemon.json",
     "test:no-reloading": "npx ts-node --files -r tsconfig-paths/register ./spec"
   },
@@ -21,10 +23,10 @@
     "ignore": [
       "src/public"
     ],
-    "exec": "./node_modules/.bin/ts-node --files -r tsconfig-paths/register ./src"
+    "exec": "./node_modules/.bin/ts-node --esm --files -r tsconfig-paths/register ./dist/index.js"
   },
-  "_moduleAliases": {
-    "@src": "dist"
+  "imports": {
+    "#src/*": "./dist/*"
   },
   "engines": {
     "node": ">=20.0.0"

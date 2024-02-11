@@ -1,6 +1,6 @@
-import { abbreviatedCompLevel, CompLevel, compLevelFromString } from "@src/models/CompLevel";
-import { PlayoffsType } from "@src/models/PlayoffsType";
-import { getBestOf3RoundNumberFromSetNumber } from "@src/util/playoffs";
+import { abbreviatedCompLevel, CompLevel, compLevelFromString } from "#src/models/CompLevel.ts";
+import { PlayoffsType } from "#src/models/PlayoffsType.ts";
+import { getBestOf3RoundNumberFromSetNumber } from "#src/util/playoffs.ts";
 
 class MatchKey {
     year: number;

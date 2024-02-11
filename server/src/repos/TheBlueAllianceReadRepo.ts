@@ -1,10 +1,10 @@
-import type MatchKey from "@src/models/MatchKey";
+import type MatchKey from "#src/models/MatchKey.ts";
 import {
     isTbaMatchSimple,
     type TbaMatchesSimpleApiResponse,
     type TbaMatchSimpleApiResponse,
-} from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
-import { isObject } from "@src/util/isObject";
+} from "#src/models/theBlueAlliance/tbaMatchesSimpleApiResponse.ts";
+import { isObject } from "#src/util/isObject.ts";
 import fetch from "node-fetch";
 
 export class TheBlueAllianceReadRepo {

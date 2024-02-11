@@ -1,18 +1,18 @@
-import { type WorkerTask } from "@src/tasks/types/tasks";
-import { graphileWorkerUtils, prisma } from "@src/server";
+import { type WorkerTask } from "#src/tasks/types/tasks.ts";
+import { graphileWorkerUtils, prisma } from "#src/server.ts";
 import { type TaskSpec } from "graphile-worker";
 import { JobStatus, type WorkerJob } from "@prisma/client";
 import logger from "jet-logger";
-import { io } from "@src/index";
+import { io } from "#src/index.ts";
 import {
   type ClientToServerEvents,
   isWorkerJobCompleteEvent,
   isWorkerJobStartEvent,
   WORKER_JOB_COMPLETE,
   WORKER_JOB_START,
-} from "@src/tasks/types/events";
+} from "#src/tasks/types/events.ts";
 import { type Socket } from "socket.io";
-import { isPrismaClientKnownRequestError } from "@src/util/prisma";
+import { isPrismaClientKnownRequestError } from "#src/util/prisma.ts";
 
 /**
  * Queues a job and creates a WorkerJob record in the database.

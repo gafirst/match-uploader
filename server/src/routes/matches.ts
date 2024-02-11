@@ -1,18 +1,18 @@
 import { Router } from "express";
-import Paths from "@src/routes/constants/Paths";
-import { type IReq, type IRes } from "@src/routes/types/types";
+import Paths from "#src/routes/constants/Paths.ts";
+import { type IReq, type IRes } from "#src/routes/types/types.ts";
 import {
     generateMatchVideoDescription,
     getLocalVideoFilesForMatch,
     getMatchList,
-} from "@src/services/MatchesService";
+} from "#src/services/MatchesService.ts";
 import { matchedData, param, validationResult } from "express-validator";
-import MatchKey from "@src/models/MatchKey";
-import { type MatchVideoInfo } from "@src/models/MatchVideoInfo";
-import { Match } from "@src/models/Match";
-import { capitalizeFirstLetter } from "@src/util/string";
-import { getSettings } from "@src/services/SettingsService";
-import { type PlayoffsType } from "@src/models/PlayoffsType";
+import MatchKey from "#src/models/MatchKey.ts";
+import { type MatchVideoInfo } from "#src/models/MatchVideoInfo.ts";
+import { Match } from "#src/models/Match.ts";
+import { capitalizeFirstLetter } from "#src/util/string.ts";
+import { getSettings } from "#src/services/SettingsService.ts";
+import { type PlayoffsType } from "#src/models/PlayoffsType.ts";
 
 export const matchesRouter = Router();
 

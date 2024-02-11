@@ -3,8 +3,8 @@ import {
     type ClientToServerEvents,
     WORKER_JOB_COMPLETE,
     WORKER_JOB_START,
-} from "@src/tasks/types/events";
-import { processWorkerEvent } from "@src/services/WorkerService";
+} from "#src/tasks/types/events.ts";
+import { processWorkerEvent } from "#src/services/WorkerService.ts";
 
 /**
  * Forwards worker events to clients by broadcasting them as "worker" events. This consolidates worker events

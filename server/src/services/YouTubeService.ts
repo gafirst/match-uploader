@@ -1,16 +1,16 @@
 import { auth } from "@googleapis/youtube";
-import { getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist } from "@src/services/SettingsService";
+import { getSecrets, getSettings, getYouTubePlaylists, setYouTubePlaylist } from "#src/services/SettingsService.ts";
 import logger from "jet-logger";
 import { type Credentials, type OAuth2Client } from "google-auth-library";
-import EnvVars from "@src/constants/EnvVars";
-import FullPaths from "@src/routes/constants/FullPaths";
-import { type YouTubeChannelList } from "@src/models/YouTubeChannel";
-import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
-import type MatchKey from "@src/models/MatchKey";
-import { queueJob } from "@src/services/WorkerService";
-import { UPLOAD_VIDEO } from "@src/tasks/types/tasks";
+import EnvVars from "#src/constants/EnvVars.ts";
+import FullPaths from "#src/routes/constants/FullPaths.ts";
+import { type YouTubeChannelList } from "#src/models/YouTubeChannel.ts";
+import { type YouTubeVideoPrivacy } from "#src/models/YouTubeVideoPrivacy.ts";
+import type MatchKey from "#src/models/MatchKey.ts";
+import { queueJob } from "#src/services/WorkerService.ts";
+import { UPLOAD_VIDEO } from "#src/tasks/types/tasks.ts";
 import { type WorkerJob } from "@prisma/client";
-import { getYouTubeApiClient } from "@src/repos/YouTubeRepo";
+import { getYouTubeApiClient } from "#src/repos/YouTubeRepo.ts";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
     const port = EnvVars.port;

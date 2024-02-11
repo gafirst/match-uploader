@@ -1,4 +1,4 @@
-import { getSystemErrorName } from "util";
+import { getSystemErrorName } from "node:util";
 
 interface IErrorObj {
   errno: number;

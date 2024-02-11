@@ -1,4 +1,4 @@
-import Paths, { type TPaths } from "./Paths";
+import Paths, { type TPaths } from "./Paths.ts";
 
 interface IPathObj {
   Base: string;

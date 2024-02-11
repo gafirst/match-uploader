@@ -4,7 +4,7 @@
 
 import fs from "fs-extra";
 import logger from "jet-logger";
-import childProcess from "child_process";
+import childProcess from "node:child_process";
 
 /**
  * Start

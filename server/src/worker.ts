@@ -1,8 +1,8 @@
-import { uploadVideo } from "@src/tasks/uploadVideo";
+import { uploadVideo } from "#src/tasks/uploadVideo.ts";
 import { type Runner, run } from "graphile-worker";
 import logger from "jet-logger";
 import { type Socket, io } from "socket.io-client";
-import EnvVars from "@src/constants/EnvVars";
+import EnvVars from "#src/constants/EnvVars.ts";
 import { PrismaClient } from "@prisma/client";
 
 export const prisma = new PrismaClient();

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { type FrcApiTournamentLevel } from "@src/models/frcEvents/frcTournamentLevel";
+import { type FrcApiTournamentLevel } from "#src/models/frcEvents/frcTournamentLevel.ts";
 
 /**
  * Represents the competition level of a match.

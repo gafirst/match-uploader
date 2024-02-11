@@ -1,12 +1,12 @@
 import "./pre-start"; // Must be the first import
 import logger from "jet-logger";
 
-import EnvVars from "@src/constants/EnvVars";
-import { appPromise } from "./server";
+import EnvVars from "#src/constants/EnvVars.ts";
+import { appPromise } from "./server.ts";
 import { Server as SocketIOServer } from "socket.io";
 import http from "http";
-import { configureSocketIoEventForwarding } from "@src/util/ws";
-import { type ClientToServerEvents, type ServerToClientEvents } from "./tasks/types/events";
+import { configureSocketIoEventForwarding } from "#src/util/ws.ts";
+import { type ClientToServerEvents, type ServerToClientEvents } from "./tasks/types/events.ts";
 
 const SERVER_START_MSG = `Express server started on port: ${EnvVars.port}`;
 export let io: SocketIOServer;

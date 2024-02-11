@@ -1,15 +1,15 @@
-import { getSettings } from "@src/services/SettingsService";
-import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
+import { getSettings } from "#src/services/SettingsService.ts";
+import { type YouTubeVideoPrivacy } from "#src/models/YouTubeVideoPrivacy.ts";
 import {
     isYouTubeVideoUploadError, isYouTubeVideoUploadInSandboxMode,
     isYouTubeVideoUploadSuccess,
-} from "@src/models/YouTubeVideoUploadResult";
+} from "#src/models/YouTubeVideoUploadResult.ts";
 import { type JobHelpers } from "graphile-worker";
-import { prisma } from "@src/worker";
-import { handleMatchVideoPostUploadSteps, uploadYouTubeVideo } from "@src/repos/YouTubeRepo";
-import MatchKey from "@src/models/MatchKey";
-import { type PlayoffsType } from "@src/models/PlayoffsType";
-import { isPrismaClientKnownRequestError } from "@src/util/prisma";
+import { prisma } from "#src/worker.ts";
+import { handleMatchVideoPostUploadSteps, uploadYouTubeVideo } from "#src/repos/YouTubeRepo.ts";
+import MatchKey from "#src/models/MatchKey.ts";
+import { type PlayoffsType } from "#src/models/PlayoffsType.ts";
+import { isPrismaClientKnownRequestError } from "#src/util/prisma.ts";
 
 // This file runs on the worker, not the server. This means that functions in this file should not
 // depend on anything in YouTubeService.ts or directly or indirectly depend on anything in server/src/index.ts (e.g.,
