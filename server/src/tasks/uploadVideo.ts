@@ -74,6 +74,8 @@ async function moveToUploadedDirectory(
 export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers): Promise<void> {
     assertIsUploadVideoTaskPayload(payload);
 
+    // FIXME: Consider adding a check here against uploading a video that contains uploaded in its path
+
     const settings = await getSettings();
     const matchKeyObject = MatchKey.fromString(payload.matchKey, payload.playoffsType as PlayoffsType);
     logger.info(`Uploading video ${payload.title} for match ${matchKeyObject.matchKey}`);
