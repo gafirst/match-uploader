@@ -82,7 +82,7 @@ export const useMatchStore = defineStore("match", () => {
 
   const allMatchVideosQueued = computed(() => {
     return matchVideos.value.length > 0 &&
-      matchVideos.value.every(video => !!video.workerJobId);
+      matchVideos.value.every(video => video.isUploaded || !!video.workerJobId);
   });
 
   function videoIsUploaded(video: MatchVideoInfo): boolean {

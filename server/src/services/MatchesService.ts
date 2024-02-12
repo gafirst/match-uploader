@@ -34,8 +34,8 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
         let videoLabel: string | null = null;
         let videoTitle: string;
 
-        // Don't set a video label if the proposed label name is "unlabeled"
-        if (proposedVideoLabel !== "unlabeled") {
+        // Don't set a video label if the proposed label name is "unlabeled" (case-insensitive)
+        if (proposedVideoLabel.toLowerCase() !== "unlabeled") {
             videoLabel = proposedVideoLabel;
         }
 

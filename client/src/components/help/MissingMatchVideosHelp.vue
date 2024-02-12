@@ -9,10 +9,6 @@
         <li>
           Ensure your video files are named correctly (review <strong>How to name match video files</strong>).
         </li>
-        <li>
-          Go to <strong>Settings</strong> and confirm that the value of the <strong>Video search directory</strong>
-          setting is correct.
-        </li>
       </ol>
     </VExpansionPanelText>
   </VExpansionPanel>
