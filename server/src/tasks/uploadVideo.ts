@@ -47,8 +47,7 @@ function assertIsUploadVideoTaskPayload(payload: unknown): asserts payload is Up
  * @param logger
  * @param videosDirectory The directory where videos are stored
  * @param videoPath The path to the video file within the videos directory
- * @param dryRun When true, allows testing this function by making it a no-op; the file will be moved back to its
- *               original location after being moved to the uploaded directory
+ * @param dryRun When true, just prints the from/to paths instead of moving the file
  */
 async function moveToUploadedDirectory(
   logger: Logger,
