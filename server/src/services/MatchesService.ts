@@ -10,8 +10,7 @@ import { type TbaFrcTeam } from "@src/models/theBlueAlliance/tbaFrcTeam";
 import { FrcEventsRepo } from "@src/repos/FrcEventsRepo";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
-import { CompLevel, toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
-import logger from "jet-logger";
+import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 import Mustache from "mustache";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
@@ -20,40 +19,24 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
     const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);
     const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
 
-    const files = await getFilesMatchingPattern(videoSearchDirectory, `${videoFileMatchingName}*`);
-    const parseVideoLabelsRegex = /^[A-Za-z]+ (\d{1,3})\s?([A-Za-z\s]*)\..*$/;
+    const files = await getFilesMatchingPattern(videoSearchDirectory, `**/${videoFileMatchingName}.*`, 2);
+    const uploadedFiles = await getFilesMatchingPattern(
+      videoSearchDirectory,
+      `**/uploaded/${videoFileMatchingName}.*`,
+      3);
 
-    return files.filter(file => {
-        const proposedVideoLabel = parseVideoLabelsRegex.exec(file);
-
-        // Filter out this file if the pattern is incorrect
-        if (!proposedVideoLabel || proposedVideoLabel.length < 3) {
-            return false;
-        }
-
-        // Pulls the actual match number out of the file name using the 2nd capture group in parseVideoLabelsRegex
-        const fileMatchNumber = proposedVideoLabel[1];
-
-        if (!fileMatchNumber) {
-            return false;
-        }
-
-        // In double eliminations, playoff matches (before finals) have their sequence number in the set number, not
-        // the match number
-        if (match.key.playoffsType === PlayoffsType.DoubleElimination && match.key.compLevel === CompLevel.Semifinal) {
-            return Number.parseInt(fileMatchNumber, 10) === match.key.setNumber;
-        }
-
-        // Otherwise, check that when parsed as a number, the match number in the file name matches the match for which
-        // we are finding videos
-        return Number.parseInt(fileMatchNumber, 10) === match.key.matchNumber;
-    }).map((file) => {
-        const proposedVideoLabel = parseVideoLabelsRegex.exec(file);
+    files.push(...uploadedFiles);
+    return files
+      .filter(filePath => filePath.includes("/")) // Files must be within a subdirectory
+      .map(filePath => {
+        // Video label is the first part of the file path
+        const proposedVideoLabel = filePath.split("/")[0];
         let videoLabel: string | null = null;
         let videoTitle: string;
 
-        if (proposedVideoLabel !== null && proposedVideoLabel.length >= 3 && proposedVideoLabel[2] !== "") {
-            videoLabel = proposedVideoLabel[2];
+        // Don't set a video label if the proposed label name is "unlabeled" (case-insensitive)
+        if (proposedVideoLabel.toLowerCase() !== "unlabeled") {
+            videoLabel = proposedVideoLabel;
         }
 
         if (!videoLabel) {
@@ -62,7 +45,9 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<Ma
             videoTitle = `${matchTitleName} - ${videoLabel} - ${eventName}`;
         }
 
-        return new MatchVideoInfo(file, videoLabel, videoTitle);
+        const isUploaded = filePath.includes("uploaded");
+
+        return new MatchVideoInfo(filePath, videoLabel, videoTitle, isUploaded);
     });
 }
 
@@ -174,7 +159,6 @@ async function generateMatchDetailsUrl(matchKey: MatchKey): Promise<{
 
 export async function generateMatchVideoDescription(match: Match, eventName: string): Promise<string> {
     const templateString = await getDescriptionTemplate();
-    logger.info(templateString);
 
     const matchKey = match.key;
     const matchInfo = await getMatch(matchKey);

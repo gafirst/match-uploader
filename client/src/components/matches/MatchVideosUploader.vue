@@ -44,7 +44,6 @@
               color="success"
               variant="tonal"
               icon="mdi-check-circle"
-              class="mt-2 mb-4"
       >
         All videos uploaded!
       </VAlert>
@@ -57,8 +56,8 @@
       >
         {{ queueAllBtnText }}
       </VBtn>
-      <SandboxModeAlert class="mt-4" :rounded="4" />
-      <PrivateUploads class="mt-4" :rounded="4" />
+      <SandboxModeAlert class="mt-2" :rounded="4" />
+      <PrivateUploads class="mt-2" :rounded="4" />
     </VCardText>
   </VCard>
 </template>
@@ -96,6 +95,9 @@ const queueAllBtnIcon = computed(() => {
 const queueAllBtnText = computed(() => {
   if (matchStore.uploadInProgress) {
     return "Uploading...";
+  }
+  if (matchStore.someMatchVideosUploaded) {
+    return "Queue all remaining";
   }
   return "Queue all";
 });

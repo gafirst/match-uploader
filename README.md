@@ -39,6 +39,50 @@ To get started:
    4. YouTube playlist mappings: If you have playlists that you'd like match videos added to, follow the instructions in this section to set this up.
    5. Video description template: While no warning appears for this, you should double-check that the default video
       description template fits your needs and adjust it as needed.
+   6. Read below on how to structure your `videos` directory, which is where you'll place the video files for matches.
+
+### Video directory structure
+
+Match Uploader expects a specific directory structure for your videos. When running Match Uploader in Docker, you can
+mount any directory (such as one that your video production software writes recordings to) as the videos volume (for
+specifics, see [Docker volumes](#docker-volumes), below).
+
+The expected directory structure is as follows:
+```
+videos/
+├─ unlabeled/
+│  ├─ Qualification 1.mp4
+├─ $LABEL/
+│  ├─ Qualification 1.mp4
+```
+
+> [!TIP]
+> The `.mp4` video extension is just an example. You can use any file type that YouTube supports.
+
+A video label is an extra description for when you have multiple videos to upload for one match. Match Uploader will
+include the video label in the middle of the video title, e.g., `Qualification Match 1 - $LABEL - Event Name`.
+
+**What if I don't want a label in the video title?** A video with no label is labeled `unlabeled` (so you would put
+videos that should be unlabeled in a directory called `unlabeled`). This will title the video like 
+`Qualification Match 1 - Event Name`.
+
+After being uploaded, videos are moved to a directory called `uploaded` within each label directory. (You don't need to
+create the `uploaded` directories; they'll get created automatically when needed.) For instance:
+```
+videos/
+├─ unlabeled/
+│  ├─ uploaded/
+│  │  ├─ Qualification 1.mp4
+|  ├─ Qualification 2.mp4
+├─ $LABEL/
+│  ├─ uploaded/
+│  │  ├─ Qualification 1.mp4
+|  ├─ Qualification 2.mp4
+```
+
+> [!CAUTION]
+> Don't mount your videos directory as a read-only Docker volume. Otherwise, the server won't be able to move videos to 
+> the `uploaded` directories.
 
 ### Docker Compose setup in-depth
 
@@ -76,6 +120,7 @@ defined in the file that are not specified below; please leave those intact.
 
 There are 3 required Docker volumes for the `web` and `worker` containers:
 - **Videos:** Mount your local videos directory as a volume to `/home/node/app/server/videos`
+    - The directory structure is described in [Video directory structure](#video-directory-structure)
 - **Environment variables:** Server environment variables located in `/home/node/app/server/env`
   - Make a copy of [`server/env/production.env.example`](server/env/production.env.example) and fill in the values.
     Descriptions of what you need to fill in are described [above](#environment-variables).

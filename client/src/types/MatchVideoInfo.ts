@@ -8,4 +8,5 @@ export interface MatchVideoInfo {
     workerJobId: string | null;
     jobCreationError: string | null;
     isRequestingJob: boolean;
+    isUploaded: boolean;
 }

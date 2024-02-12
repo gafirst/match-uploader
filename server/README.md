@@ -34,7 +34,7 @@ Run the production build (Must be built first).
 Run production build with a different env file.
 
 ## Linting
-## Linting
+
 ```
 # lint
 yarn lint
