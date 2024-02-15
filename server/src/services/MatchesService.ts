@@ -13,17 +13,25 @@ import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
 import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 import Mustache from "mustache";
 
-export async function getLocalVideoFilesForMatch(matchKey: MatchKey): Promise<MatchVideoInfo[]> {
+export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: boolean): Promise<MatchVideoInfo[]> {
+    console.log(isReplay);
     const { eventName, videoSearchDirectory } = await getSettings();
-    const match = new Match(matchKey);
+    const match = new Match(matchKey, isReplay);
     const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);
     const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
 
-    const files = await getFilesMatchingPattern(videoSearchDirectory, `**/${videoFileMatchingName}.*`, 2);
+    const files = await getFilesMatchingPattern(
+      videoSearchDirectory,
+      `**/${videoFileMatchingName}.*`,
+      2,
+      false,
+    );
     const uploadedFiles = await getFilesMatchingPattern(
       videoSearchDirectory,
       `**/uploaded/${videoFileMatchingName}.*`,
-      3);
+      3,
+      false,
+    );
 
     files.push(...uploadedFiles);
     return files

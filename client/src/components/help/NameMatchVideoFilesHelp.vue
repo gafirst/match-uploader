@@ -42,7 +42,15 @@ videos/
       <pre>$Label/Final #.mp4</pre>
       <p><strong>Examples</strong>: Overhead/Playoff 10.mp4, Feed B/Final 1.mp4</p>
       <br />
-      Be sure to set your playoff type in Settings so we know how to parse your playoff matches!
+      <p>Be sure to set your playoff type in Settings so we know how to parse your playoff matches!</p>
+      <br />
+      <strong>Replayed matches:</strong>
+      <p>
+        For a replayed match, insert "Replay" (case-insensitive) between the match title and the file extension. For
+        instance, <code>unlabeled/Qualification 1.mp4</code> would become
+        <code>unlabeled/Qualification 1 Replay.mp4</code>. <code>$LABEL/Playoff 1.mp4</code> would become
+        <code>$LABEL/Playoff 1 Replay.mp4</code>
+      </p>
     </VExpansionPanelText>
   </VExpansionPanel>
 </template>
