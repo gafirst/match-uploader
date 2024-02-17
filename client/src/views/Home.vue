@@ -14,10 +14,8 @@
       <h2
         class="mt-2 mb-2"
       >
-        Video metadata
+        Video description
       </h2>
-      <MatchMetadata />
-      <h3 class="mb-2">Description</h3>
       <MatchDescription />
     </VCol>
     <VCol cols="12" :md="videosMdColWidth">
@@ -82,7 +80,6 @@ import UploadErrors from "@/components/help/UploadErrors.vue";
 import MissingPlaylistMapping from "@/components/help/MissingPlaylistMapping.vue";
 import JobsList from "@/components/jobs/JobsList.vue";
 import {useWorkerStore} from "@/stores/worker";
-import MatchMetadata from "@/components/matches/MatchMetadata.vue";
 
 const error = ref("");
 

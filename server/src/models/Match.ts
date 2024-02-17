@@ -3,11 +3,9 @@ import { CompLevel } from "@src/models/CompLevel";
 
 export class Match {
     key: MatchKey;
-    isReplay: boolean;
 
-    constructor(key: MatchKey, isReplay: boolean = false) {
+    constructor(key: MatchKey) {
         this.key = key;
-        this.isReplay = isReplay;
     }
 
     /**
@@ -19,25 +17,24 @@ export class Match {
      */
     private generateMatchName(includeMatch: boolean, includeDoubleElimRound: boolean): string {
         const match = includeMatch ? "Match " : "";
-        const replay = this.isReplay ? " Replay" : "";
 
         const fullCompLevel = this.key.compLevel;
 
         const playoffsRound = this.key.playoffsRound;
         if (playoffsRound) {
             const round = includeDoubleElimRound ? ` (R${playoffsRound})` : "";
-            return `Playoff ${match}${this.key.setNumber}${round}${replay}`;
+            return `Playoff ${match}${this.key.setNumber}${round}`;
         }
 
         if (this.key.setNumber) {
             if (fullCompLevel === CompLevel.Final) {
-                return `${fullCompLevel} ${match}${this.key.matchNumber}${replay}`;
+                return `${fullCompLevel} ${match}${this.key.matchNumber}`;
             }
 
-            return `${fullCompLevel} ${this.key.setNumber} ${match}${this.key.matchNumber}${replay}`;
+            return `${fullCompLevel} ${this.key.setNumber} ${match}${this.key.matchNumber}`;
         }
 
-        return `${fullCompLevel} ${match}${this.key.matchNumber}${replay}`;
+        return `${fullCompLevel} ${match}${this.key.matchNumber}`;
     }
 
     get matchName(): string {

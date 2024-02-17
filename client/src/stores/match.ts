@@ -1,5 +1,5 @@
 import { acceptHMRUpdate, defineStore } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { MatchVideoInfo } from "@/types/MatchVideoInfo";
 import { useSettingsStore } from "@/stores/settings";
 import { useWorkerStore } from "@/stores/worker";
@@ -11,13 +11,11 @@ export const useMatchStore = defineStore("match", () => {
   const settingsStore = useSettingsStore();
   const workerStore = useWorkerStore();
   const selectedMatchKey = ref<string | null>(null);
-  const isReplay = ref(false);
 
   const uploadInProgress = ref(false);
 
   async function selectMatch(matchKey: string) {
     selectedMatchKey.value = matchKey;
-    isReplay.value = false;
     await getMatchVideos();
     await getSuggestedDescription();
   }
@@ -59,7 +57,7 @@ export const useMatchStore = defineStore("match", () => {
     matchVideosLoading.value = true;
     matchVideoError.value = "";
 
-    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/videos/recommend?isReplay=${isReplay.value}`);
+    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/videos/recommend`);
 
     if (!result.ok) {
       const message = `Unable to retrieve video file suggestions for ${selectedMatchKey.value}`;
@@ -226,10 +224,6 @@ export const useMatchStore = defineStore("match", () => {
     return !!job.linkedOnTheBlueAlliance && !!job.addedToYouTubePlaylist;
   }
 
-  watch(isReplay, async (value, oldValue, onCleanup) => {
-    await getMatchVideos();
-  });
-
   return {
     advanceMatch,
     allMatchVideosQueued,
@@ -240,7 +234,6 @@ export const useMatchStore = defineStore("match", () => {
     descriptionLoading,
     getMatchVideos,
     getSuggestedDescription,
-    isReplay,
     matchVideoError,
     matchVideos,
     matchVideosLoading,
