@@ -23,6 +23,7 @@ describe("MatchesService", () => {
 
         const files = await getLocalVideoFilesForMatch(
             MatchKey.fromString("2023gadal_qm16", PlayoffsType.DoubleElimination),
+            false,
         );
         expect(files).toEqual([]);
         mockFs.restore();
