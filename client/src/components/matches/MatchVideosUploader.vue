@@ -2,9 +2,11 @@
   <VCard class="ml-4 mt-2 mb-2">
     <VCardTitle>Videos to upload</VCardTitle>
     <VCardText>
-      <LoadingSpinner v-if="matchStore.matchVideosLoading" class="mt-2 mb-4" />
+      <VProgressCircular v-if="matchStore.matchVideosLoading"
+                         indeterminate
+                         class="mb-2"
+      />
       <div v-else-if="matchStore.selectedMatchKey">
-        <VChip v-if="matchStore.isReplay" color="info">Replay</VChip>
         <VList v-if="matchStore.matchVideos.length">
           <MatchVideoListItem v-for="video in matchStore.matchVideos"
                               :key="video.path"
@@ -12,11 +14,11 @@
           />
         </VList>
         <VAlert v-else
-                class="mt-2 mb-2"
+                class="mb-4"
                 color="warning"
                 variant="tonal"
         >
-          No video files found
+          No video files found for this match
         </VAlert>
         <VBtn prepend-icon="mdi-refresh"
               variant="outlined"
@@ -68,13 +70,12 @@ import SandboxModeAlert from "@/components/alerts/SandboxModeAlert.vue";
 import PrivateUploads from "@/components/alerts/PrivateUploads.vue";
 import QueueAllVideosBtn from "@/components/matches/QueueAllVideosBtn.vue";
 import { computed } from "vue";
-import LoadingSpinner from "@/components/util/LoadingSpinner.vue";
 
 const matchStore = useMatchStore();
 const settingsStore = useSettingsStore();
 
 const showQueueAllBtn = computed(() => {
-  return !matchStore.matchVideosLoading && !matchStore.allMatchVideosUploaded;
+  return !matchStore.allMatchVideosUploaded;
 });
 
 const queueAllBtnColor = computed(() => {

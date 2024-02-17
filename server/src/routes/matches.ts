@@ -6,7 +6,7 @@ import {
     getLocalVideoFilesForMatch,
     getMatchList,
 } from "@src/services/MatchesService";
-import { matchedData, param, query, validationResult } from "express-validator";
+import { matchedData, param, validationResult } from "express-validator";
 import MatchKey from "@src/models/MatchKey";
 import { type MatchVideoInfo } from "@src/models/MatchVideoInfo";
 import { Match } from "@src/models/Match";
@@ -48,7 +48,6 @@ matchesRouter.get(
         "matchKey",
         "Match key is required and must pass a format test. (See MatchKey class for regex.)",
     ).isString().matches(MatchKey.matchKeyRegex),
-    query("isReplay", "isReplay must be a boolean").isBoolean().toBoolean(),
     recommendVideoFiles,
 );
 
@@ -63,14 +62,14 @@ async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
         return;
     }
 
-    const { matchKey, isReplay } = matchedData(req);
+    const { matchKey } = matchedData(req);
 
     const { playoffsType: playoffsTypeRaw } = await getSettings();
     const playoffsType = playoffsTypeRaw as PlayoffsType;
 
     const matchKeyObject = MatchKey.fromString(matchKey as string, playoffsType);
 
-    const recommendedVideoFiles = await getLocalVideoFilesForMatch(matchKeyObject, isReplay as boolean);
+    const recommendedVideoFiles = await getLocalVideoFilesForMatch(matchKeyObject);
     res.json({
         ok: true,
         recommendedVideoFiles: recommendedVideoFiles.map((recommendation: MatchVideoInfo) => recommendation.toJson()),

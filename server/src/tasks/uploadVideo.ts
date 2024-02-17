@@ -62,8 +62,7 @@ async function moveToUploadedDirectory(
     const toPath = path.join(videosDirectory, splitPath[0], "uploaded", splitPath[1]);
 
     if (dryRun) {
-        logger.info(`[Sandbox mode] Would have moved video file ${fromPath} to uploaded directory ${toPath}`);
-        return;
+        logger.info(`[Sandbox mode] Woul dhave moved video file ${fromPath} to uploaded directory ${toPath}`);
     }
 
     return await fs.move(fromPath, toPath);
