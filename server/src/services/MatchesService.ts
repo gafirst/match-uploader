@@ -14,7 +14,6 @@ import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 import Mustache from "mustache";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: boolean): Promise<MatchVideoInfo[]> {
-    console.log(isReplay);
     const { eventName, videoSearchDirectory } = await getSettings();
     const match = new Match(matchKey, isReplay);
     const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);

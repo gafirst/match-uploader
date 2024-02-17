@@ -70,7 +70,7 @@ async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
 
     const matchKeyObject = MatchKey.fromString(matchKey as string, playoffsType);
 
-    const recommendedVideoFiles = await getLocalVideoFilesForMatch(matchKeyObject, isReplay);
+    const recommendedVideoFiles = await getLocalVideoFilesForMatch(matchKeyObject, isReplay as boolean);
     res.json({
         ok: true,
         recommendedVideoFiles: recommendedVideoFiles.map((recommendation: MatchVideoInfo) => recommendation.toJson()),

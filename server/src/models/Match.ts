@@ -19,10 +19,7 @@ export class Match {
      */
     private generateMatchName(includeMatch: boolean, includeDoubleElimRound: boolean): string {
         const match = includeMatch ? "Match " : "";
-        const replay = this.isReplay ? " Replay" : ""; // FIXME: unit tests
-        console.log("isReplay", this.isReplay);
-        console.log("replay", replay);
-        console.log(typeof this.isReplay);
+        const replay = this.isReplay ? " Replay" : "";
 
         const fullCompLevel = this.key.compLevel;
 
