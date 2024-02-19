@@ -20,6 +20,7 @@ const Paths = {
     Get: "/:matchKey",
     RecommendVideoFiles: "/:matchKey/videos/recommend",
     GenerateDescription: "/:matchKey/description",
+    PossibleNextMatches: "/:matchKey/nextMatch",
   },
   YouTube: {
     Base: "/youtube",

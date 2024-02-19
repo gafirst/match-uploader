@@ -10,7 +10,7 @@ class MatchKey {
     matchNumber: number;
     playoffsType: PlayoffsType;
 
-    static matchKeyRegex = /^(\d{4})([a-z]+)_(q|qf|sf|f)(\d{1,2})?m(\d+)$/;
+    static matchKeyRegex = /^(\d{4})([a-z0-9]+)_(q|qf|sf|f)(\d{1,2})?m(\d+)$/;
 
     constructor(year: number,
                 eventCode: string,
@@ -93,6 +93,93 @@ class MatchKey {
         if (this.playoffsType === PlayoffsType.DoubleElimination && this.compLevel === CompLevel.Semifinal &&
             this.setNumber) {
             return getBestOf3RoundNumberFromSetNumber(this.setNumber);
+        }
+
+        return null;
+    }
+
+    /**
+     * Increment the match key to the next match in the same CompLevel (tournament phase). For instance, if the current
+     * MatchKey represents Qualification 1, this function would return Qualification 2.
+     *
+     * Limitations:
+     * - This function is naive and does *not* know if the proposed match actually exists.
+     * - This function does not support Best of 3 playoffs currently, as FRC has moved to double eliminations.
+     *
+     * @return A MatchKey representing the next match within the same CompLevel (tournament phase)
+     */
+    get nextMatchInSameCompLevel(): MatchKey {
+        if (this.compLevel === CompLevel.Qualification) {
+            return new MatchKey(this.year,
+              this.eventCode,
+              abbreviatedCompLevel(this.compLevel),
+              null,
+              this.matchNumber + 1,
+              this.playoffsType,
+            );
+        }
+
+        if (this.playoffsType !== PlayoffsType.DoubleElimination) {
+            throw new Error("Cannot increment match key for non-double elimination playoffs");
+        }
+
+        if (this.compLevel === CompLevel.Final) {
+            return new MatchKey(
+              this.year,
+              this.eventCode,
+              abbreviatedCompLevel(this.compLevel),
+              1,
+              this.matchNumber + 1,
+              this.playoffsType,
+            );
+        }
+
+        if (this.compLevel === CompLevel.Semifinal && this.setNumber !== null) {
+            return new MatchKey(this.year,
+              this.eventCode,
+              abbreviatedCompLevel(this.compLevel),
+              this.setNumber + 1,
+              1,
+              this.playoffsType);
+        }
+
+        throw new Error(`Cannot increment match key ${this.matchKey}: did not match any recognized scenarios`);
+    }
+
+    /**
+     * Increment the match key to the first match in the next CompLevel (tournament phase). For instance, if the current
+     * MatchKey represents Qualification 1, this function would return Playoff Match 1 (R1).
+     *
+     * Limitations:
+     * - This function is naive and does *not* know if the proposed match actually exists.
+     * - This function does not support Best of 3 playoffs currently, as FRC has moved to double eliminations.
+     *
+     * @return A MatchKey representing the first match in the next CompLevel (tournament phase). If there is no
+     *         subsequent CompLevel (e.g., the current MatchKey is a finals match), this function returns null.
+     */
+    get firstMatchInNextCompLevel(): MatchKey | null {
+        if (this.playoffsType !== PlayoffsType.DoubleElimination) {
+            throw new Error("Cannot increment match key for non-double elimination playoffs");
+        }
+
+        if (this.compLevel === CompLevel.Qualification) {
+            return new MatchKey(this.year,
+              this.eventCode,
+              abbreviatedCompLevel(CompLevel.Semifinal),
+              1,
+              1,
+              this.playoffsType,
+            );
+        }
+
+        if (this.compLevel === CompLevel.Semifinal) {
+            return new MatchKey(this.year,
+              this.eventCode,
+              abbreviatedCompLevel(CompLevel.Final),
+              1,
+              1,
+              this.playoffsType,
+            );
         }
 
         return null;

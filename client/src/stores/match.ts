@@ -4,10 +4,13 @@ import { MatchVideoInfo } from "@/types/MatchVideoInfo";
 import { useSettingsStore } from "@/stores/settings";
 import { useWorkerStore } from "@/stores/worker";
 import { WorkerJobStatus } from "@/types/WorkerJob";
+import { useMatchListStore } from "@/stores/matchList";
+import { PossibleNextMatches } from "@/types/PossibleNextMatches";
 
 export const useMatchStore = defineStore("match", () => {
   // Note: Variables intended to be exported to be used elsewhere must be returned from this function!
   const matches = ref([]);
+  const matchListStore = useMatchListStore();
   const settingsStore = useSettingsStore();
   const workerStore = useWorkerStore();
   const selectedMatchKey = ref<string | null>(null);
@@ -15,35 +18,88 @@ export const useMatchStore = defineStore("match", () => {
 
   const uploadInProgress = ref(false);
 
+  const nextMatchLoading = ref(false);
+  const nextMatchError = ref("");
+
   async function selectMatch(matchKey: string) {
+    nextMatchError.value = "";
     selectedMatchKey.value = matchKey;
     isReplay.value = false;
     await getMatchVideos();
     await getSuggestedDescription();
   }
 
-  async function advanceMatch() {
+  async function getPossibleNextMatches(): Promise<PossibleNextMatches|undefined> {
     if (!selectedMatchKey.value) {
-      return; // TODO: set to qm1
+      return;
     }
 
-    const matchKeyRegex = /^(\d{4})([a-z]+)_(q|qf|sf|f)(\d{1,2})?m(\d+)$/;
+    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/nextMatch`);
 
-    const currentMatchNumber = selectedMatchKey.value?.match(matchKeyRegex);
+    if (!result.ok) {
+      const message = `Unable to retrieve possible next matches for ${selectedMatchKey.value}`;
+      nextMatchError.value = `API error (${result.status} ${result.statusText}): ${message}`;
+      return;
+    }
 
-    if (currentMatchNumber && currentMatchNumber.length === 6) {
-      console.log(currentMatchNumber[5]);
-      const currentMatchNumberDigits = currentMatchNumber[5].length;
-      const incrementedMatchNumber = Number.parseInt(currentMatchNumber[5], 10) + 1;
-      console.log(incrementedMatchNumber);
-      const currentMatchKeyPrefix =
-          selectedMatchKey.value.substring(0, selectedMatchKey.value.length - currentMatchNumberDigits);
-      const nextMatchKey = `${currentMatchKeyPrefix}${incrementedMatchNumber}`;
-      console.log(nextMatchKey);
-      await selectMatch(nextMatchKey);
-    } else {
-      console.error(`Unable to advance match: selected match key ${selectedMatchKey.value} didn't match regex or was `
-          + "missing match number in capture groups");
+    const data = await result.json();
+
+    if (data.error) {
+      nextMatchError.value = data.error;
+      return;
+    }
+
+    if (Object.hasOwn(data, "sameLevel") && Object.hasOwn(data, "nextLevel")) {
+      return data;
+    }
+
+    const message = "API response missing possibleNextMatches property";
+    console.error(message);
+    nextMatchError.value = message;
+  }
+
+  async function advanceMatch() {
+    nextMatchError.value = "";
+
+    if (!selectedMatchKey.value) {
+      nextMatchError.value = "Cannot advance match because no match is currently selected. If you are seeing this, " +
+        "you have found a bug. Congrats! Please open an issue on Github.";
+      return;
+    }
+
+    nextMatchLoading.value = true;
+
+    const candidates = await getPossibleNextMatches();
+
+    let foundNextMatch = false;
+    let attempts = 0;
+    const maxAttempts = 2;
+
+    while (!foundNextMatch && attempts < maxAttempts) {
+      attempts++;
+
+      // If we have already looked once without refreshing, and neither possible next match exists, try refreshing the
+      // match list
+      if (attempts > 1) {
+        await matchListStore.getMatchList(true);
+      }
+
+      if (candidates?.sameLevel && matchListStore.matchListContains(candidates.sameLevel)) {
+        nextMatchLoading.value = false; // If we find a match, stop showing the spinner since `selectMatch` waits
+                                        // until several other long-running loads are complete
+        foundNextMatch = true;
+        await selectMatch(candidates.sameLevel);
+      } else if (candidates?.nextLevel && matchListStore.matchListContains(candidates.nextLevel)) {
+        nextMatchLoading.value = false;
+        foundNextMatch = true;
+        await selectMatch(candidates.nextLevel);
+      }
+    }
+
+    nextMatchLoading.value = false;
+    if (!foundNextMatch) {
+      nextMatchError.value = "No match found after this one. If you are expecting another match, try again in a few " +
+        "minutes.";
     }
   }
 
@@ -245,6 +301,8 @@ export const useMatchStore = defineStore("match", () => {
     matchVideos,
     matchVideosLoading,
     matches,
+    nextMatchError,
+    nextMatchLoading,
     postUploadStepsSucceeded,
     selectMatch,
     selectedMatchKey,

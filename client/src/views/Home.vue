@@ -11,9 +11,7 @@
       <h2 class="mb-2">Match info</h2>
       <MatchSelector />
 
-      <h2
-        class="mt-2 mb-2"
-      >
+      <h2 class="mb-2">
         Video metadata
       </h2>
       <MatchMetadata />
