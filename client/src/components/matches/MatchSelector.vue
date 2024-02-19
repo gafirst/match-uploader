@@ -52,7 +52,7 @@
       >
         View on TBA
       </VBtn>
-      <VBtn v-if="matchStore.selectedMatchKey"
+      <VBtn v-if="shouldShowNextMatchBtn"
             :variant="!matchStore.allMatchVideosQueued ? 'outlined' : undefined"
             :disabled="matchStore.uploadInProgress"
             :loading="matchStore.nextMatchLoading"
@@ -62,6 +62,20 @@
       >
         Next match
       </VBtn>
+
+      <VAlert v-else
+              color="warning"
+              variant="tonal"
+              class="mt-2"
+      >
+        <p class="mb-2">
+          The Next Match button is unavailable because the playoffs type is not set to double elimination.
+        </p>
+        <p>
+          If this is unintentional, update the playoffs type in
+          <RouterLink to="/settings">Settings</RouterLink>.
+        </p>
+      </VAlert>
     </VCol>
   </VRow>
 </template>
@@ -69,10 +83,11 @@
 <script lang="ts" setup>
 import {useMatchStore} from "@/stores/match";
 import {useMatchListStore} from "@/stores/matchList";
-import {onMounted} from "vue";
+import { computed, onMounted } from "vue";
 import FrcEventsWarning from "@/components/alerts/FrcEventsWarning.vue";
 import {useSettingsStore} from "@/stores/settings";
 import MatchDataAttribution from "@/components/matches/MatchDataAttribution.vue";
+import { PLAYOFF_DOUBLE_ELIM } from "@/types/MatchType";
 
 const matchStore = useMatchStore();
 const matchListStore = useMatchListStore();
@@ -81,6 +96,11 @@ const settingsStore = useSettingsStore();
 onMounted(() => {
   matchListStore.getMatchList();
 });
+
+const shouldShowNextMatchBtn = computed(
+  () => matchStore.selectedMatchKey &&
+    (settingsStore.isFirstLoad || settingsStore.settings?.playoffsType === PLAYOFF_DOUBLE_ELIM),
+);
 
 async function matchSelected(matchKey: string) {
   await matchStore.selectMatch(matchKey);
