@@ -12,7 +12,7 @@ import { type MatchVideoInfo } from "@src/models/MatchVideoInfo";
 import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { getSettings } from "@src/services/SettingsService";
-import { type PlayoffsType } from "@src/models/PlayoffsType";
+import { PlayoffsType } from "@src/models/PlayoffsType";
 
 export const matchesRouter = Router();
 
@@ -77,7 +77,6 @@ async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
     });
 }
 
-// generate description GET endpoint
 matchesRouter.get(
     Paths.Matches.GenerateDescription,
     param(
@@ -106,4 +105,46 @@ async function generateDescription(req: IReq, res: IRes): Promise<void> {
         ok: true,
         description: await generateMatchVideoDescription(match, eventName),
     });
+}
+
+matchesRouter.get(
+  Paths.Matches.PossibleNextMatches,
+  param(
+    "matchKey",
+    "Match key is required and must pass a format test. (See MatchKey class for regex.)",
+  ).isString().matches(MatchKey.matchKeyRegex),
+  getPossibleNextMatches,
+);
+
+async function getPossibleNextMatches(req: IReq, res: IRes): Promise<IRes> {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+      return res.status(400)
+      .json({
+        errors: errors.array(),
+      });
+  }
+
+  const { playoffsType } = await getSettings();
+
+  if ((playoffsType as PlayoffsType) !== PlayoffsType.DoubleElimination) {
+      return res.status(400)
+      .json({
+        errors: "Possible next matches are only available for double elimination playoffs mode",
+      });
+  }
+
+  const { matchKey: matchKeyRaw } = matchedData(req);
+  const matchKey = MatchKey.fromString(matchKeyRaw as string, playoffsType as PlayoffsType);
+
+  const nextMatchSameLevel = matchKey.nextMatchInSameCompLevel.matchKey;
+
+  const firstMatchNextLevel = matchKey.firstMatchInNextCompLevel?.matchKey ?? null;
+
+  return res.json({
+    ok: true,
+    sameLevel: nextMatchSameLevel,
+    nextLevel: firstMatchNextLevel,
+  });
 }

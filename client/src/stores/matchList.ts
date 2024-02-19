@@ -19,7 +19,7 @@ export const useMatchListStore = defineStore("matchList", () => {
 
     async function getMatchList(forceRefresh = false): Promise<void> {
         if (matches.value.length > 0 && !forceRefresh) {
-            console.log("cached");
+            console.log("getMatchList: Returning cached match list");
             return;
         }
 
@@ -44,11 +44,16 @@ export const useMatchListStore = defineStore("matchList", () => {
         loading.value = false;
     }
 
+    function matchListContains(matchKey: string): boolean {
+      return matches.value.some((match) => match.key === matchKey);
+    }
+
     return {
         error,
         loading,
         matches,
         getMatchList,
+        matchListContains,
     };
 });
 
