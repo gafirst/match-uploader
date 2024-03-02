@@ -18,8 +18,8 @@ body:
       label: Are you running Match Uploader using the official Docker Compose setup?
       multiple: false
       options:
-        - Yes
-        - No
+        - "Yes"
+        - "No"
     validations:
       required: true
   - type: dropdown
