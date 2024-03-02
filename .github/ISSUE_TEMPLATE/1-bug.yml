@@ -13,12 +13,13 @@ body:
       label: Match Uploader version
     validations:
       required: true
-  - type: checkboxes
+  - type: dropdown
     attributes:
       label: Are you running Match Uploader using the official Docker Compose setup?
       options:
-        - label: "Yes"
-        - label: "No"
+        - Select a value...
+        - "Yes"
+        - "No"
     validations:
       required: true
   - type: dropdown
