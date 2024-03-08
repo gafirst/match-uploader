@@ -13,7 +13,7 @@ To get started:
 1. Clone this repo locally. You don't actually need the source code, but it's the easiest way to get the directory structure for the required Docker volumes.
 2. Copy [`server/env/production.env.example`](server/env/production.env.example) to `server/env/production.env` and
    fill in the values using the descriptions in [Environment variables](#environment-variables) below.
-3. Adjust `docker-compose.yml` as needed (additional details in comments on the relevant lines):
+3. Adjust `docker-compose.yaml` as needed (additional details in comments on the relevant lines):
    1. Set the port you want to access the web client on by editing the `port` property on the `web` container
    2. Adjust the path to your videos directory by editing the `volumes` property on the `web` container
 4. Run `docker compose up` to start the containers.
@@ -97,7 +97,7 @@ containers should be started in this order (the default Docker Compose setup pro
 
 #### Environment variables
 
-For simplicity, and to keep secrets out of `docker-compose.yml`, all 3 containers mentioned above will
+For simplicity, and to keep secrets out of `docker-compose.yaml`, all 3 containers mentioned above will
 pull environment variables from the `server/env/production.env` file. As a result, not all containers use all the environment variables,
 and you need to provide values for database information in two different environment variables. There are some additional environment variables
 defined in the file that are not specified below; please leave those intact.
@@ -109,7 +109,7 @@ defined in the file that are not specified below; please leave those intact.
 
 | Variable              | Description                                                                                                                                                                                                                                                          | Sample value                                                                                                                                                                                                                                                                                                                                |
 |-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `PORT`                  | Determines the port the backend server runs on _inside of its container_. (To change the external container port, you'd want to edit the `port` property on the `web` container in `docker-compose.yml`.)                                                            | Leave set to default: `8080`                                                                                                                                                                                                                                                                                                                |
+| `PORT`                  | Determines the port the backend server runs on _inside of its container_. (To change the external container port, you'd want to edit the `port` property on the `web` container in `docker-compose.yaml`.)                                                            | Leave set to default: `8080`                                                                                                                                                                                                                                                                                                                |
 | `POSTGRES_DB`           | Used by the `db` container. The name of the Postgres database to create.                                                                                                                                                                                             | Leave set to default: `match_uploader`                                                                                                                                                                                                                                                                                                      |
 | `POSTGRES_USER`         | Used by the `db` container. Determines the username of the user created to access the Postgres server, so you can put anything here as long as you use the same value in `DB_CONNECTION_STRING`.                                                                     | Leave set to default: `match_uploader`                                                                                                                                                                                                                                                                                                      |
 | `POSTGRES_PASSWORD`     | Used by the `db` container. Determines the password of the user created to access the Postgres server, so you can put anything here as long as you use the same value in `DB_CONNECTION_STRING`.                                                                     | Pick any random string to use as a password                                                                                                                                                                                                                                                                                                 |
@@ -127,7 +127,7 @@ There are 3 required Docker volumes for the `web` and `worker` containers:
 - **Settings:** Mount a directory to persist settings files to `/home/node/app/server/settings`
   - You can leave the directory empty initially and Match Uploader will create settings files for you
 
-Examples of how to provide these volumes are in [`docker-compose.yml`](docker-compose.yml).
+Examples of how to provide these volumes are in [`docker-compose.yaml`](docker-compose.yaml).
 
 The Postgres container requires a volume to persist the database in. The default Docker Compose setup is set up so
 that Docker will create this volume for you.
