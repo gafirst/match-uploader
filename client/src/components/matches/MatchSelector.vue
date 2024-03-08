@@ -63,7 +63,7 @@
         Next match
       </VBtn>
 
-      <VAlert v-else
+      <VAlert v-else-if="shouldShowNextMatchBtnUnavailableError"
               color="warning"
               variant="tonal"
               class="mt-2"
@@ -100,6 +100,12 @@ onMounted(() => {
 const shouldShowNextMatchBtn = computed(
   () => matchStore.selectedMatchKey &&
     (settingsStore.isFirstLoad || settingsStore.settings?.playoffsType === PLAYOFF_DOUBLE_ELIM),
+);
+
+const shouldShowNextMatchBtnUnavailableError = computed(
+  () => !settingsStore.isFirstLoad
+    && settingsStore.settings?.playoffsType !== PLAYOFF_DOUBLE_ELIM
+    && matchStore.selectedMatchKey,
 );
 
 async function matchSelected(matchKey: string) {
