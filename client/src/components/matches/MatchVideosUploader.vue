@@ -66,7 +66,6 @@ import MatchVideoListItem from "@/components/matches/MatchVideoListItem.vue";
 import {useSettingsStore} from "@/stores/settings";
 import SandboxModeAlert from "@/components/alerts/SandboxModeAlert.vue";
 import PrivateUploads from "@/components/alerts/PrivateUploads.vue";
-import QueueAllVideosBtn from "@/components/matches/QueueAllVideosBtn.vue";
 import { computed } from "vue";
 import LoadingSpinner from "@/components/util/LoadingSpinner.vue";
 
