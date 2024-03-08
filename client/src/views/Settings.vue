@@ -219,8 +219,8 @@
         <p class="mt-4">Retrieve match data from FRC Events</p>
         <AutosavingBtnSelectGroup :choices="['On', 'Off']"
                                   :default-value="settingsStore.settings?.useFrcEventsApi ? 'On' : 'Off'"
-                                  :loading="savingFrcEventsApiKey"
-                                  @on-choice-selected="saveFrcEventsApiKey"
+                                  :loading="savingFrcEventsEnabled"
+                                  @on-choice-selected="saveFrcEventsEnabled"
         />
 
         <VAlert v-if="!settingsStore.settings?.useFrcEventsApi"
@@ -325,6 +325,7 @@ import AutosavingBtnSelectGroup from "@/components/form/AutosavingBtnSelectGroup
 import {useSettingsStore} from "@/stores/settings";
 import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.vue";
 import { useMatchStore } from "@/stores/match";
+import { useMatchListStore } from "@/stores/matchList";
 
 // const loading = ref(true);
 const loading = computed(() => {
@@ -336,6 +337,7 @@ const error = computed(() => {
   return settingsStore.error;
 });
 const matchStore = useMatchStore();
+const matchListStore = useMatchListStore();
 const settingsStore = useSettingsStore();
 // const settings = ref<ISettings | null>(null);
 // const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
@@ -389,6 +391,7 @@ async function savePlayoffMatchType(value: string): Promise<void> {
   await submit("playoffsType", value, "setting");
   await refreshData(false);
   savingPlayoffMatchType.value = false;
+  await matchListStore.getMatchList(true);
 }
 
 // TODO: Move into its own component
@@ -432,13 +435,14 @@ const tbaReadApiKeyHelpText = computed((): string => {
 });
 
 // TODO: Move into its own component
-const savingFrcEventsApiKey = ref(false);
+const savingFrcEventsEnabled = ref(false);
 
-async function saveFrcEventsApiKey(value: string): Promise<void> {
-  savingFrcEventsApiKey.value = true;
+async function saveFrcEventsEnabled(value: string): Promise<void> {
+  savingFrcEventsEnabled.value = true;
   await submit("useFrcEventsApi", value === "On", "setting");
   await refreshData(false);
-  savingFrcEventsApiKey.value = false;
+  savingFrcEventsEnabled.value = false;
+  await matchListStore.getMatchList(true);
 }
 
 </script>
