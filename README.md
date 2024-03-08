@@ -15,7 +15,8 @@ To get started:
    fill in the values using the descriptions in [Environment variables](#environment-variables) below.
 3. Adjust `docker-compose.yaml` as needed (additional details in comments on the relevant lines):
    1. Set the port you want to access the web client on by editing the `port` property on the `web` container
-   2. Adjust the path to your videos directory by editing the `volumes` property on the `web` container
+   2. Adjust the path to your videos directory by editing the `volumes` property on the `web` and `worker` containers
+      1. The default docker-compose.yaml file uses a YAML anchor to keep the volumes in sync between the `web` and `worker` containers. In that case, you only have to update the volumes for the `web` container, and the `worker` container will use those volumes as well.
 4. Run `docker compose up` to start the containers.
    1. If there's a new version of Match Uploader available, you can pull the latest version by running `docker compose pull` before `docker compose up`.
    2. The first time you run Match Uploader, Docker containers are pulled and database migrations are run. This can take a few minutes.
