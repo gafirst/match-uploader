@@ -24,7 +24,7 @@
                 class="mb-4"
                 color="warning"
         >
-          Changing the event code will clear your currently selected match.
+          Changing the event code will clear the current selected match.
         </VAlert>
         <AutosavingTextInput :key="`eventTbaCode-${dataRefreshKey}`"
                              :on-submit="submitEventCode"
