@@ -17,3 +17,8 @@ body {
 .force-text-wrap {
     -webkit-line-clamp: unset !important;
 }
+
+.v-card-title {
+    letter-spacing: normal !important; /* This is intentionally overriding Vuetify's style here as I don't like the way
+                                          the increased letter spacing looks*/
+}

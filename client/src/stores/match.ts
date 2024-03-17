@@ -216,6 +216,7 @@ export const useMatchStore = defineStore("match", () => {
   }
 
   async function uploadVideos(): Promise<void> {
+    // FIXME: should this check that uploads are allowed?
     uploadInProgress.value = true;
     for (const video of matchVideos.value) {
       if (!video.isUploaded) {
