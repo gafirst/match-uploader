@@ -2,7 +2,7 @@
 services:
   web:
     extends:
-      file: docker-compose.yml
+      file: docker-compose.yaml
       service: web
     image: !reset null
     build:
@@ -11,7 +11,7 @@ services:
       target: prod
   worker:
     extends:
-      file: docker-compose.yml
+      file: docker-compose.yaml
       service: worker
     image: !reset null
     build:
@@ -20,7 +20,7 @@ services:
       target: prod
   db:
     extends:
-      file: docker-compose.yml
+      file: docker-compose.yaml
       service: db
     ports:
       - 5432:5432
