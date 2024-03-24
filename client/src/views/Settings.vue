@@ -280,8 +280,8 @@
                 color="info"
                 variant="tonal"
         >
-          You already have an active YouTube connection. Please use the Reset YouTube Connection button below to
-          adjust your YouTube OAuth2 client details.
+          You currently have an active YouTube connection. Use the <strong>Reset YouTube Connection</strong> button
+          below to adjust your YouTube OAuth2 client details.
         </VAlert>
         <AutosavingTextInput :on-submit="submit"
                              :initial-value="settingsStore.settings?.googleClientId"

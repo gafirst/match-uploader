@@ -2,18 +2,30 @@ import { acceptHMRUpdate, defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { usePlaylistsStore } from "@/stores/playlists";
 import { useIntervalFn } from "@vueuse/core";
-import { LiveModeState } from "@/types/liveMode/LiveModeState";
+import { LiveModeStatus } from "@/types/liveMode/LiveModeStatus";
 import { useMatchStore } from "@/stores/match";
+import { useSettingsStore } from "@/stores/settings";
+import { PLAYOFF_DOUBLE_ELIM } from "@/types/MatchType";
+import { LiveModeRequirements, LiveModeUnsatisfiedRequirements } from "@/types/liveMode/LiveModeRequirements";
 
 export const useLiveModeStore = defineStore("liveMode", () => {
   const lastTick = ref<Date | null>(null);
-  const state = ref<LiveModeState>(LiveModeState.SETUP);
+  const state = ref<LiveModeStatus>(LiveModeStatus.STOPPED);
 
+  const settingsStore = useSettingsStore();
   const playlistStore = usePlaylistsStore();
   const matchStore = useMatchStore();
 
-  const allowLiveMode = computed(() => {
-    return matchStore.selectedMatchKey;
+  const requirements = computed<LiveModeRequirements>(() => {
+    return {
+      startingMatchKeyKnown: !!matchStore.selectedMatchKey,
+      settingsLoaded: !settingsStore.isFirstLoad,
+      doubleElimPlayoffs: settingsStore.settings?.playoffsType === PLAYOFF_DOUBLE_ELIM,
+    };
+  });
+
+  const isAllowed = computed(() => {
+    return Object.values(requirements.value).every(requirementMet => requirementMet);
   });
   async function areAllVideosPresent() {
     await playlistStore.getPlaylists();
@@ -40,13 +52,13 @@ export const useLiveModeStore = defineStore("liveMode", () => {
     lastTick.value = new Date();
 
     console.log(new Date().toISOString(), "Live mode tick:", state.value);
-    if (state.value === LiveModeState.WAITING) {
-      state.value = LiveModeState.FETCH_VIDEOS;
+    if (state.value === LiveModeStatus.WAITING) {
+      state.value = LiveModeStatus.FETCH_VIDEOS;
       await matchStore.getMatchVideos();
 
       // fixme: all this nesting is gross
       if (await areAllVideosPresent()) {
-        state.value = LiveModeState.QUEUE_UPLOADS;
+        state.value = LiveModeStatus.QUEUE_UPLOADS;
         // await matchStore.queueMatchVideos();
         if (!matchStore.allowMatchUpload) {
           console.error("Cannot trigger upload right now, check matchStore"); // fixme
@@ -54,12 +66,12 @@ export const useLiveModeStore = defineStore("liveMode", () => {
           await matchStore.uploadVideos();
           // fixme: check if it succeeded?
 
-          state.value = LiveModeState.ADVANCE_MATCH;
+          state.value = LiveModeStatus.ADVANCE_MATCH;
           await matchStore.advanceMatch();
-          state.value = LiveModeState.WAITING;
+          state.value = LiveModeStatus.WAITING;
         }
       } else {
-        state.value = LiveModeState.WAITING;
+        state.value = LiveModeStatus.WAITING;
       }
     }
   }
@@ -74,8 +86,13 @@ export const useLiveModeStore = defineStore("liveMode", () => {
     }
 
     resume();
-    state.value = LiveModeState.WAITING;
+    state.value = LiveModeStatus.WAITING;
     await triggerImmediateTick();
+  }
+
+  function deactivate() {
+    pause();
+    state.value = LiveModeStatus.STOPPED;
   }
 
   async function triggerImmediateTick() {
@@ -84,9 +101,11 @@ export const useLiveModeStore = defineStore("liveMode", () => {
 
   return {
     activate,
-    allowLiveMode,
+    deactivate,
     isActive,
+    isAllowed,
     lastTick,
+    requirements,
     state,
     triggerImmediateTick,
   };
