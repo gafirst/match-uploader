@@ -11,7 +11,7 @@
       <div v-else>
         <h2>General</h2>
         <AutosavingTextInput :key="`eventName-${dataRefreshKey}`"
-                             :on-submit="submit"
+                             :on-submit="submitEventName"
                              :initial-value="settingsStore.settings?.eventName"
                              name="eventName"
                              label="Event name"
@@ -389,14 +389,20 @@ async function submit(settingName: string, value: string | boolean, settingType:
   return await settingsStore.saveSetting(settingName, value, settingType);
 }
 
+async function submitEventName(settingName: string, value: string | boolean, settingType: SettingType) {
+  // TODO(#114): Ideally we could alert other client instances that the event name has changed
+  const submitResult = await submit(settingName, value, settingType);
+  await matchStore.getMatchVideos();
+  return submitResult;
+}
+
 async function submitEventCode(settingName: string, value: string | boolean, settingType: SettingType) {
-  // TODO(#113): Ideally we could alert other client instances that the event code has changed
+  // TODO(#114): Ideally we could alert other client instances that the event code has changed
   const submitResult = await submit(settingName, value, settingType);
   await matchListStore.getMatchList(true);
   matchStore.clearSelectedMatch();
   return submitResult;
 }
-
 
 async function saveDescriptionTemplate(settingName: string, value: string, settingType: SettingType) {
   return await settingsStore.saveDescriptionTemplate(value);
