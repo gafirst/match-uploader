@@ -29,6 +29,26 @@ export const useMatchStore = defineStore("match", () => {
     await getSuggestedDescription();
   }
 
+  /**
+   * Utility function to completely clear out the selected match and all related data that is derived from it.
+   */
+  function clearSelectedMatch() {
+    // Clear selected match key
+    selectedMatchKey.value = null;
+
+    // Clear data derived from selected match key:
+    matchVideos.value = [];
+    description.value = null;
+
+    // Clear loading/error states
+    nextMatchLoading.value = false;
+    nextMatchError.value = "";
+    matchVideosLoading.value = false;
+    matchVideoError.value = "";
+    descriptionLoading.value = false;
+    descriptionFetchError.value = "";
+  }
+
   async function getPossibleNextMatches(): Promise<PossibleNextMatches|undefined> {
     if (!selectedMatchKey.value) {
       return;
@@ -291,6 +311,7 @@ export const useMatchStore = defineStore("match", () => {
     allMatchVideosQueued,
     allMatchVideosUploaded,
     allowMatchUpload,
+    clearSelectedMatch,
     description,
     descriptionFetchError,
     descriptionLoading,
