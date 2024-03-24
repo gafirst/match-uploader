@@ -1,0 +1,15 @@
+name: Feedback
+description: General thoughts and opinions | Feature requests
+labels: ["type / feedback", "status / grooming"]
+body:
+  - type: textarea
+    attributes:
+      label: Feedback
+      description: Include useful context such as what you were trying to do, what you expected, and what actually happened. Include screenshots if relevant.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Match Uploader version
+    validations:
+      required: true

@@ -1,0 +1,41 @@
+name: Bug report
+description: I found a bug | Something isn't working
+labels: ["type / bug", "status / grooming"]
+body:
+  - type: textarea
+    attributes:
+      label: Bug description
+      description: Describe what you were trying to do, what you expected, and what actually happened. Include screenshots if possible.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Match Uploader version
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Are you running Match Uploader using the official Docker Compose setup?
+      options:
+        - Select a value...
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Which part(s) of Match Uploader are affected?
+      multiple: true
+      options:
+        - Server
+        - Client (frontend)
+        - Worker
+        - Database
+        - YouTube integration
+        - The Blue Alliance integration
+        - FRC Events integration
+  - type: textarea
+    attributes:
+      label: Relevant error or log output
+      description: If there are logs or errors related to this problem, include them here. Make sure to note which component the logs came from. This will be automatically formatted into code, so no need for backticks.
+      render: shell
