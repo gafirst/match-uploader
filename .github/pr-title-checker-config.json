@@ -1,0 +1,17 @@
+{
+  "LABEL": {
+    "name": "",
+    "color": "EEEEEE"
+  },
+  "CHECKS": {
+    "prefixes": ["feat: ", "ci: ", "docs: ", "fix: ", "perf:", "revert: "],
+    "regexp": "^(ci:.{0,69}|fix:.{0,68}|(feat|docs|perf):.{0,67}|revert:.{0,65}$",
+    "regexpFlags": "",
+    "ignoreLabels" : []
+  },
+  "MESSAGES": {
+    "success": "All OK",
+    "failure": "PR title must start with one of the following prefixes: feat:, ci:, docs:, refactor:, fix:, perf:, revert: and have a maximum length of 72 characters",
+    "notice": ""
+  }
+}

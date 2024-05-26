@@ -2,7 +2,7 @@
 name: pr
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
 jobs:
   task-list-checker:
     runs-on: ubuntu-latest
@@ -12,3 +12,11 @@ jobs:
         uses: Shopify/task-list-checker@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+  title-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: thehanimo/pr-title-checker@v1.4.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pass_on_octokit_error: false
+          configuration_path: .github/pr-title-checker-config.json

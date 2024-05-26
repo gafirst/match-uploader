@@ -186,22 +186,20 @@ as part of a change, be sure to include a migration that can run on startup to a
 ## Releases
 
 To trigger an automatic version increment and create releases, make sure the commit message when merging your PR starts
-with a type and scope, followed by a colon and a description (it's easiest to do this if you set your PR title correctly
-when you create it). For example:
+with a type and scope, followed by a colon and a description. For example:
 ```
-type(scope): Brief description of changes
-feat(youtube): Improve upload error handling
-ci(github): Add automatic release workflow
-docs(readme): Add release instructions
-refactor(server): Move video upload to separate module
-build(docker): Add docker-compose file
-fix(client): Fix bug when uploading videos
+type: Brief description of changes
+feat: Upload videos asynchronously
+ci: Add automatic release workflow
+ci: Add docker-compose file
+docs: Add release instructions
+perf: Move video upload to separate module
+fix: Fix bug when uploading videos
 ```
 
 The exact format required is based on the Angular commit message format. See 
 https://gist.github.com/brianclements/841ea7bffdb01346392c for more details. The `type` must be one of the Angular
-commit message format types. No specific value is required for `scope`, though we may further define this as the project
-matures.
+commit message format types. We do not use the `scope` field, so you should omit it from your PR title.
 
 The release process will trigger automatically once your PR is merged. A GitHub tag and release will be created, and a
 new production image will be pushed to GitHub Container Registry.
