@@ -29,6 +29,7 @@ module.exports = {
         "void": "always",
       },
     }],
+    "max-len": "off",
     "vue/max-len": ["error", {
       "code": 120,
     }],
