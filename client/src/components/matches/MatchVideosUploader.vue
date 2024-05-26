@@ -41,7 +41,8 @@
       <div v-else>
         <p class="mb-2">No match selected</p>
       </div>
-      <VAlert v-if="!matchStore.description && !matchStore.allMatchVideosQueued && !matchStore.allMatchVideosUploaded"
+      <VAlert v-if="matchStore.selectedMatchKey && !matchStore.description && !matchStore.descriptionLoading
+                && !matchStore.allMatchVideosQueued && !matchStore.allMatchVideosUploaded"
               color="error"
               variant="tonal"
               class="mt-2 mb-2"

@@ -113,7 +113,6 @@ export const useLiveModeStore = defineStore("liveMode", () => {
       const maxAttempts = 2;
       let shouldCheckAgain = true;
 
-      // FIXME: what happens if the description isn't available?
       while (attempts < maxAttempts && shouldCheckAgain) {
         attempts++;
 
@@ -142,13 +141,13 @@ export const useLiveModeStore = defineStore("liveMode", () => {
             setError("Videos cannot be queued for upload right now. Check the upload form for errors.");
             console.error("Cannot trigger upload right now, check matchStore");
           } else {
-            await matchStore.uploadVideos(); // FIXME: check if all upload job creations succeeded?
+            await matchStore.uploadVideos();
             if (matchStore.allMatchVideosQueued) {
               state.value = LiveModeStatus.ADVANCE_MATCH;
               await matchStore.advanceMatch();
             } else {
               shouldCheckAgain = false;
-              setError("All videos were not queued for upload; please check for errors in the upload form");
+              setError("Some videos were not queued for upload. Check the upload form for errors.");
             }
           }
         } else { // If videos aren't present (or an error occurred while checking), switch to slow mode
@@ -181,7 +180,7 @@ export const useLiveModeStore = defineStore("liveMode", () => {
     console.log(`setFastTicks: ${enableFastTicks}`);
     if (enableFastTicks) {
       slowPause();
-      fastResume(); // FIXME: is it problematic to call this twice?
+      fastResume();
     } else {
       fastPause();
       slowResume();
@@ -189,8 +188,8 @@ export const useLiveModeStore = defineStore("liveMode", () => {
   }
 
   async function activate() {
-    if (!matchStore.selectedMatchKey) { // FIXME: replace with requirements check
-      console.error("Cannot activate live mode because a match is not selected");
+    if (!isAllowed.value) {
+      console.error("activate: Cannot activate live mode because isAllowed is false");
       state.value = LiveModeStatus.ERROR;
       return;
     }
