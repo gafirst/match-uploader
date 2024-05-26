@@ -49,12 +49,20 @@ export const useMatchStore = defineStore("match", () => {
     descriptionFetchError.value = "";
   }
 
-  async function getPossibleNextMatches(): Promise<PossibleNextMatches|undefined> {
+  async function getPossibleNextMatches(): Promise<PossibleNextMatches | undefined> {
     if (!selectedMatchKey.value) {
       return;
     }
 
-    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/nextMatch`);
+    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/nextMatch`)
+      .catch((error) => {
+        nextMatchError.value = `Unable to retrieve possible next matches for ${selectedMatchKey.value}: ${error}`;
+        return null;
+      });
+
+    if (!result) {
+      return;
+    }
 
     if (!result.ok) {
       const message = `Unable to retrieve possible next matches for ${selectedMatchKey.value}`;
@@ -90,6 +98,10 @@ export const useMatchStore = defineStore("match", () => {
     nextMatchLoading.value = true;
 
     const candidates = await getPossibleNextMatches();
+    if (!candidates) {
+      nextMatchLoading.value = false;
+      return;
+    }
 
     let foundNextMatch = false;
     let attempts = 0;
@@ -135,7 +147,16 @@ export const useMatchStore = defineStore("match", () => {
     matchVideosLoading.value = true;
     matchVideoError.value = "";
 
-    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/videos/recommend?isReplay=${isReplay.value}`);
+    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/videos/recommend?isReplay=${isReplay.value}`)
+      .catch((error) => {
+        matchVideoError.value = `Unable to retrieve video file suggestions for ${selectedMatchKey.value}: ${error}`;
+        matchVideosLoading.value = false;
+        return null;
+      });
+
+    if (!result) {
+      return;
+    }
 
     if (!result.ok) {
       const message = `Unable to retrieve video file suggestions for ${selectedMatchKey.value}`;
@@ -164,7 +185,7 @@ export const useMatchStore = defineStore("match", () => {
   });
 
   function videoIsUploaded(video: MatchVideoInfo): boolean {
-    return video.isUploaded || workerStore.jobHasStatus(video.workerJobId,[WorkerJobStatus.COMPLETED]);
+    return video.isUploaded || workerStore.jobHasStatus(video.workerJobId, [WorkerJobStatus.COMPLETED]);
   }
 
   const allMatchVideosUploaded = computed(() => {
@@ -182,7 +203,7 @@ export const useMatchStore = defineStore("match", () => {
     video.jobCreationError = null;
 
     if (!settingsStore.settings?.youTubeVideoPrivacy) {
-        throw new Error("Unable to upload video: YouTube video privacy setting is undefined");
+      throw new Error("Unable to upload video: YouTube video privacy setting is undefined");
     }
 
     const response = await fetch("/api/v1/youtube/upload", {
@@ -198,7 +219,15 @@ export const useMatchStore = defineStore("match", () => {
         description: description.value,
         videoPrivacy: settingsStore.settings.youTubeVideoPrivacy,
       }),
+    }).catch((error) => {
+      video.jobCreationError = `Unable to create job: ${error}`;
+      video.isRequestingJob = false;
+      return null;
     });
+
+    if (!response) {
+      return;
+    }
 
     if (!response.ok) {
       video.jobCreationError = `API error (${response.status} ${response.statusText}): Unable to create job`;
@@ -207,7 +236,6 @@ export const useMatchStore = defineStore("match", () => {
     }
 
     const result: any = await response.json();
-    console.log("result", result);
 
     if (response.ok) {
       if (result.workerJob && result.workerJob.jobId) {
@@ -236,7 +264,12 @@ export const useMatchStore = defineStore("match", () => {
   }
 
   async function uploadVideos(): Promise<void> {
-    // FIXME: should this check that uploads are allowed?
+    if (!allowMatchUpload.value) {
+      console.error("uploadVideos: allowMatchUpload returned false");
+      matchVideoError.value = "Videos can't be queued for upload right now. Check the upload form for errors.";
+      return;
+    }
+
     uploadInProgress.value = true;
     for (const video of matchVideos.value) {
       if (!video.isUploaded) {
@@ -258,7 +291,16 @@ export const useMatchStore = defineStore("match", () => {
     descriptionLoading.value = true;
     descriptionFetchError.value = "";
 
-    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/description`);
+    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/description`)
+      .catch((error) => {
+        descriptionFetchError.value = `Unable to retrieve description for ${selectedMatchKey.value}: ${error}`;
+        descriptionLoading.value = false;
+        return null;
+      });
+
+    if (!result) {
+      return;
+    }
 
     if (!result.ok) {
       const message = `Unable to retrieve description for ${selectedMatchKey.value}`;
@@ -290,7 +332,7 @@ export const useMatchStore = defineStore("match", () => {
       && !allMatchVideosUploaded.value;
   });
 
-  function postUploadStepsSucceeded (video: MatchVideoInfo): boolean {
+  function postUploadStepsSucceeded(video: MatchVideoInfo): boolean {
     if (!video.workerJobId) {
       return false;
     }

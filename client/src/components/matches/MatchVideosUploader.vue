@@ -4,7 +4,18 @@
     <VCardText>
       <LoadingSpinner v-if="matchStore.matchVideosLoading" class="mt-2 mb-4" />
       <div v-else-if="matchStore.selectedMatchKey">
-        <VChip v-if="matchStore.isReplay" color="info">Replay</VChip>
+        <VChip v-if="matchStore.isReplay"
+               class="mb-2"
+               color="info"
+        >
+          Replay
+        </VChip>
+        <VAlert v-if="matchStore.matchVideoError"
+                class="mb-2"
+                color="error"
+                variant="tonal"
+                :text="matchStore.matchVideoError"
+        />
         <VList v-if="matchStore.matchVideos.length">
           <MatchVideoListItem v-for="video in matchStore.matchVideos"
                               :key="video.path"
@@ -30,10 +41,18 @@
       <div v-else>
         <p class="mb-2">No match selected</p>
       </div>
+      <VAlert v-if="!matchStore.description && !matchStore.allMatchVideosQueued && !matchStore.allMatchVideosUploaded"
+              color="error"
+              variant="tonal"
+              class="mt-2 mb-2"
+      >
+        Uploads cannot be queued while the video description field is empty. To upload videos for this match, regenerate
+        or manually enter a description.
+      </VAlert>
       <VAlert v-if="!!matchStore.descriptionFetchError"
               color="warning"
               variant="tonal"
-              class="mt-2 mb-4"
+              class="mt-2 mb-2"
       >
         An error occurred while fetching the video description for this match. You may want to confirm its accuracy
         before uploading.

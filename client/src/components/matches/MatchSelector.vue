@@ -11,7 +11,7 @@
       </VAlert>
 
       <VAlert v-if="!!matchStore.nextMatchError"
-              color="warning"
+              color="error"
               variant="tonal"
               class="mb-2"
       >

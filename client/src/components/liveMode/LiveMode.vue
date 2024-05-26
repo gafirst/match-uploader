@@ -7,7 +7,7 @@
     <VCardText style="color: initial">
       <VAlert color="purple"
               variant="tonal"
-              class="mb-2"
+              class="mb-4"
               density="compact"
               icon="mdi-bug-outline"
       >
@@ -27,7 +27,7 @@
         <VDivider class="mb-2 border-opacity-25" thickness="2" />
       </template>
       <template v-if="!liveMode.isAllowed">
-        <p>Some requirements to enable Live Mode are not met:</p>
+        <p>Some requirements to use Live Mode are not met:</p>
         <VList>
           <TaskListItem v-for="[requirement, requirementMet] in Object.entries(liveMode.requirements).filter(([_, met]) => !met)"
                         :key="requirement"
@@ -38,7 +38,7 @@
           </TaskListItem>
         </VList>
       </template>
-      <VAlert v-else-if="!liveMode.isActive"
+      <VAlert v-if="liveMode.isAllowed && !liveMode.isActive"
               variant="outlined"
               color="success"
               density="compact"
@@ -48,10 +48,10 @@
         Live Mode is ready!
       </VAlert>
       <template v-else>
-        <h2 class="mt-4 mb-2">
-          Live Mode is active <VChip v-if="liveMode.isFastActive">Fast</VChip><VChip v-if="liveMode.isSlowActive">Slow</VChip>
+        <h2 v-if="liveMode.isActive" class="mb-2">
+          Live Mode is active <VChip v-if="liveMode.error || liveMode.state === LiveModeStatus.ERROR">Paused</VChip><VChip v-else-if="liveMode.isFastActive">Fast</VChip><VChip v-else-if="liveMode.isSlowActive">Slow</VChip>
         </h2>
-        <p class="mb-3">
+        <p v-if="liveMode.isActive" class="mb-3">
           Keep this tab open—Live Mode runs in your browser.
         </p>
 
@@ -65,8 +65,8 @@
           <VAlertTitle class="mb-2">Live Mode is paused due to an error</VAlertTitle>
           <p class="mb-2">{{ liveMode.error ?? "An unknown error occurred" }}</p>
 
-          <p class="mb-2">Once you've resolved the error, press <strong>Clear error</strong> below to try again.</p>
-          <VBtn class="mb-2" @click="liveMode.clearErrorAndTick">Clear error</VBtn>
+          <p class="mb-2">Once you've resolved the error, press <strong>Retry</strong> below to try again.</p>
+          <VBtn class="mb-2" @click="liveMode.clearErrorAndTick">Retry</VBtn>
         </VAlert>
 
         <VAlert v-else-if="liveMode.missingPlaylistLabels.length > 0"
@@ -123,7 +123,7 @@
           Queueing videos for upload...
         </VAlert>
 
-        <VAlert v-if="liveMode.state === LiveModeStatus.STOPPED"
+        <VAlert v-if="liveMode.isActive && liveMode.state === LiveModeStatus.STOPPED"
                 variant="outlined"
                 color="gray"
                 density="compact"

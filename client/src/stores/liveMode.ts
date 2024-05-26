@@ -6,8 +6,7 @@ import { LiveModeStatus } from "@/types/liveMode/LiveModeStatus";
 import { useMatchStore } from "@/stores/match";
 import { useSettingsStore } from "@/stores/settings";
 import { PLAYOFF_DOUBLE_ELIM } from "@/types/MatchType";
-import { LiveModeRequirements, LiveModeUnsatisfiedRequirements } from "@/types/liveMode/LiveModeRequirements";
-import LiveMode from "@/components/liveMode/LiveMode.vue";
+import { LiveModeRequirements } from "@/types/liveMode/LiveModeRequirements";
 
 export const useLiveModeStore = defineStore("liveMode", () => {
   const lastTick = ref<Date | null>(null);
@@ -50,6 +49,7 @@ export const useLiveModeStore = defineStore("liveMode", () => {
       startingMatchKeyKnown: !!matchStore.selectedMatchKey,
       settingsLoaded: !settingsStore.isFirstLoad,
       doubleElimPlayoffs: settingsStore.settings?.playoffsType === PLAYOFF_DOUBLE_ELIM,
+      replayDisabled: !matchStore.isReplay,
     };
   });
 
@@ -95,57 +95,74 @@ export const useLiveModeStore = defineStore("liveMode", () => {
   }
 
   async function liveModeTick() {
-    lastTick.value = new Date();
+    try {
+      lastTick.value = new Date();
 
-    console.log(new Date().toISOString(), "Live mode tick:", state.value);
-    if (state.value !== LiveModeStatus.WAITING) {
-      console.log(`Live mode tick: state is ${state.value}, stopping tick`);
-      return;
-    }
+      console.log(new Date().toISOString(), "Live mode tick:", state.value);
+      if (state.value !== LiveModeStatus.WAITING) {
+        console.log(`Live mode tick: state is ${state.value}, stopping tick`);
+        return;
+      }
 
-    let attempts = 0;
-    const maxAttempts = 2;
-    let shouldCheckAgain = true;
+      if (!isAllowed.value) {
+        setError("The Live Mode requirements are no longer met.");
+        return;
+      }
 
-    // FIXME: what happens if the description isn't available?
-    while (attempts < maxAttempts && shouldCheckAgain) {
-      attempts++;
+      let attempts = 0;
+      const maxAttempts = 2;
+      let shouldCheckAgain = true;
 
-      state.value = LiveModeStatus.FETCH_VIDEOS;
-      await matchStore.getMatchVideos();
+      // FIXME: what happens if the description isn't available?
+      while (attempts < maxAttempts && shouldCheckAgain) {
+        attempts++;
 
-      if (await areAllRequiredVideosPresent()) {
-        setFastTicks(true);
-        state.value = LiveModeStatus.QUEUE_UPLOADS;
+        state.value = LiveModeStatus.FETCH_VIDEOS;
+        if (matchStore.isReplay) {
+          setError("The Replay flag is set in the upload form. You must disable it to proceed.");
+          return;
+        }
 
-        if (matchStore.allMatchVideosUploaded) {
-          state.value = LiveModeStatus.ADVANCE_MATCH;
-          await matchStore.advanceMatch();
-        } else if (!matchStore.allowMatchUpload) {
-          shouldCheckAgain = false;
-          setError("Videos cannot be queued for upload right now. Check the upload form for errors.");
-          console.error("Cannot trigger upload right now, check matchStore");
-        } else {
-          await matchStore.uploadVideos(); // FIXME: check if all upload job creations succeeded?
-          if (matchStore.allMatchVideosQueued) {
+        await matchStore.getMatchVideos();
+
+        if (matchStore.matchVideoError) {
+          setError("The videos list failed to refresh. Check the upload form for errors.");
+          return;
+        }
+
+        if (await areAllRequiredVideosPresent()) {
+          setFastTicks(true);
+          state.value = LiveModeStatus.QUEUE_UPLOADS;
+
+          if (matchStore.allMatchVideosUploaded) {
             state.value = LiveModeStatus.ADVANCE_MATCH;
             await matchStore.advanceMatch();
-          } else {
+          } else if (!matchStore.allowMatchUpload) {
             shouldCheckAgain = false;
-            setError("All videos were not queued for upload; please check for errors in the upload form");
+            setError("Videos cannot be queued for upload right now. Check the upload form for errors.");
+            console.error("Cannot trigger upload right now, check matchStore");
+          } else {
+            await matchStore.uploadVideos(); // FIXME: check if all upload job creations succeeded?
+            if (matchStore.allMatchVideosQueued) {
+              state.value = LiveModeStatus.ADVANCE_MATCH;
+              await matchStore.advanceMatch();
+            } else {
+              shouldCheckAgain = false;
+              setError("All videos were not queued for upload; please check for errors in the upload form");
+            }
           }
+        } else { // If videos aren't present (or an error occurred while checking), switch to slow mode
+          setFastTicks(false);
+          shouldCheckAgain = false;
         }
-      } else {
-        if (error.value) {
-          state.value = LiveModeStatus.ERROR;
-        }
-        // If videos aren't present, drop back to slow mode
-        setFastTicks(false);
-        shouldCheckAgain = false;
       }
+      state.value = LiveModeStatus.WAITING;
+    } catch (e) {
+      console.error("Unhandled during live mode tick", e);
+      setError(`Live Mode encountered an error that could not be handled elsewhere: ${e}. ` +
+        "This is unintentional, so please file a bug report.");
+      state.value = LiveModeStatus.ERROR;
     }
-
-    state.value = LiveModeStatus.WAITING;
   }
 
   const {
@@ -187,6 +204,7 @@ export const useLiveModeStore = defineStore("liveMode", () => {
   function deactivate() {
     fastPause();
     slowPause();
+    error.value = null;
     state.value = LiveModeStatus.STOPPED;
   }
 
