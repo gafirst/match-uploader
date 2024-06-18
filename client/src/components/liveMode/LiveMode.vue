@@ -29,7 +29,8 @@
       <template v-if="!liveMode.isAllowed">
         <p>Some requirements to use Live Mode are not met:</p>
         <VList>
-          <TaskListItem v-for="[requirement, requirementMet] in Object.entries(liveMode.requirements).filter(([_, met]) => !met)"
+          <TaskListItem v-for="[requirement, requirementMet] in
+                          Object.entries(liveMode.requirements).filter(([_, met]) => !met)"
                         :key="requirement"
                         :complete="requirementMet"
                         density="compact"
