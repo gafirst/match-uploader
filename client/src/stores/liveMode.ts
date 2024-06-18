@@ -7,6 +7,7 @@ import { useMatchStore } from "@/stores/match";
 import { useSettingsStore } from "@/stores/settings";
 import { PLAYOFF_DOUBLE_ELIM } from "@/types/MatchType";
 import { LiveModeRequirements } from "@/types/liveMode/LiveModeRequirements";
+import { useWorkerStore } from "@/stores/worker";
 
 export const useLiveModeStore = defineStore("liveMode", () => {
   const lastTick = ref<Date | null>(null);
@@ -32,8 +33,8 @@ export const useLiveModeStore = defineStore("liveMode", () => {
   const settingsStore = useSettingsStore();
   const playlistStore = usePlaylistsStore();
   const matchStore = useMatchStore();
+  const workerStore = useWorkerStore();
 
-  const lastAction = ref<LiveModeStatus | null>(null);
   const missingPlaylistLabels = ref<string[]>([]);
 
   const estimatedNextTick = computed(() => {
@@ -50,6 +51,7 @@ export const useLiveModeStore = defineStore("liveMode", () => {
       settingsLoaded: !settingsStore.isFirstLoad,
       doubleElimPlayoffs: settingsStore.settings?.playoffsType === PLAYOFF_DOUBLE_ELIM,
       replayDisabled: !matchStore.isReplay,
+      workerConnected: workerStore.isConnected,
     };
   });
 
@@ -67,40 +69,25 @@ export const useLiveModeStore = defineStore("liveMode", () => {
     missingPlaylistLabels.value = [];
     await playlistStore.getPlaylists();
 
-    console.log("playlistStore.playlists", playlistStore.playlists);
-
     if (playlistStore.error || !playlistStore.playlists) {
       setError("Cannot determine if all required videos are present due to an error loading playlist " +
         `data: ${playlistStore.error}`);
       return false;
     }
 
-    // FIXME: does not return all missing labels because of `every`
-    return playlistStore.playlists.every((playlist) => {
-      const result = matchStore.matchVideos.some((video) => {
-          console.log("video.videoLabel?.toLowerCase() ?? \"unlabeled\"", video.videoLabel?.toLowerCase() ?? "unlabeled");
-          console.log("playlist.label.toLowerCase()", playlist.label.toLowerCase());
-          return (video.videoLabel?.toLowerCase() ?? "unlabeled") === playlist.label.toLowerCase();
-        },
-      );
+    const requiredLabels = playlistStore.playlists.map((playlist) => playlist.label.toLowerCase());
+    const actualLabels = matchStore.matchVideos.map((video) => video.videoLabel?.toLowerCase() ?? "unlabeled");
+    missingPlaylistLabels.value = requiredLabels.filter((label) => !actualLabels.includes(label));
 
-      console.log("result for playlist", playlist.label, result);
-
-      if (!result) {
-        missingPlaylistLabels.value.push(playlist.label);
-      }
-
-      return result;
-    });
+    return !missingPlaylistLabels.value.length;
   }
 
   async function liveModeTick() {
     try {
       lastTick.value = new Date();
 
-      console.log(new Date().toISOString(), "Live mode tick:", state.value);
       if (state.value !== LiveModeStatus.WAITING) {
-        console.log(`Live mode tick: state is ${state.value}, stopping tick`);
+        console.log(`[${new Date().toISOString()}] Live mode tick: state is ${state.value}, stopping tick`);
         return;
       }
 

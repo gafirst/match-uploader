@@ -49,7 +49,7 @@
       </VAlert>
       <template v-else>
         <h2 v-if="liveMode.isActive" class="mb-2">
-          Live Mode is active <VChip v-if="liveMode.error || liveMode.state === LiveModeStatus.ERROR">Paused</VChip><VChip v-else-if="liveMode.isFastActive">Fast</VChip><VChip v-else-if="liveMode.isSlowActive">Slow</VChip>
+          Live Mode is active <VChip v-if="liveMode.error || liveMode.state === LiveModeStatus.ERROR">Paused</VChip>
         </h2>
         <p v-if="liveMode.isActive" class="mb-3">
           Keep this tab open—Live Mode runs in your browser.
@@ -76,8 +76,21 @@
                 icon="mdi-alert-circle"
                 class="mb-4"
         >
-          Missing required video{{ liveMode.missingPlaylistLabels.length > 1 ? "s" : "" }}:
-          {{ liveMode.missingPlaylistLabels.sort().join(", ") }}
+          <VAlertTitle class="mb-2">Waiting to proceed</VAlertTitle>
+          <p class="mb-2">
+            Missing required video{{ liveMode.missingPlaylistLabels.length > 1 ? "s" : "" }}:
+            {{ liveMode.missingPlaylistLabels.sort().join(", ") }}
+          </p>
+          <p class="mb-2">
+            <template v-if="liveMode.missingPlaylistLabels.length > 1">
+              Videos for the current match with the labels above are still expected.
+            </template>
+            <template v-else>
+              A video for the current match with the label above is still expected.
+            </template>
+            If this is incorrect, go to <RouterLink to="/settings">Settings</RouterLink> and remove
+            any unnecessary playlist mappings.
+          </p>
         </VAlert>
 
         <VAlert v-if="liveMode.state === LiveModeStatus.WAITING"

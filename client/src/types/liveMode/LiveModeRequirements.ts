@@ -3,6 +3,7 @@ export interface LiveModeRequirements {
   startingMatchKeyKnown: boolean;
   doubleElimPlayoffs: boolean;
   replayDisabled: boolean;
+  workerConnected: boolean;
 }
 
 export type LiveModeUnsatisfiedRequirements = [keyof LiveModeRequirements];
@@ -14,6 +15,7 @@ export function liveModeRequirementToUiString(requirement: string): string | nul
     doubleElimPlayoffs:
       "Playoffs type is double eliminations",
     replayDisabled: "Replay flag is disabled in the upload form",
+    workerConnected: "Worker is connected",
   };
 
   if (!Object.hasOwn(outputMap, requirement)) {
