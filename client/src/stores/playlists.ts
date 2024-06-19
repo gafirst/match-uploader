@@ -30,6 +30,7 @@ export const usePlaylistsStore = defineStore("playlists", () => {
 
     async function getPlaylists() {
         loading.value = true;
+        error.value = "";
         const result = await fetch("/api/v1/youtube/playlists");
 
         if (handleApiError(result, "Unable to load playlist mappings")) {

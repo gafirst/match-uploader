@@ -29,9 +29,7 @@ module.exports = {
         "void": "always",
       },
     }],
-    "vue/max-len": ["error", {
-      "code": 120,
-    }],
+    "vue/max-len": "off",
     "vue/max-attributes-per-line": ["error", {
       singleline: 2,
     }],

@@ -1,6 +1,7 @@
 <template>
   <VRow>
     <VCol cols="12" md="4">
+      <LiveMode />
       <h1>Upload match</h1>
       <VAlert v-if="!!error"
               color="error"
@@ -81,6 +82,7 @@ import MissingPlaylistMapping from "@/components/help/MissingPlaylistMapping.vue
 import JobsList from "@/components/jobs/JobsList.vue";
 import {useWorkerStore} from "@/stores/worker";
 import MatchMetadata from "@/components/matches/MatchMetadata.vue";
+import LiveMode from "@/components/liveMode/LiveMode.vue";
 
 const error = ref("");
 

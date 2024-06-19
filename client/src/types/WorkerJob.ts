@@ -6,7 +6,7 @@ export type WorkerEvent = typeof WORKER_JOB_CREATED | typeof WORKER_JOB_START | 
 
 
 export enum WorkerJobStatus {
-  PENDING= "PENDING",
+  PENDING = "PENDING",
   STARTED = "STARTED",
   COMPLETED = "COMPLETED",
   FAILED = "FAILED",
