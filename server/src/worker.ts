@@ -4,6 +4,7 @@ import logger from "jet-logger";
 import { type Socket, io } from "socket.io-client";
 import EnvVars from "@src/constants/EnvVars";
 import { PrismaClient } from "@prisma/client";
+import { autoRename } from "@src/tasks/autoRename";
 
 export const prisma = new PrismaClient();
 
@@ -60,10 +61,12 @@ async function main(): Promise<void> {
     const runner = await run({
         connectionString: EnvVars.db.connectionString,
         concurrency: 5,
+        crontabFile: "./src/crontab.txt", // FIXME: This should be configurable
         // Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
         noHandleSignals: false,
         pollInterval: 1000,
         taskList: {
+            autoRename,
             uploadVideo,
         },
     });

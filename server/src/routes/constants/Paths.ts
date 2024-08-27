@@ -46,6 +46,10 @@ const Paths = {
       Cancel: "/cancel",
     },
     ForceUnlockWorker: "/forceUnlock",
+    Debug: {
+      Base: "/debug",
+      AutoRename: "/autoRename",
+    },
   },
 };
 

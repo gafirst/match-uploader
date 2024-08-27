@@ -4,7 +4,7 @@ import { type IReq, type IRes } from "@src/routes/types/types";
 import { graphileWorkerUtils, prisma } from "@src/server";
 import { body, matchedData, param, validationResult } from "express-validator";
 import { JobStatus } from "@prisma/client";
-import { cancelJob } from "@src/services/WorkerService";
+import { cancelJob, queueJob } from "@src/services/WorkerService";
 
 export const workerRouter = Router();
 export const workerJobsRouter = Router();
@@ -153,4 +153,21 @@ async function permanentlyFailJob(req: IReq, res: IRes): Promise<IRes> {
         success: false,
         error: `Job cannot be cancelled from ${workerJob.status} status`,
     });
+}
+
+export const workerDebugRouter = Router();
+workerRouter.use(Paths.Worker.Debug.Base, workerDebugRouter);
+
+workerDebugRouter.get(Paths.Worker.Debug.AutoRename, triggerAutoRename);
+
+async function triggerAutoRename(req: IReq, res: IRes): Promise<IRes> {
+    const job = await graphileWorkerUtils.addJob("autoRename", {
+        _cron: {
+            ts: new Date().toISOString(),
+            backfill: false,
+        },
+    }, {
+        maxAttempts: 1,
+    });
+    return res.json({ success: true, job });
 }

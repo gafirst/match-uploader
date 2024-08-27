@@ -103,8 +103,8 @@ export class FrcEventsRepo {
                     (elem as FrcScoredMatchesResponse).Matches.every(isFrcScoredMatch),
             );
 
-            // For some reason, the API response still has entries for every match even when matchNumber is spedified;
-            // the irrelevant entries have the import details nulled out and the respones is returned much faster
+            // For some reason, the API response still has entries for every match even when matchNumber is specified;
+            // the irrelevant entries have the import details nulled out and the response is returned much faster
             // though. Anyways, we can get around this easily enough using `find`
             const match = result.Matches.find(match => match.matchNumber === matchNumber);
 
