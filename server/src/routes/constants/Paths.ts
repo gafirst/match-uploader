@@ -51,6 +51,13 @@ const Paths = {
       AutoRename: "/autoRename",
     },
   },
+  AutoRename: {
+    Base: "/autoRename",
+    Associations: {
+        Base: "/associations",
+        List: "/",
+    },
+  },
 };
 
 export type TPaths = Immutable<typeof Paths>;

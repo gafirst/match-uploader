@@ -43,6 +43,11 @@ const navItems = computed(() => {
       icon: "mdi-cloud-upload-outline",
     },
     {
+      title: "Auto rename",
+      to: "/autoRename",
+      icon: "mdi-auto-mode",
+    },
+    {
       title: "Worker queue",
       to: "/worker",
       icon: "mdi-tray-full",

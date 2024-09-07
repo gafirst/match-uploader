@@ -37,5 +37,6 @@ module.exports = {
     "vue/no-multiple-template-root": "off",
     "vue/singleline-html-element-content-newline": "off",
     "vue/v-slot-style": "off",
+    "vue/valid-v-slot": "off",
   },
 };

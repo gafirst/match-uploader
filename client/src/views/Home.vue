@@ -101,7 +101,7 @@ const videosMdColWidth = computed(() => {
 
 </script>
 
-<style>
+<style scoped>
 .video-preview {
   max-width: 12.25rem;
 }

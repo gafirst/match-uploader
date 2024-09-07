@@ -16,6 +16,7 @@ body {
 /* https://stackoverflow.com/a/59769716 */
 .force-text-wrap {
     -webkit-line-clamp: unset !important;
+    white-space: inherit !important;
 }
 
 .v-card-title {
