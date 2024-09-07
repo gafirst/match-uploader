@@ -19,8 +19,8 @@ autoRenameAssociationsRouter.get(
   query("status")
     .optional()
     .toUpperCase()
-    .isIn(["STRONG", "WEAK", "FAILED", "PENDING"])
-    .withMessage("Status must be one of STRONG, WEAK, FAILED, PENDING"),
+    .isIn(["UNMATCHED", "STRONG", "WEAK", "FAILED"])
+    .withMessage("Status must be one of UNMATCHED, STRONG, WEAK, FAILED"),
   getAutoRenameAssociations,
 );
 
