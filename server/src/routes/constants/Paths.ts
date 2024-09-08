@@ -55,6 +55,7 @@ const Paths = {
     Base: "/autoRename",
     Associations: {
         Base: "/associations",
+        Confirm: "/confirm",
         List: "/",
     },
   },

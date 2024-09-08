@@ -6,8 +6,9 @@ import MatchKey from "@src/models/MatchKey";
 import { getSettings } from "@src/services/SettingsService";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
 import { Match } from "@src/models/Match";
-import { matchedData, query, validationResult } from "express-validator";
+import { body, matchedData, query, validationResult } from "express-validator";
 import { type AutoRenameAssociationStatus } from "@prisma/client";
+import { updateAssociationData } from "@src/services/AutoRenameService";
 
 export const autoRenameRouter = Router();
 
@@ -41,10 +42,10 @@ async function getAutoRenameAssociations(req: IReq, res: IRes): Promise<void> {
   } = matchedData(req);
 
   const where = status
-                ? {
-                    status: status as AutoRenameAssociationStatus,
-                  }
-                : undefined;
+    ? {
+      status: status as AutoRenameAssociationStatus,
+    }
+    : undefined;
 
   const associations = await prisma.autoRenameAssociation.findMany(
     {
@@ -52,7 +53,12 @@ async function getAutoRenameAssociations(req: IReq, res: IRes): Promise<void> {
     },
   );
   const associationsWithMatchNames = associations.map((association) => {
-    if (!association.matchKey) return association;
+    if (!association.matchKey) {
+      return {
+        ...association,
+        match: null,
+      };
+    }
     const matchKey = MatchKey.fromString(association.matchKey, playoffsType as PlayoffsType);
     const match = new Match(matchKey);
 
@@ -65,5 +71,38 @@ async function getAutoRenameAssociations(req: IReq, res: IRes): Promise<void> {
   res.json({
     ok: true,
     associations: associationsWithMatchNames,
+  });
+}
+
+autoRenameAssociationsRouter.put(
+  Paths.AutoRename.Associations.Confirm,
+  body("videoLabel").isString().notEmpty(),
+  body("filePath").isString().notEmpty(),
+  body("matchKey").optional().isString().notEmpty(),
+  confirmWeakAssociationRoute,
+);
+
+async function confirmWeakAssociationRoute(req: IReq, res: IRes): Promise<void> {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    res.status(400)
+      .json({
+        errors: errors.array(),
+      });
+    return;
+  }
+
+  const {
+    videoLabel,
+    filePath,
+    matchKey,
+  } = matchedData(req);
+
+  const error = await updateAssociationData(videoLabel as string, filePath as string, matchKey as string | null);
+
+  res.json({
+    ok: !error,
+    message: error,
   });
 }
