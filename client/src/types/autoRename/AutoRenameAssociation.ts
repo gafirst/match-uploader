@@ -21,7 +21,9 @@ export interface AutoRenameAssociation {
   newFileName: string | null;
   createdAt: string;
   updatedAt: string;
+  renameAfter: string | null;
   match: string;
+  isIgnored: boolean;
 }
 
 export function isAutoRenameAssociationApiResponse(x: unknown): x is AutoRenameAssociationApiResponse {
@@ -49,5 +51,7 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
     "newFileName" in x &&
     "createdAt" in x &&
     "updatedAt" in x &&
-    "match" in x;
+    "match" in x &&
+    "isIgnored" in x &&
+    "renameAfter" in x;
 }
