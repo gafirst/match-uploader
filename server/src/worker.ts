@@ -5,6 +5,7 @@ import { type Socket, io } from "socket.io-client";
 import EnvVars from "@src/constants/EnvVars";
 import { PrismaClient } from "@prisma/client";
 import { autoRename } from "@src/tasks/autoRename";
+import { renameFile } from "@src/tasks/renameFile";
 
 export const prisma = new PrismaClient();
 
@@ -67,6 +68,7 @@ async function main(): Promise<void> {
         pollInterval: 1000,
         taskList: {
             autoRename,
+            renameFile,
             uploadVideo,
         },
     });

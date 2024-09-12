@@ -56,13 +56,15 @@ model AutoRenameAssociation {
   statusReason   String?
   videoTimestamp DateTime?
 
-  associationAttempts    Int       @default(0)
-  maxAssociationAttempts Int       @default(5)
+  associationAttempts    Int     @default(0)
+  maxAssociationAttempts Int     @default(5)
   matchKey               String?
   videoLabel             String
-  renameAfter            DateTime?
-  renameCompleted        Boolean   @default(false)
-  newFileName            String?
+
+  renameAfter     DateTime?
+  renameJobId     String?
+  renameCompleted Boolean   @default(false)
+  newFileName     String?
 
   isIgnored Boolean @default(false)
 

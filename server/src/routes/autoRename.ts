@@ -8,7 +8,7 @@ import { type PlayoffsType } from "@src/models/PlayoffsType";
 import { Match } from "@src/models/Match";
 import { body, matchedData, query, validationResult } from "express-validator";
 import { type AutoRenameAssociationStatus } from "@prisma/client";
-import { updateAssociationData } from "@src/services/AutoRenameService";
+import { markAssociationIgnored, updateAssociationData } from "@src/services/AutoRenameService";
 
 export const autoRenameRouter = Router();
 
@@ -79,10 +79,10 @@ autoRenameAssociationsRouter.put(
   body("videoLabel").isString().notEmpty(),
   body("filePath").isString().notEmpty(),
   body("matchKey").optional().isString().notEmpty(),
-  confirmWeakAssociationRoute,
+  updateAssociation,
 );
 
-async function confirmWeakAssociationRoute(req: IReq, res: IRes): Promise<void> {
+async function updateAssociation(req: IReq, res: IRes): Promise<void> {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -99,7 +99,41 @@ async function confirmWeakAssociationRoute(req: IReq, res: IRes): Promise<void> 
     matchKey,
   } = matchedData(req);
 
-  const error = await updateAssociationData(videoLabel as string, filePath as string, matchKey as string | null);
+  const error = await updateAssociationData(videoLabel as string,
+    filePath as string,
+    matchKey as string | null,
+  );
+
+  res.json({
+    ok: !error,
+    message: error,
+  });
+}
+
+autoRenameAssociationsRouter.put(
+  Paths.AutoRename.Associations.Ignore,
+  body("videoLabel").isString().notEmpty(),
+  body("filePath").isString().notEmpty(),
+  ignoreAssociation,
+);
+
+async function ignoreAssociation(req: IReq, res: IRes): Promise<void> {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    res.status(400)
+      .json({
+        errors: errors.array(),
+      });
+    return;
+  }
+
+  const {
+    videoLabel,
+    filePath,
+  } = matchedData(req);
+
+  const error = await markAssociationIgnored(videoLabel as string, filePath as string);
 
   res.json({
     ok: !error,

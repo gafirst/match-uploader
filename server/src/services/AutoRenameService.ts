@@ -1,6 +1,7 @@
-import { prisma } from "@src/server";
+import { graphileWorkerUtils, prisma } from "@src/server";
 import { AutoRenameAssociationStatus } from "@prisma/client";
 import logger from "jet-logger";
+import { cancelJob } from "@src/services/WorkerService";
 
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
@@ -14,6 +15,10 @@ export async function updateAssociationData(
 
   if (!existingAssociation) {
     return `An association with the video label "${videoLabel}" and file path "${filePath}" does not exist`;
+  }
+
+  if (existingAssociation.isIgnored) {
+    return "Cannot update ignored association";
   }
 
   if (existingAssociation.renameCompleted) {
@@ -43,6 +48,39 @@ export async function updateAssociationData(
       status: AutoRenameAssociationStatus.STRONG,
       statusReason: `Manually approved at ${new Date().toISOString()}`,
       ...extraUpdateProps,
+    },
+  });
+}
+
+export async function markAssociationIgnored(videoLabel: string, filePath: string): Promise<string | undefined> {
+  const existingAssociation = await prisma.autoRenameAssociation.findFirst({
+    where: {
+      videoLabel,
+      filePath,
+    },
+  });
+
+  if (!existingAssociation) {
+    return `An association with the video label "${videoLabel}" and file path "${filePath}" does not exist`;
+  }
+
+  if (existingAssociation.renameJobId) {
+    await graphileWorkerUtils
+      .permanentlyFailJobs([existingAssociation.renameJobId], "Association was manually ignored");
+  }
+
+ await prisma.autoRenameAssociation.update({
+    where: {
+      videoLabel,
+      filePath,
+    },
+    data: {
+      isIgnored: true,
+      status: AutoRenameAssociationStatus.FAILED,
+      statusReason: `Manually ignored at ${new Date().toISOString()}`,
+      renameJobId: null,
+      renameCompleted: false,
+      renameAfter: null,
     },
   });
 }

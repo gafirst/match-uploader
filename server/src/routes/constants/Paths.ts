@@ -54,9 +54,10 @@ const Paths = {
   AutoRename: {
     Base: "/autoRename",
     Associations: {
-        Base: "/associations",
-        Confirm: "/confirm",
-        List: "/",
+      Base: "/associations",
+      Confirm: "/confirm",
+      Ignore: "/ignore",
+      List: "/",
     },
   },
 };

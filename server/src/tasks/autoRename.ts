@@ -1,5 +1,4 @@
 import type { JobHelpers } from "graphile-worker";
-import { type UploadVideoTaskPayload } from "@src/tasks/uploadVideo";
 import { assertIsCronPayload, type CronPayload } from "@src/tasks/types/cronPayload";
 import { getSettings } from "@src/services/SettingsService";
 import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
@@ -8,31 +7,30 @@ import { AutoRenameAssociationStatus } from "@prisma/client";
 import { prisma } from "@src/worker";
 import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
 import { getMatchList } from "@src/services/MatchesService";
+import { Match } from "@src/models/Match";
+import MatchKey from "@src/models/MatchKey";
+import { type PlayoffsType } from "@src/models/PlayoffsType";
 
 export interface AutoRenameCronPayload {
   _cron: CronPayload;
 }
 
-function assertIsUploadVideoTaskPayload(payload: unknown): asserts payload is UploadVideoTaskPayload {
+function assertIsAutoRenameCronPayload(payload: unknown): asserts payload is AutoRenameCronPayload {
   if (payload === null) {
     throw new Error(`Invalid payload (null): ${JSON.stringify(payload)}`);
   } else if (typeof payload === "undefined") {
     throw new Error(`Invalid payload (undefined): ${JSON.stringify(payload)}`);
-  } else {
-    assertIsCronPayload((payload as unknown as AutoRenameCronPayload)._cron);
-
-    // if (!(payload as unknown as AutoRenameCronPayload).title) {
-    //     throw new Error(`Invalid payload (missing required prop): ${JSON.stringify(payload)}`);
-    // }
   }
+  assertIsCronPayload((payload as unknown as AutoRenameCronPayload)._cron);
 }
 
 export async function autoRename(payload: unknown, {
   logger,
   job,
+  addJob,
 }: JobHelpers): Promise<void> {
   logger.info(JSON.stringify(payload));
-  assertIsUploadVideoTaskPayload(payload);
+  assertIsAutoRenameCronPayload(payload);
 
   const { videoSearchDirectory } = await getSettings();
 
@@ -90,6 +88,7 @@ export async function autoRename(payload: unknown, {
   logger.info(`Found ${toProcess.length} files to process`);
 
   const matches = await getMatchList();
+  const { playoffsType } = await getSettings();
 
   for (const association of toProcess) {
     // TODO: Check if file still exists
@@ -98,17 +97,18 @@ export async function autoRename(payload: unknown, {
     let closestMatch: TbaMatchSimple | null = null;
     let closestMatchDiff = Infinity;
     logger.info(`Processing ${association.filePath}`);
+
     for (const match of matches) {
-      logger.info("-------");
-      logger.info(`Checking match ${match.key}`);
+      // logger.info("-------");
+      // logger.info(`Checking match ${match.key}`);
       if (!match.actual_time || !association.videoTimestamp) {
         continue;
       }
-      logger.info(`Match start time: ${DateTime.fromSeconds(match.actual_time).toISO()}`);
+      // logger.info(`Match start time: ${DateTime.fromSeconds(match.actual_time).toISO()}`);
 
       const matchDate = DateTime.fromSeconds(match.actual_time);
       const diffSeconds = Math.abs(matchDate.diff(DateTime.fromJSDate(association.videoTimestamp)).as("seconds"));
-      logger.info(`Difference: ${diffSeconds} / closest match: ${closestMatchDiff}`);
+      // logger.info(`Difference: ${diffSeconds} / closest match: ${closestMatchDiff}`);
       if (diffSeconds < closestMatchDiff) {
         if (diffSeconds > 300) {
           continue;
@@ -127,6 +127,30 @@ export async function autoRename(payload: unknown, {
     }
 
     if (closestMatch && associationType) {
+      const oldExtension = association.videoFile.split(".").pop();
+      const matchKeyObj = MatchKey.fromString(closestMatch.key, playoffsType as PlayoffsType);
+      const matchObj = new Match(matchKeyObj);
+      const newFileName = `${matchObj.videoFileMatchingName}.${oldExtension}`;
+      // TODO: decide on delay before renames
+      const renameAfter = DateTime.now().plus({ seconds: 10 });
+      let renameJobId: string | undefined;
+
+      if (associationType === AutoRenameAssociationStatus.STRONG) {
+        // TODO: Need to use WorkerJob for this
+        const job = await addJob("renameFile", {
+            directory: association.videoLabel,
+            oldFileName: association.videoFile,
+            newFileName: association.newFileName,
+          },
+          {
+            maxAttempts: 1,
+            jobKey: `autoRename-${association.filePath}`,
+            jobKeyMode: "replace",
+            runAt: renameAfter.toJSDate(),
+          });
+        renameJobId = job.id;
+      }
+
       await prisma.autoRenameAssociation.update({
         where: {
           filePath: association.filePath,
@@ -138,6 +162,11 @@ export async function autoRename(payload: unknown, {
           associationAttempts: {
             increment: 1,
           },
+          newFileName,
+          renameAfter: renameAfter.toISO(),
+          renameCompleted: false,
+          isIgnored: false,
+          renameJobId,
         },
       });
     } else {
