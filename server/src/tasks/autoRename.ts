@@ -32,7 +32,7 @@ export async function autoRename(payload: unknown, {
   logger.info(JSON.stringify(payload));
   assertIsAutoRenameCronPayload(payload);
 
-  const { videoSearchDirectory } = await getSettings();
+  const { playoffsType, videoSearchDirectory } = await getSettings();
 
   const files = await getFilesMatchingPattern(
     videoSearchDirectory,
@@ -88,7 +88,6 @@ export async function autoRename(payload: unknown, {
   logger.info(`Found ${toProcess.length} files to process`);
 
   const matches = await getMatchList();
-  const { playoffsType } = await getSettings();
 
   for (const association of toProcess) {
     // TODO: Check if file still exists
@@ -129,8 +128,12 @@ export async function autoRename(payload: unknown, {
     if (closestMatch && associationType) {
       const oldExtension = association.videoFile.split(".").pop();
       const matchKeyObj = MatchKey.fromString(closestMatch.key, playoffsType as PlayoffsType);
+      logger.info(`Match key object: ${JSON.stringify(matchKeyObj)}`);
       const matchObj = new Match(matchKeyObj);
+      logger.info(`Match object: ${JSON.stringify(matchObj)}`);
       const newFileName = `${matchObj.videoFileMatchingName}.${oldExtension}`;
+
+      logger.info(`New file name: ${newFileName}`);
       // TODO: decide on delay before renames
       const renameAfter = DateTime.now().plus({ seconds: 10 });
       let renameJobId: string | undefined;
@@ -138,9 +141,10 @@ export async function autoRename(payload: unknown, {
       if (associationType === AutoRenameAssociationStatus.STRONG) {
         // TODO: Need to use WorkerJob for this
         const job = await addJob("renameFile", {
-            directory: association.videoLabel,
+            directory: `${videoSearchDirectory}/${association.videoLabel}`,
             oldFileName: association.videoFile,
-            newFileName: association.newFileName,
+            newFileName,
+            associationId: association.filePath,
           },
           {
             maxAttempts: 1,

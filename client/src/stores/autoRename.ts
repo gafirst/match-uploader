@@ -53,10 +53,29 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     return associations.value.filter((association) => statuses.includes(association.status));
   }
 
+  async function confirmWeakAssociation(association: AutoRenameAssociation, newMatchKey: string | null = null) {
+    const matchKeyExtra = newMatchKey ? { newMatchKey } : {};
+
+    const result = await fetch("/api/v1/autoRename/associations/confirm", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filePath: association.filePath,
+        videoLabel: association.videoLabel,
+        ...matchKeyExtra,
+      }),
+    });
+
+    // TODO: Error handling
+  }
+
   return {
     associations,
     associationsInStatus,
     associationsError,
+    confirmWeakAssociation,
     getAssociations,
     loadingAssociations,
   };

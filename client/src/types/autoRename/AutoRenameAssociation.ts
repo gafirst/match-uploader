@@ -10,6 +10,7 @@ export interface AutoRenameAssociationApiResponse {
 
 export interface AutoRenameAssociation {
   filePath: string;
+  videoFile: string;
   status: AutoRenameAssociationStatus;
   statusReason: string | null;
   videoTimestamp: string | null;
@@ -17,12 +18,13 @@ export interface AutoRenameAssociation {
   maxAssociationAttempts: number;
   matchKey: string | null;
   videoLabel: string | null;
-  renameCompleted: boolean;
   newFileName: string | null;
   createdAt: string;
   updatedAt: string;
+  renameJobId: string | null;
   renameAfter: string | null;
-  match: string;
+  renameCompleted: boolean;
+  match: string | null;
   isIgnored: boolean;
 }
 
@@ -47,11 +49,12 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
     "maxAssociationAttempts" in x &&
     "matchKey" in x &&
     "videoLabel" in x &&
+    "renameJobId" in x &&
+    "renameAfter" in x &&
     "renameCompleted" in x &&
     "newFileName" in x &&
     "createdAt" in x &&
     "updatedAt" in x &&
     "match" in x &&
-    "isIgnored" in x &&
-    "renameAfter" in x;
+    "isIgnored" in x;
 }

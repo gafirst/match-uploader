@@ -1,10 +1,12 @@
 import type { JobHelpers } from "graphile-worker";
 import fs from "fs-extra";
+import { prisma } from "@src/worker";
 
 export interface RenameFilePayload {
   directory: string;
   oldFileName: string;
   newFileName: string;
+  associationId?: string;
 }
 
 function assertIsRenameFilePayload(payload: unknown): asserts payload is RenameFilePayload {
@@ -22,7 +24,6 @@ function assertIsRenameFilePayload(payload: unknown): asserts payload is RenameF
 
 export async function renameFile(payload: unknown, {
   logger,
-  job,
 }: JobHelpers): Promise<void> {
   logger.info(JSON.stringify(payload));
   assertIsRenameFilePayload(payload);
@@ -30,4 +31,16 @@ export async function renameFile(payload: unknown, {
   logger.info(`Renaming ${payload.directory}/${payload.oldFileName} to ${payload.directory}/${payload.newFileName}`);
   // Rename the file
   await fs.rename(`${payload.directory}/${payload.oldFileName}`, `${payload.directory}/${payload.newFileName}`);
+
+  if (payload.associationId) {
+    // TODO: Websocket event
+    await prisma.autoRenameAssociation.update({
+      where: {
+        filePath: payload.associationId,
+      },
+      data: {
+        renameCompleted: true,
+      },
+    });
+  }
 }

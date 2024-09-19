@@ -21,20 +21,20 @@
         >
           Review
         </VBtn>
-        <VBtn v-if="allowEdits(item)"
-              class="mr-2"
-              color="error"
-              variant="outlined"
-        >
-          Ignore
-        </VBtn>
-        <VBtn v-if="allowEdits(item) && item.status === AutoRenameAssociationStatus.WEAK"
-              class="mr-2"
-              color="success"
-              @click="selectedAssociation = item; showReviewDialog = true"
-        >
-          Confirm
-        </VBtn>
+        <!--        <VBtn v-if="allowEdits(item)"-->
+        <!--              class="mr-2"-->
+        <!--              color="error"-->
+        <!--              variant="outlined"-->
+        <!--        >-->
+        <!--          Ignore-->
+        <!--        </VBtn>-->
+        <!--        <VBtn v-if="allowEdits(item) && item.status === AutoRenameAssociationStatus.WEAK"-->
+        <!--              class="mr-2"-->
+        <!--              color="success"-->
+        <!--              @click="selectedAssociation = item; showReviewDialog = true"-->
+        <!--        >-->
+        <!--          Confirm-->
+        <!--        </VBtn>-->
         <VBtn v-if="item.status === AutoRenameAssociationStatus.STRONG && !item.renameCompleted" color="error">
           Unmatch
         </VBtn>
@@ -58,8 +58,16 @@
       <span style="color: gray">{{ item.matchKey ?? "" }}</span>
     </template>
   </VDataTable>
-  <VDialog v-model="showReviewDialog" max-width="500">
-    <AutoRenameReviewDialogContents association="selectedAssociation" @close="showReviewDialog = false" />
+  <!--  TODO: Use this + useDisplay() to add mobile support later-->
+  <!--  <VDialog v-model="showReviewDialog"-->
+  <!--           max-width="500"-->
+  <!--           transition="dialog-bottom-transition"-->
+  <!--           :fullscreen="true"-->
+  <!--  >-->
+  <VDialog v-model="showReviewDialog"
+           max-width="1000"
+  >
+    <AutoRenameReviewDialogContents :association="selectedAssociation" @close="showReviewDialog = false" />
   </VDialog>
 </template>
 
@@ -69,10 +77,15 @@ import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssoci
 import { ref } from "vue";
 import { isAutoRenameAssociation } from "@/types/autoRename/AutoRenameAssociation";
 import AutoRenameReviewDialogContents from "@/components/autoRename/AutoRenameReviewDialogContents.vue";
+import { useDisplay } from "vuetify";
 
 const props = defineProps<{
   includedAssociationStatuses: AutoRenameAssociationStatus[];
 }>();
+
+const display = useDisplay();
+
+console.log(display);
 
 const autoRenameStore = useAutoRenameStore();
 autoRenameStore.getAssociations();
