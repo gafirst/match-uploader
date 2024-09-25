@@ -131,6 +131,7 @@ export async function autoRename(payload: unknown, {
       logger.info(`Match key object: ${JSON.stringify(matchKeyObj)}`);
       const matchObj = new Match(matchKeyObj);
       logger.info(`Match object: ${JSON.stringify(matchObj)}`);
+      // TODO: Centralize this logic
       const newFileName = `${matchObj.videoFileMatchingName}.${oldExtension}`;
 
       logger.info(`New file name: ${newFileName}`);

@@ -1,7 +1,6 @@
 import { graphileWorkerUtils, prisma } from "@src/server";
 import { AutoRenameAssociationStatus } from "@prisma/client";
 import logger from "jet-logger";
-import { cancelJob } from "@src/services/WorkerService";
 
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
@@ -37,6 +36,10 @@ export async function updateAssociationData(
 
   if (matchKey) {
     extraUpdateProps.matchKey = matchKey;
+  }
+
+  if (!matchKey && !existingAssociation.matchKey) {
+    return "Cannot confirm association because it wouldn't have a match key";
   }
 
   await prisma.autoRenameAssociation.update({

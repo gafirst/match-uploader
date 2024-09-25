@@ -23,7 +23,7 @@ COPY client/public ./public
 COPY client/src ./src
 COPY client/index.html .
 COPY client/tsconfig*.json .
-COPY client/vite.config.ts .
+COPY client/vite.config.mts .
 
 RUN yarn run build
 

@@ -54,7 +54,7 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
   }
 
   async function confirmWeakAssociation(association: AutoRenameAssociation, newMatchKey: string | null = null) {
-    const matchKeyExtra = newMatchKey ? { newMatchKey } : {};
+    const matchKeyExtra = newMatchKey ? { matchKey: newMatchKey } : {};
 
     const result = await fetch("/api/v1/autoRename/associations/confirm", {
       method: "PUT",

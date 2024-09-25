@@ -1,5 +1,6 @@
 import type MatchKey from "@src/models/MatchKey";
 import { CompLevel } from "@src/models/CompLevel";
+import { capitalizeFirstLetter } from "@src/util/string";
 
 export class Match {
     key: MatchKey;
@@ -31,13 +32,13 @@ export class Match {
 
         if (this.key.setNumber) {
             if (fullCompLevel === CompLevel.Final) {
-                return `${fullCompLevel} ${match}${this.key.matchNumber}${replay}`;
+                return `${capitalizeFirstLetter(fullCompLevel)} ${match}${this.key.matchNumber}${replay}`;
             }
 
-            return `${fullCompLevel} ${this.key.setNumber} ${match}${this.key.matchNumber}${replay}`;
+            return `${capitalizeFirstLetter(fullCompLevel)} ${this.key.setNumber} ${match}${this.key.matchNumber}${replay}`;
         }
 
-        return `${fullCompLevel} ${match}${this.key.matchNumber}${replay}`;
+        return `${capitalizeFirstLetter(fullCompLevel)} ${match}${this.key.matchNumber}${replay}`;
     }
 
     get matchName(): string {

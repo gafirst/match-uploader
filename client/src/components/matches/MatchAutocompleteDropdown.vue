@@ -3,10 +3,11 @@
   Note: this component may be laggy when running in development, but in production builds the performance
   should become significantly better.
   -->
-  <v-autocomplete v-model="matchStore.selectedMatchKey"
+  {{ model }}
+  <v-autocomplete :model-value="model"
                   class="mt-6"
                   :items="matchListStore.matches"
-                  :loading="matchListStore.loading"
+                  :loading="matchListStore.loading || loading"
                   rounded
                   auto-select-first
                   placeholder="Select a match..."
@@ -14,21 +15,27 @@
                   label="Match"
                   item-title="verboseName"
                   item-value="key"
-                  :disabled="matchStore.uploadInProgress || !!matchListStore.error"
+                  :disabled="!!matchListStore.error || disabled"
                   @update:model-value="matchSelected"
   />
 </template>
 <script lang="ts" setup>
 
 import { useMatchListStore } from "@/stores/matchList";
-import { useMatchStore } from "@/stores/match";
+
+const props = defineProps<{
+  loading?: boolean;
+  disabled?: boolean
+}>();
 
 const matchListStore = useMatchListStore();
-const matchStore = useMatchStore();
 
 matchListStore.getMatchList();
 
-function matchSelected() {
-  console.log("Match selected");
+const model = defineModel();
+
+function matchSelected(value: string) {
+  console.log(value);
+  model.value = value;
 }
 </script>

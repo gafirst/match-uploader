@@ -104,7 +104,7 @@ async function updateAssociation(req: IReq, res: IRes): Promise<void> {
     matchKey as string | null,
   );
 
-  res.json({
+  res.status(error ? 400 : 200).json({
     ok: !error,
     message: error,
   });

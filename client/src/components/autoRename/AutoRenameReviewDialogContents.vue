@@ -7,6 +7,11 @@
     </VToolbar>
     <VCardText>
       <VRow>
+        <p>
+          {{ associatedMatchKey }}
+        </p>
+      </VRow>
+      <VRow>
         <VCol>
           <h2 class="mb-2">Video</h2>
           <video :src="`videos/${props.association.filePath}`"
@@ -26,7 +31,7 @@
           >
             <template v-slot:item.value="{ item }">
               <span v-if="item.key.toLowerCase() === 'match'">
-                <MatchAutocompleteDropdown />
+                <MatchAutocompleteDropdown v-model="associatedMatchKey" />
               </span>
               <span v-else>{{ item.value }}</span>
             </template>
@@ -53,7 +58,7 @@
 </template>
 <script lang="ts" setup>
 import { AutoRenameAssociation } from "@/types/autoRename/AutoRenameAssociation";
-import { computed, ref } from "vue";
+import { computed, ref, toRef } from "vue";
 import { capitalizeFirstLetter } from "@/util/capitalize";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import MatchAutocompleteDropdown from "@/components/matches/MatchAutocompleteDropdown.vue";
@@ -70,7 +75,7 @@ const confirmLoading = ref(false);
 // TODO: Implement confirmError
 async function onConfirm() {
   confirmLoading.value = true;
-  await autoRenameStore.confirmWeakAssociation(props.association);
+  await autoRenameStore.confirmWeakAssociation(association.value, associatedMatchKey.value);
   confirmLoading.value = false;
   emit("close");
 }
@@ -83,8 +88,6 @@ const columnOrder = [
   "statusReason",
   "videoTimestamp",
   "videoFile",
-  "associationAttempts",
-  "maxAssociationAttempts",
 ];
 
 const prettyColumnNames = {
@@ -97,6 +100,9 @@ const prettyColumnNames = {
   associationAttempts : "association attempts",
   maxAssociationAttempts: "max association attempts",
 };
+
+const association = toRef(props, "association");
+const associatedMatchKey = ref(association.value.matchKey);
 
 const associationAsEntries = computed(() => Object.entries(props.association)
   .filter(([key]) => columnOrder.includes(key))
