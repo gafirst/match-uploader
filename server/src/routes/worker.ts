@@ -4,7 +4,7 @@ import { type IReq, type IRes } from "@src/routes/types/types";
 import { graphileWorkerUtils, prisma } from "@src/server";
 import { body, matchedData, param, validationResult } from "express-validator";
 import { JobStatus } from "@prisma/client";
-import { cancelJob, queueJob } from "@src/services/WorkerService";
+import { cancelJob } from "@src/services/WorkerService";
 
 export const workerRouter = Router();
 export const workerJobsRouter = Router();

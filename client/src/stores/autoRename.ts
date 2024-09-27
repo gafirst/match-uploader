@@ -1,11 +1,19 @@
 import { acceptHMRUpdate, defineStore } from "pinia";
 import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssociationStatus";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import {
   AutoRenameAssociation,
   isAutoRenameAssociation,
   isAutoRenameAssociationApiResponse,
 } from "@/types/autoRename/AutoRenameAssociation";
+import {
+  isWorkerEvent,
+  isWorkerJobCompleteEvent,
+  isWorkerJobCreatedEvent,
+  isWorkerJobStartEvent,
+  WorkerJobEvent,
+} from "@/types/WorkerJob";
+import { socket } from "@/socket";
 
 export const useAutoRenameStore = defineStore("autoRename", () => {
   const associations = ref<AutoRenameAssociation[]>([]);
@@ -71,10 +79,41 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     // TODO: Error handling
   }
 
+  const isConnected = ref(false);
+  const isInitialConnectionPending = ref(true);
+
+  const events = ref<WorkerJobEvent[]>([]);
+
+  watch(isConnected, (newValue) => {
+    console.log("isConnected changed to", newValue);
+  });
+
+  /**
+   * Binds Socket.IO listeners
+   *
+   * Adapted from https://socket.io/how-to/use-with-vue#with-pinia
+   */
+  function bindEvents() {
+    socket.on("connect", () => {
+      isConnected.value = true;
+      isInitialConnectionPending.value = false;
+      console.log("Connected to socket.io server!");
+    });
+
+    socket.on("disconnect", () => {
+      isConnected.value = false;
+    });
+
+    socket.on("autorename", async (payload) => {
+      console.log("Received autorename event", payload);
+    });
+  }
+
   return {
     associations,
     associationsInStatus,
     associationsError,
+    bindEvents,
     confirmWeakAssociation,
     getAssociations,
     loadingAssociations,

@@ -1,6 +1,8 @@
 import { graphileWorkerUtils, prisma } from "@src/server";
-import { AutoRenameAssociationStatus } from "@prisma/client";
+import { type AutoRenameAssociation, AutoRenameAssociationStatus } from "@prisma/client";
 import logger from "jet-logger";
+import { type ClientToServerEvents, isAutoRenameAssociationUpdateEvent } from "@src/tasks/types/events";
+import type { Socket } from "socket.io";
 
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
@@ -86,4 +88,36 @@ export async function markAssociationIgnored(videoLabel: string, filePath: strin
       renameAfter: null,
     },
   });
+}
+
+export async function processAutoRenameEvent(
+  event: keyof ClientToServerEvents,
+  data: ClientToServerEvents[typeof event],
+  socket: Socket,
+): Promise<void> {
+  try {
+    logger.info("1");
+    if (!isAutoRenameAssociationUpdateEvent(data)) {
+        logger.warn(`Dropping invalid autorename:association:update event: ${JSON.stringify(data)}`);
+        return;
+    }
+    logger.info("2");
+
+    const association: AutoRenameAssociation = await prisma.autoRenameAssociation.findUniqueOrThrow({
+        where: {
+            filePath: data.filePath,
+        },
+    });
+    console.log(event, association);
+
+    socket.broadcast.emit("autorename", {
+      event,
+      association,
+    });
+    logger.info("4");
+  } catch (e) {
+    logger.info("5");
+
+    logger.err(`Error handling ${event} event: ${e}`);
+  }
 }

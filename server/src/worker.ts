@@ -56,6 +56,8 @@ function configureWorkerEvents(socketClient: Socket, runner: Runner): void {
     });
 }
 
+export let workerIo: Socket;
+
 async function main(): Promise<void> {
     // Run a worker to execute jobs:
 
@@ -74,6 +76,7 @@ async function main(): Promise<void> {
     });
 
     const socketClient: Socket = io(EnvVars.worker.webServerUrl);
+    workerIo = socketClient;
     logger.info(`Connecting to Socket.IO server at ${EnvVars.worker.webServerUrl}`);
     socketClient.on("connect_error", (error) => {
         logger.err("Socket.IO client connection error:");

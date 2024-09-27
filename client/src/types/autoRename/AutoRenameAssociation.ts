@@ -58,3 +58,11 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
     "match" in x &&
     "isIgnored" in x;
 }
+
+export const AUTO_RENAME_ASSOCIATION_UPDATE = "autorename:association:update";
+export type AutoRenameEvent  = typeof AUTO_RENAME_ASSOCIATION_UPDATE;
+
+export interface AutoRenameEvents<EventName extends AutoRenameEvent> {
+  event: EventName;
+  association: AutoRenameAssociation;
+}

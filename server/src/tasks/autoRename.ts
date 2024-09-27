@@ -4,12 +4,15 @@ import { getSettings } from "@src/services/SettingsService";
 import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
 import { DateTime } from "luxon";
 import { AutoRenameAssociationStatus } from "@prisma/client";
-import { prisma } from "@src/worker";
+import { prisma, workerIo } from "@src/worker";
 import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
 import { getMatchList } from "@src/services/MatchesService";
-import { Match } from "@src/models/Match";
 import MatchKey from "@src/models/MatchKey";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
+import { getNewFileNameForAutoRename, getNewFileNamePreservingExtension } from "@src/repos/AutoRenameRepo";
+import { RENAME_FILE } from "@src/tasks/types/tasks";
+import { queueJob } from "@src/util/queueJob";
+import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
 
 export interface AutoRenameCronPayload {
   _cron: CronPayload;
@@ -59,7 +62,7 @@ export async function autoRename(payload: unknown, {
     const parsedDate = DateTime.fromFormat(videoFile, "'Match_ - 'dd MMMM yyyy - hh-mm-ss a'.mp4'");
     logger.info(`File: ${file} / Parsed date: ${parsedDate.toISO()}`);
     if (parsedDate.isValid) {
-      await prisma.autoRenameAssociation.upsert({
+      const association = await prisma.autoRenameAssociation.upsert({
         where: {
           filePath: file,
         },
@@ -73,6 +76,9 @@ export async function autoRename(payload: unknown, {
         update: {
           videoTimestamp: parsedDate.toJSDate(),
         },
+      });
+      workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
+        filePath: association.filePath,
       });
     }
   }
@@ -98,16 +104,12 @@ export async function autoRename(payload: unknown, {
     logger.info(`Processing ${association.filePath}`);
 
     for (const match of matches) {
-      // logger.info("-------");
-      // logger.info(`Checking match ${match.key}`);
       if (!match.actual_time || !association.videoTimestamp) {
         continue;
       }
-      // logger.info(`Match start time: ${DateTime.fromSeconds(match.actual_time).toISO()}`);
 
       const matchDate = DateTime.fromSeconds(match.actual_time);
       const diffSeconds = Math.abs(matchDate.diff(DateTime.fromJSDate(association.videoTimestamp)).as("seconds"));
-      // logger.info(`Difference: ${diffSeconds} / closest match: ${closestMatchDiff}`);
       if (diffSeconds < closestMatchDiff) {
         if (diffSeconds > 300) {
           continue;
@@ -126,22 +128,25 @@ export async function autoRename(payload: unknown, {
     }
 
     if (closestMatch && associationType) {
-      const oldExtension = association.videoFile.split(".").pop();
       const matchKeyObj = MatchKey.fromString(closestMatch.key, playoffsType as PlayoffsType);
-      logger.info(`Match key object: ${JSON.stringify(matchKeyObj)}`);
-      const matchObj = new Match(matchKeyObj);
-      logger.info(`Match object: ${JSON.stringify(matchObj)}`);
-      // TODO: Centralize this logic
-      const newFileName = `${matchObj.videoFileMatchingName}.${oldExtension}`;
 
-      logger.info(`New file name: ${newFileName}`);
+      const newFileName = getNewFileNamePreservingExtension(
+        association.videoFile,
+        getNewFileNameForAutoRename(matchKeyObj, false),
+      );
+
       // TODO: decide on delay before renames
       const renameAfter = DateTime.now().plus({ seconds: 10 });
       let renameJobId: string | undefined;
 
       if (associationType === AutoRenameAssociationStatus.STRONG) {
-        // TODO: Need to use WorkerJob for this
-        const job = await addJob("renameFile", {
+        const job = await queueJob(
+          prisma,
+          addJob,
+          workerIo,
+          association.videoFile,
+          RENAME_FILE,
+          {
             directory: `${videoSearchDirectory}/${association.videoLabel}`,
             oldFileName: association.videoFile,
             newFileName,
@@ -152,8 +157,9 @@ export async function autoRename(payload: unknown, {
             jobKey: `autoRename-${association.filePath}`,
             jobKeyMode: "replace",
             runAt: renameAfter.toJSDate(),
-          });
-        renameJobId = job.id;
+          },
+        );
+        renameJobId = job.jobId;
       }
 
       await prisma.autoRenameAssociation.update({
@@ -174,6 +180,10 @@ export async function autoRename(payload: unknown, {
           renameJobId,
         },
       });
+
+      workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
+        filePath: association.filePath,
+      });
     } else {
       if (association.associationAttempts >= association.maxAssociationAttempts) {
         await prisma.autoRenameAssociation.update({
@@ -184,6 +194,9 @@ export async function autoRename(payload: unknown, {
             status: AutoRenameAssociationStatus.FAILED,
             statusReason: "Max attempts reached",
           },
+        });
+        workerIo.emit("autoRename:association:update", {
+          filePath: association.filePath,
         });
       } else {
         await prisma.autoRenameAssociation.update({
@@ -196,6 +209,9 @@ export async function autoRename(payload: unknown, {
               increment: 1,
             },
           },
+        });
+        workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
+          filePath: association.filePath,
         });
       }
     }
