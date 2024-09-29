@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from "pinia";
 import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssociationStatus";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   AutoRenameAssociation,
   isAutoRenameAssociation,
@@ -16,7 +16,8 @@ import {
 import { socket } from "@/socket";
 
 export const useAutoRenameStore = defineStore("autoRename", () => {
-  const associations = ref<AutoRenameAssociation[]>([]);
+  const associations = ref<Map<string, AutoRenameAssociation>>(new Map<string, AutoRenameAssociation>());
+  const associationsList = computed(() => Array.from(associations.value.values()));
   const loadingAssociations = ref(false);
   const associationsError = ref("");
 
@@ -33,7 +34,7 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     loadingAssociations.value = true;
     associationsError.value = "";
 
-    const url = status ? `/api/v1/autoRename/associations?status=${status}` : "/api/v1/autoRename/associations";
+    const url = "/api/v1/autoRename/associations";
     const result = await fetch(url);
 
     if (handleGetAssociationsError(result, "Unable to load associations")) {
@@ -49,7 +50,10 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
       return;
     }
 
-    associations.value = resultJson.associations;
+    for (const association of resultJson.associations) {
+       associations.value.set(association.filePath, association);
+    }
+
     loadingAssociations.value = false;
   }
 
@@ -58,7 +62,7 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
       statuses = [statuses];
     }
 
-    return associations.value.filter((association) => statuses.includes(association.status));
+    return associationsList.value.filter((association) => statuses.includes(association.status));
   }
 
   async function confirmWeakAssociation(association: AutoRenameAssociation, newMatchKey: string | null = null) {
@@ -105,12 +109,19 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     });
 
     socket.on("autorename", async (payload) => {
-      console.log("Received autorename event", payload);
+      console.log("Received autorename event", payload.association);
+      if (!isAutoRenameAssociation(payload.association)) {
+        console.warn("Ignoring invalid autorename event", payload);
+        return;
+      }
+
+      associations.value.set(payload.association.filePath, payload.association);
     });
   }
 
   return {
-    associations,
+    associations: associationsList,
+    associationsDict: associations,
     associationsInStatus,
     associationsError,
     bindEvents,

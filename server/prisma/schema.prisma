@@ -50,11 +50,15 @@ enum JobStatus {
 }
 
 model AutoRenameAssociation {
-  filePath       String                      @id @unique
-  videoFile      String
-  status         AutoRenameAssociationStatus @default(UNMATCHED)
-  statusReason   String?
-  videoTimestamp DateTime?
+  filePath              String                      @id @unique
+  videoFile             String
+  status                AutoRenameAssociationStatus @default(UNMATCHED)
+  statusReason          String?
+  videoTimestamp        DateTime?
+  startTimeDiff         Int?
+  videoDurationSecs     Int?
+  startTimeDiffAbnormal Boolean?
+  videoDurationAbnormal Boolean?
 
   associationAttempts    Int     @default(0)
   maxAssociationAttempts Int     @default(5)

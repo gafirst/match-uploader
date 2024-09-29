@@ -10,7 +10,6 @@ export enum AutoRenameAssociationStatus {
   STRONG = "STRONG",
 }
 
-// ^ convert to a function for AutoRenameAssociationStatus
 /**
  * Converts an AutoRenameAssociationStatus to a string suitable for display in the UI. Will always return a lowercase,
  * so you may need to adjust capitalization depending on the context.

@@ -9,13 +9,53 @@ import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpl
 import { getMatchList } from "@src/services/MatchesService";
 import MatchKey from "@src/models/MatchKey";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
-import { getNewFileNameForAutoRename, getNewFileNamePreservingExtension } from "@src/repos/AutoRenameRepo";
-import { RENAME_FILE } from "@src/tasks/types/tasks";
-import { queueJob } from "@src/util/queueJob";
+import {
+  getNewFileNameForAutoRename,
+  getNewFileNamePreservingExtension,
+  queueRenameJob,
+} from "@src/repos/AutoRenameRepo";
 import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
+import { videoDuration } from "@numairawan/video-duration";
 
 export interface AutoRenameCronPayload {
   _cron: CronPayload;
+}
+
+function classifyAssociation(startTimeDiff: number, videoDuration: number): {
+  associationStatus: AutoRenameAssociationStatus;
+  startTimeDiffAbnormal: boolean;
+  videoDurationAbnormal: boolean;
+} {
+  const minVideoDuration = 3 * 60; // 3 minutes
+  const maxVideoDurationStrong = 5 * 60; // 5 minutes FIXME
+
+  const videoDurationInRange = videoDuration >= minVideoDuration && videoDuration <= maxVideoDurationStrong;
+
+  const startTimeDiffStrong = startTimeDiff <= 60;
+  const startTimeDiffWeak = startTimeDiff <= 300;
+
+  let associationStatus: AutoRenameAssociationStatus = AutoRenameAssociationStatus.UNMATCHED;
+
+  if (startTimeDiffStrong) {
+    if (videoDurationInRange) {
+        associationStatus = AutoRenameAssociationStatus.STRONG;
+    } else {
+        associationStatus = AutoRenameAssociationStatus.WEAK;
+    }
+  } else if (startTimeDiffWeak) {
+    associationStatus = AutoRenameAssociationStatus.WEAK;
+  }
+
+    return {
+      associationStatus,
+      startTimeDiffAbnormal: !startTimeDiffWeak,
+      videoDurationAbnormal: !videoDurationInRange,
+    };
+}
+
+async function getVideoDuration(filePath: string): Promise<{ seconds: number }> {
+  // eslint-disable-next-line
+  return await videoDuration(filePath);
 }
 
 function assertIsAutoRenameCronPayload(payload: unknown): asserts payload is AutoRenameCronPayload {
@@ -98,7 +138,6 @@ export async function autoRename(payload: unknown, {
   for (const association of toProcess) {
     // TODO: Check if file still exists
 
-    let associationType: AutoRenameAssociationStatus | null = null;
     let closestMatch: TbaMatchSimple | null = null;
     let closestMatchDiff = Infinity;
     logger.info(`Processing ${association.filePath}`);
@@ -114,11 +153,6 @@ export async function autoRename(payload: unknown, {
         if (diffSeconds > 300) {
           continue;
         }
-        if (diffSeconds > 60) {
-          associationType = AutoRenameAssociationStatus.WEAK;
-        } else {
-          associationType = AutoRenameAssociationStatus.STRONG;
-        }
 
         closestMatchDiff = diffSeconds;
 
@@ -127,7 +161,15 @@ export async function autoRename(payload: unknown, {
       }
     }
 
-    if (closestMatch && associationType) {
+    // FIXME: error handling?
+    const videoDurationSecs = (await getVideoDuration(`${videoSearchDirectory}/${association.filePath}`)).seconds;
+
+    const {
+      associationStatus,
+      startTimeDiffAbnormal,
+      videoDurationAbnormal,
+    } = classifyAssociation(closestMatchDiff, videoDurationSecs);
+    if (closestMatch && associationStatus) {
       const matchKeyObj = MatchKey.fromString(closestMatch.key, playoffsType as PlayoffsType);
 
       const newFileName = getNewFileNamePreservingExtension(
@@ -139,27 +181,17 @@ export async function autoRename(payload: unknown, {
       const renameAfter = DateTime.now().plus({ seconds: 10 });
       let renameJobId: string | undefined;
 
-      if (associationType === AutoRenameAssociationStatus.STRONG) {
-        const job = await queueJob(
+      if (associationStatus === AutoRenameAssociationStatus.STRONG) {
+        const renameJob = await queueRenameJob(
           prisma,
           addJob,
           workerIo,
-          association.videoFile,
-          RENAME_FILE,
-          {
-            directory: `${videoSearchDirectory}/${association.videoLabel}`,
-            oldFileName: association.videoFile,
-            newFileName,
-            associationId: association.filePath,
-          },
-          {
-            maxAttempts: 1,
-            jobKey: `autoRename-${association.filePath}`,
-            jobKeyMode: "replace",
-            runAt: renameAfter.toJSDate(),
-          },
+          association,
+          videoSearchDirectory,
+          newFileName,
+          renameAfter,
         );
-        renameJobId = job.jobId;
+        renameJobId = renameJob.jobId;
       }
 
       await prisma.autoRenameAssociation.update({
@@ -167,35 +199,45 @@ export async function autoRename(payload: unknown, {
           filePath: association.filePath,
         },
         data: {
-          status: associationType,
-          statusReason: `${associationType.toLowerCase()} association in job ${job.id}`,
+          status: associationStatus,
           matchKey: closestMatch.key,
           associationAttempts: {
             increment: 1,
           },
           newFileName,
+          renameJobId,
           renameAfter: renameAfter.toISO(),
           renameCompleted: false,
           isIgnored: false,
-          renameJobId,
+          videoDurationSecs,
+          videoDurationAbnormal,
+          startTimeDiff: closestMatchDiff,
+          startTimeDiffAbnormal,
         },
       });
-
       workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
         filePath: association.filePath,
       });
     } else {
-      if (association.associationAttempts >= association.maxAssociationAttempts) {
-        await prisma.autoRenameAssociation.update({
+      console.log("inside the else");
+      if (association.associationAttempts + 1 >= association.maxAssociationAttempts) {
+        console.log("here");
+        const updatedAssociation = await prisma.autoRenameAssociation.update({
           where: {
             filePath: association.filePath,
           },
           data: {
             status: AutoRenameAssociationStatus.FAILED,
+            associationAttempts: {
+              increment: 1,
+            },
             statusReason: "Max attempts reached",
+            videoDurationSecs,
+            videoDurationAbnormal,
           },
         });
-        workerIo.emit("autoRename:association:update", {
+        console.log("updatedAssoc", updatedAssociation);
+        workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
           filePath: association.filePath,
         });
       } else {
@@ -208,6 +250,8 @@ export async function autoRename(payload: unknown, {
             associationAttempts: {
               increment: 1,
             },
+            videoDurationSecs,
+            videoDurationAbnormal,
           },
         });
         workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {

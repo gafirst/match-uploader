@@ -3,7 +3,6 @@
   Note: this component may be laggy when running in development, but in production builds the performance
   should become significantly better.
   -->
-  {{ model }}
   <v-autocomplete :model-value="model"
                   class="mt-6"
                   :items="matchListStore.matches"

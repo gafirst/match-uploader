@@ -1,12 +1,24 @@
 import { graphileWorkerUtils, prisma } from "@src/server";
 import { type AutoRenameAssociation, AutoRenameAssociationStatus } from "@prisma/client";
 import logger from "jet-logger";
-import { type ClientToServerEvents, isAutoRenameAssociationUpdateEvent } from "@src/tasks/types/events";
+import {
+  AUTO_RENAME_ASSOCIATION_UPDATE,
+  type ClientToServerEvents,
+  isAutoRenameAssociationUpdateEvent,
+} from "@src/tasks/types/events";
 import type { Socket } from "socket.io";
+import { io } from "@src/index";
+import { getNewFileNameForAutoRename, queueRenameJob } from "@src/repos/AutoRenameRepo";
+import { getSettings } from "@src/services/SettingsService";
+import { DateTime } from "luxon";
+import MatchKey from "@src/models/MatchKey";
+import { type PlayoffsType } from "@src/models/PlayoffsType";
+import { Match } from "@src/models/Match";
 
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
 ): Promise<string | undefined> {
+  const { playoffsType, videoSearchDirectory } = await getSettings();
   const existingAssociation = await prisma.autoRenameAssociation.findFirst({
     where: {
       videoLabel,
@@ -44,7 +56,19 @@ export async function updateAssociationData(
     return "Cannot confirm association because it wouldn't have a match key";
   }
 
-  await prisma.autoRenameAssociation.update({
+  const renameAfter = DateTime.now().plus({ seconds: 10 }); // FIXME: decide on delay before renames
+  const renameJob = await queueRenameJob(
+    prisma,
+    graphileWorkerUtils.addJob,
+    io,
+    existingAssociation,
+    videoSearchDirectory,
+    // FIXME: use association.newFileName
+    // @ts-expect-error matchKey is fine FIXME
+    getNewFileNameForAutoRename(MatchKey.fromString(matchKey, playoffsType as PlayoffsType), false), // FIXME: this is missing the file extension,
+    renameAfter,
+  );
+  const association = await prisma.autoRenameAssociation.update({
     where: {
       videoLabel,
       filePath,
@@ -52,8 +76,15 @@ export async function updateAssociationData(
     data: {
       status: AutoRenameAssociationStatus.STRONG,
       statusReason: `Manually approved at ${new Date().toISOString()}`,
+      renameJobId: renameJob.jobId,
+      renameAfter: renameAfter.toJSDate(),
       ...extraUpdateProps,
     },
+  });
+
+  io.emit("autorename", {
+    event: AUTO_RENAME_ASSOCIATION_UPDATE,
+    association,
   });
 }
 
@@ -88,6 +119,7 @@ export async function markAssociationIgnored(videoLabel: string, filePath: strin
       renameAfter: null,
     },
   });
+  // TODO: ws event
 }
 
 export async function processAutoRenameEvent(
@@ -96,12 +128,10 @@ export async function processAutoRenameEvent(
   socket: Socket,
 ): Promise<void> {
   try {
-    logger.info("1");
     if (!isAutoRenameAssociationUpdateEvent(data)) {
         logger.warn(`Dropping invalid autorename:association:update event: ${JSON.stringify(data)}`);
         return;
     }
-    logger.info("2");
 
     const association: AutoRenameAssociation = await prisma.autoRenameAssociation.findUniqueOrThrow({
         where: {
@@ -110,14 +140,20 @@ export async function processAutoRenameEvent(
     });
     console.log(event, association);
 
+    const { playoffsType } = await getSettings();
+    const extraProps: { match?: string } = {};
+    if (association.matchKey) {
+      const matchKey = MatchKey.fromString(association.matchKey, playoffsType as PlayoffsType);
+      extraProps.match = new Match(matchKey).matchName;
+    }
     socket.broadcast.emit("autorename", {
       event,
-      association,
+      association: {
+        ...association,
+        ...extraProps,
+      },
     });
-    logger.info("4");
   } catch (e) {
-    logger.info("5");
-
     logger.err(`Error handling ${event} event: ${e}`);
   }
 }

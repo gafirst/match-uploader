@@ -7,11 +7,6 @@
     </VToolbar>
     <VCardText>
       <VRow>
-        <p>
-          {{ associatedMatchKey }}
-        </p>
-      </VRow>
-      <VRow>
         <VCol>
           <h2 class="mb-2">Video</h2>
           <video :src="`videos/${props.association.filePath}`"
@@ -31,6 +26,7 @@
           >
             <template v-slot:item.value="{ item }">
               <span v-if="item.key.toLowerCase() === 'match'">
+                <!-- FIXME: This doesn't appear sometimes when events come from websocket -->
                 <MatchAutocompleteDropdown v-model="associatedMatchKey" />
               </span>
               <span v-else>{{ item.value }}</span>
