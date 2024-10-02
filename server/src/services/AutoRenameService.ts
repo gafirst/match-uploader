@@ -8,7 +8,11 @@ import {
 } from "@src/tasks/types/events";
 import type { Socket } from "socket.io";
 import { io } from "@src/index";
-import { getNewFileNameForAutoRename, queueRenameJob } from "@src/repos/AutoRenameRepo";
+import {
+  getNewFileNameForAutoRename,
+  getNewFileNamePreservingExtension,
+  queueRenameJob,
+} from "@src/repos/AutoRenameRepo";
 import { getSettings } from "@src/services/SettingsService";
 import { DateTime } from "luxon";
 import MatchKey from "@src/models/MatchKey";
@@ -30,7 +34,7 @@ export async function updateAssociationData(
     return `An association with the video label "${videoLabel}" and file path "${filePath}" does not exist`;
   }
 
-  if (existingAssociation.isIgnored) {
+  if (existingAssociation.status === AutoRenameAssociationStatus.IGNORED) {
     return "Cannot update ignored association";
   }
 
@@ -48,13 +52,24 @@ export async function updateAssociationData(
 
   const extraUpdateProps: { matchKey?: string | null } = {};
 
-  if (matchKey) {
-    extraUpdateProps.matchKey = matchKey;
-  }
-
+  let matchKeyObj: MatchKey | null = null;
   if (!matchKey && !existingAssociation.matchKey) {
     return "Cannot confirm association because it wouldn't have a match key";
   }
+
+  if (matchKey) {
+    extraUpdateProps.matchKey = matchKey;
+    matchKeyObj = MatchKey.fromString(matchKey, playoffsType as PlayoffsType);
+  } else if (existingAssociation.matchKey) {
+    matchKeyObj = MatchKey.fromString(existingAssociation.matchKey, playoffsType as PlayoffsType);
+  } else {
+    return "Cannot confirm association because it wouldn't have a match key";
+  }
+
+  const newFileName = getNewFileNamePreservingExtension(
+    existingAssociation.videoFile,
+    getNewFileNameForAutoRename(matchKeyObj, false),
+  );
 
   const renameAfter = DateTime.now().plus({ seconds: 10 }); // FIXME: decide on delay before renames
   const renameJob = await queueRenameJob(
@@ -63,9 +78,6 @@ export async function updateAssociationData(
     io,
     existingAssociation,
     videoSearchDirectory,
-    // FIXME: use association.newFileName
-    // @ts-expect-error matchKey is fine FIXME
-    getNewFileNameForAutoRename(MatchKey.fromString(matchKey, playoffsType as PlayoffsType), false), // FIXME: this is missing the file extension,
     renameAfter,
   );
   const association = await prisma.autoRenameAssociation.update({
@@ -75,13 +87,13 @@ export async function updateAssociationData(
     },
     data: {
       status: AutoRenameAssociationStatus.STRONG,
-      statusReason: `Manually approved at ${new Date().toISOString()}`,
+      statusReason: `Weak association approved at ${new Date().toISOString()}`,
+      newFileName,
       renameJobId: renameJob.jobId,
       renameAfter: renameAfter.toJSDate(),
       ...extraUpdateProps,
     },
   });
-
   io.emit("autorename", {
     event: AUTO_RENAME_ASSOCIATION_UPDATE,
     association,
@@ -105,21 +117,22 @@ export async function markAssociationIgnored(videoLabel: string, filePath: strin
       .permanentlyFailJobs([existingAssociation.renameJobId], "Association was manually ignored");
   }
 
- await prisma.autoRenameAssociation.update({
+ const association = await prisma.autoRenameAssociation.update({
     where: {
       videoLabel,
       filePath,
     },
     data: {
-      isIgnored: true,
-      status: AutoRenameAssociationStatus.FAILED,
-      statusReason: `Manually ignored at ${new Date().toISOString()}`,
+      status: AutoRenameAssociationStatus.IGNORED,
       renameJobId: null,
       renameCompleted: false,
       renameAfter: null,
     },
   });
-  // TODO: ws event
+  io.emit("autorename", {
+    event: AUTO_RENAME_ASSOCIATION_UPDATE,
+    association,
+  });
 }
 
 export async function processAutoRenameEvent(
@@ -141,7 +154,7 @@ export async function processAutoRenameEvent(
     console.log(event, association);
 
     const { playoffsType } = await getSettings();
-    const extraProps: { match?: string } = {};
+    const extraProps: { match: string | null } = { match: null };
     if (association.matchKey) {
       const matchKey = MatchKey.fromString(association.matchKey, playoffsType as PlayoffsType);
       extraProps.match = new Match(matchKey).matchName;

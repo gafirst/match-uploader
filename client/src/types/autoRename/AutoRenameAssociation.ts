@@ -54,7 +54,6 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
   console.log("createdAt", x.createdAt, "createdAt" in x);
   console.log("updatedAt", x.updatedAt, "updatedAt" in x);
   console.log("match", x.match, "match" in x);
-  console.log("isIgnored", x.isIgnored, "isIgnored" in x);
 
   return typeof x === "object" &&
     x !== null &&
@@ -72,8 +71,7 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
     "newFileName" in x &&
     "createdAt" in x &&
     "updatedAt" in x &&
-    "matchKey" in x &&
-    "isIgnored" in x;
+    "matchKey" in x;
 }
 
 export const AUTO_RENAME_ASSOCIATION_UPDATE = "autorename:association:update";

@@ -11,12 +11,18 @@
       </VAlert>
       <AutoRenameAssociations :included-association-statuses="[
         AutoRenameAssociationStatus.WEAK,
-        AutoRenameAssociationStatus.FAILED
+        AutoRenameAssociationStatus.FAILED,
       ]"
       />
       <h2>Recently associated</h2>
       <AutoRenameAssociations :included-association-statuses="[
-        AutoRenameAssociationStatus.STRONG
+        AutoRenameAssociationStatus.STRONG,
+      ]"
+      />
+      <h2>Everything else</h2>
+      <AutoRenameAssociations :included-association-statuses="[
+        AutoRenameAssociationStatus.UNMATCHED,
+        AutoRenameAssociationStatus.IGNORED,
       ]"
       />
     </VCol>
@@ -25,27 +31,10 @@
 <script lang="ts" setup>
 import { useAutoRenameStore } from "@/stores/autoRename";
 import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssociationStatus";
-import { ref } from "vue";
 import AutoRenameAssociations from "@/components/autoRename/AutoRenameAssociations.vue";
 
 const autoRenameStore = useAutoRenameStore();
 autoRenameStore.getAssociations();
-
-const selectedAssociation = ref(null);
-const showReviewDialog = ref(false);
-
-function statusToColor(status: string) {
-  switch (status) {
-    case "STRONG":
-      return "success";
-    case "WEAK":
-      return "warning";
-    case "FAILED":
-      return "error";
-    default:
-      return "grey";
-  }
-}
 </script>
 <style scoped>
 /* https://css-tricks.com/fluid-width-video/ */

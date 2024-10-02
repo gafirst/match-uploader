@@ -6,13 +6,6 @@ import {
   isAutoRenameAssociation,
   isAutoRenameAssociationApiResponse,
 } from "@/types/autoRename/AutoRenameAssociation";
-import {
-  isWorkerEvent,
-  isWorkerJobCompleteEvent,
-  isWorkerJobCreatedEvent,
-  isWorkerJobStartEvent,
-  WorkerJobEvent,
-} from "@/types/WorkerJob";
 import { socket } from "@/socket";
 
 export const useAutoRenameStore = defineStore("autoRename", () => {
@@ -83,10 +76,23 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     // TODO: Error handling
   }
 
+  async function ignoreAssociation(association: AutoRenameAssociation) {
+    const result = await fetch("/api/v1/autoRename/associations/ignore", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filePath: association.filePath,
+        videoLabel: association.videoLabel,
+      }),
+    });
+
+    // TODO: Error handling
+  }
+
   const isConnected = ref(false);
   const isInitialConnectionPending = ref(true);
-
-  const events = ref<WorkerJobEvent[]>([]);
 
   watch(isConnected, (newValue) => {
     console.log("isConnected changed to", newValue);
@@ -127,6 +133,7 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     bindEvents,
     confirmWeakAssociation,
     getAssociations,
+    ignoreAssociation,
     loadingAssociations,
   };
 });

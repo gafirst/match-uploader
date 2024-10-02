@@ -8,6 +8,8 @@ export enum AutoRenameAssociationStatus {
   // A strong association was made (manually set by a human, manually approved by a human, or automatically classified
   // as strong)
   STRONG = "STRONG",
+  // The association was manually ignored and won't be matched
+  IGNORED = "IGNORED",
 }
 
 /**
@@ -21,6 +23,7 @@ export function autoRenameAssociationStatusToUiString(status: AutoRenameAssociat
     [AutoRenameAssociationStatus.FAILED]: "failed",
     [AutoRenameAssociationStatus.WEAK]: "weak",
     [AutoRenameAssociationStatus.STRONG]: "strong",
+    [AutoRenameAssociationStatus.IGNORED]: "ignored",
   };
 
   return outputMap[status];

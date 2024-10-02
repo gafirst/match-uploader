@@ -1,6 +1,7 @@
 <template>
   <VDataTable :items="autoRenameStore.associationsInStatus(includedAssociationStatuses)"
               :loading="autoRenameStore.loadingAssociations"
+              no-data-text="No associations found"
               :headers="[
                 { title: 'Label', value: 'videoLabel' },
                 { title: 'File', key: 'videoFileName', value: item => item.videoFile },
@@ -21,20 +22,6 @@
         >
           Review
         </VBtn>
-        <!--        <VBtn v-if="allowEdits(item)"-->
-        <!--              class="mr-2"-->
-        <!--              color="error"-->
-        <!--              variant="outlined"-->
-        <!--        >-->
-        <!--          Ignore-->
-        <!--        </VBtn>-->
-        <!--        <VBtn v-if="allowEdits(item) && item.status === AutoRenameAssociationStatus.WEAK"-->
-        <!--              class="mr-2"-->
-        <!--              color="success"-->
-        <!--              @click="selectedAssociation = item; showReviewDialog = true"-->
-        <!--        >-->
-        <!--          Confirm-->
-        <!--        </VBtn>-->
         <VBtn v-if="item.status === AutoRenameAssociationStatus.STRONG && !item.renameCompleted" color="error">
           Unmatch
         </VBtn>

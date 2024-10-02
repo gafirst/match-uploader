@@ -70,8 +70,6 @@ model AutoRenameAssociation {
   renameCompleted Boolean   @default(false)
   newFileName     String?
 
-  isIgnored Boolean @default(false)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -86,6 +84,8 @@ enum AutoRenameAssociationStatus {
   // A strong association was made (manually set by a human, manually approved by a human, or automatically classified
   // as strong)
   STRONG
+  // Do not try to associate this file again / TODO: Implement this everywhere else
+  IGNORED
 }
 
 model AutoRenameMetadata {

@@ -27,8 +27,9 @@ export async function queueRenameJob(
   io: SocketIOServer | Socket,
   association: AutoRenameAssociation,
   videoSearchDirectory: string,
-  newFileName: string,
-  renameAfter: DateTime): Promise<WorkerJob> {
+  renameAfter: DateTime,
+  priority: number | undefined = undefined,
+): Promise<WorkerJob> {
   return await queueJob(
     prisma,
     addJob,
@@ -38,7 +39,6 @@ export async function queueRenameJob(
     {
       directory: `${videoSearchDirectory}/${association.videoLabel}`,
       oldFileName: association.videoFile,
-      newFileName,
       associationId: association.filePath,
     },
     {
@@ -46,6 +46,7 @@ export async function queueRenameJob(
       jobKey: `autoRename-${association.filePath}`,
       jobKeyMode: "replace",
       runAt: renameAfter.toJSDate(),
+      priority,
     },
   );
 }

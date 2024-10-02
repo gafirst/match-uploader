@@ -38,13 +38,15 @@
     <VCardActions>
       <VSpacer />
       <VBtn color="error"
-            :disabled="confirmLoading"
+            :disabled="confirmLoading || ignoreLoading"
+            :loading="ignoreLoading"
+            @click="onIgnore"
       >
         Ignore
       </VBtn>
       <VBtn color="success"
             variant="tonal"
-            :loading="confirmLoading"
+            :loading="confirmLoading || ignoreLoading"
             @click="onConfirm"
       >
         Accept
@@ -68,11 +70,20 @@ const props = defineProps<{
 const autoRenameStore = useAutoRenameStore();
 
 const confirmLoading = ref(false);
-// TODO: Implement confirmError
+// TODO: Implement confirmError and ignoreError
+
 async function onConfirm() {
   confirmLoading.value = true;
   await autoRenameStore.confirmWeakAssociation(association.value, associatedMatchKey.value);
   confirmLoading.value = false;
+  emit("close");
+}
+
+const ignoreLoading = ref(false);
+async function onIgnore() {
+  ignoreLoading.value = true;
+  await autoRenameStore.ignoreAssociation(association.value);
+  ignoreLoading.value = false;
   emit("close");
 }
 

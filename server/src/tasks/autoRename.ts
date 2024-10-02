@@ -67,6 +67,9 @@ function assertIsAutoRenameCronPayload(payload: unknown): asserts payload is Aut
   assertIsCronPayload((payload as unknown as AutoRenameCronPayload)._cron);
 }
 
+// FIXME: Add event code checking
+// FIXME: Add customizable delay before renaming
+// FIXME: Add chronological order check
 export async function autoRename(payload: unknown, {
   logger,
   job,
@@ -188,7 +191,6 @@ export async function autoRename(payload: unknown, {
           workerIo,
           association,
           videoSearchDirectory,
-          newFileName,
           renameAfter,
         );
         renameJobId = renameJob.jobId;
@@ -208,7 +210,6 @@ export async function autoRename(payload: unknown, {
           renameJobId,
           renameAfter: renameAfter.toISO(),
           renameCompleted: false,
-          isIgnored: false,
           videoDurationSecs,
           videoDurationAbnormal,
           startTimeDiff: closestMatchDiff,

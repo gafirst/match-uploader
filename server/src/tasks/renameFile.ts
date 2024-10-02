@@ -1,12 +1,12 @@
 import type { JobHelpers } from "graphile-worker";
 import fs from "fs-extra";
-import { prisma } from "@src/worker";
+import { prisma, workerIo } from "@src/worker";
+import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
 
 export interface RenameFilePayload {
   directory: string;
   oldFileName: string;
-  newFileName: string;
-  associationId?: string;
+  associationId: string;
 }
 
 function assertIsRenameFilePayload(payload: unknown): asserts payload is RenameFilePayload {
@@ -16,31 +16,44 @@ function assertIsRenameFilePayload(payload: unknown): asserts payload is RenameF
     throw new Error(`Invalid payload (undefined): ${JSON.stringify(payload)}`);
   } else if (!(payload as unknown as RenameFilePayload).directory ||
     !(payload as unknown as RenameFilePayload).oldFileName ||
-    !(payload as unknown as RenameFilePayload).newFileName
+    !(payload as unknown as RenameFilePayload).associationId
   ) {
     throw new Error(`Invalid payload (missing required prop): ${JSON.stringify(payload)}`);
   }
 }
 
+// TODO: Add way to undo rename
+// FIXME: Just make this really specific to associations
 export async function renameFile(payload: unknown, {
   logger,
 }: JobHelpers): Promise<void> {
   logger.info(JSON.stringify(payload));
   assertIsRenameFilePayload(payload);
 
-  logger.info(`Renaming ${payload.directory}/${payload.oldFileName} to ${payload.directory}/${payload.newFileName}`);
-  // Rename the file
-  await fs.rename(`${payload.directory}/${payload.oldFileName}`, `${payload.directory}/${payload.newFileName}`);
+  const association = await prisma.autoRenameAssociation.findUniqueOrThrow({
+    where: {
+      filePath: payload.associationId,
+    },
+  });
 
-  if (payload.associationId) {
-    // TODO: Websocket event
-    await prisma.autoRenameAssociation.update({
-      where: {
-        filePath: payload.associationId,
-      },
-      data: {
-        renameCompleted: true,
-      },
-    });
+  if (!association.newFileName) {
+    throw new Error(`Association ${association.filePath} does not have a new file name`);
   }
+
+  logger.info(`Renaming ${payload.directory}/${payload.oldFileName} to ${payload.directory}/${association.newFileName}`);
+  // Rename the file
+  // FIXME: error handling?
+  await fs.rename(`${payload.directory}/${payload.oldFileName}`, `${payload.directory}/${association.newFileName}`);
+
+  await prisma.autoRenameAssociation.update({
+    where: {
+      filePath: payload.associationId,
+    },
+    data: {
+      renameCompleted: true,
+    },
+  });
+  workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
+    filePath: association.filePath,
+  });
 }
