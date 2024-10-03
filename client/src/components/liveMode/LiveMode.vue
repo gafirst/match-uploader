@@ -175,8 +175,7 @@ import { useLiveModeStore } from "@/stores/liveMode";
 import { liveModeRequirementToUiString } from "@/types/liveMode/LiveModeRequirements";
 import TaskListItem from "@/components/util/TaskListItem.vue";
 import dayjs from "dayjs";
-import { LiveModeStatus, liveModeStatusToUiString } from "@/types/liveMode/LiveModeStatus";
-import { computed } from "vue";
+import { LiveModeStatus } from "@/types/liveMode/LiveModeStatus";
 
 const liveMode = useLiveModeStore();
 </script>

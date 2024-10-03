@@ -55,7 +55,7 @@ model AutoRenameAssociation {
   status                AutoRenameAssociationStatus @default(UNMATCHED)
   statusReason          String?
   videoTimestamp        DateTime?
-  startTimeDiff         Int?
+  startTimeDiffSecs     Int?
   videoDurationSecs     Int?
   startTimeDiffAbnormal Boolean?
   videoDurationAbnormal Boolean?

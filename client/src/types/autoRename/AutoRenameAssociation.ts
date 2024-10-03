@@ -16,7 +16,7 @@ export interface AutoRenameAssociation {
   videoTimestamp: string | null;
   associationAttempts: number;
   maxAssociationAttempts: number;
-  matchKey?: string;
+  matchKey: string;
   videoLabel: string | null;
   newFileName: string | null;
   createdAt: string;
@@ -24,8 +24,12 @@ export interface AutoRenameAssociation {
   renameJobId: string | null;
   renameAfter: string | null;
   renameCompleted: boolean;
-  match: string | null;
+  match?: string | null;
   isIgnored: boolean;
+  videoDurationSecs: number | null;
+  startTimeDiffSecs: number | null;
+  startTimeDiffAbnormal: boolean | null;
+  videoDurationAbnormal: boolean | null;
 }
 
 export function isAutoRenameAssociationApiResponse(x: unknown): x is AutoRenameAssociationApiResponse {
@@ -54,6 +58,11 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
   console.log("createdAt", x.createdAt, "createdAt" in x);
   console.log("updatedAt", x.updatedAt, "updatedAt" in x);
   console.log("match", x.match, "match" in x);
+  console.log("isIgnored", x.isIgnored, "isIgnored" in x);
+  console.log("videoDurationSecs", x.videoDurationSecs, "videoDurationSecs" in x);
+  console.log("startTimeDiffSecs", x.startTimeDiffSecs, "startTimeDiffSecs" in x);
+  console.log("startTimeDiffAbnormal", x.startTimeDiffAbnormal, "startTimeDiffAbnormal" in x);
+  console.log("videoDurationAbnormal", x.videoDurationAbnormal, "videoDurationAbnormal" in x);
 
   return typeof x === "object" &&
     x !== null &&
@@ -71,7 +80,11 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
     "newFileName" in x &&
     "createdAt" in x &&
     "updatedAt" in x &&
-    "matchKey" in x;
+    "matchKey" in x &&
+    "videoDurationSecs" in x &&
+    "startTimeDiffSecs" in x &&
+    "startTimeDiffAbnormal" in x &&
+    "videoDurationAbnormal" in x;
 }
 
 export const AUTO_RENAME_ASSOCIATION_UPDATE = "autorename:association:update";

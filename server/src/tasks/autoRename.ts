@@ -21,7 +21,7 @@ export interface AutoRenameCronPayload {
   _cron: CronPayload;
 }
 
-function classifyAssociation(startTimeDiff: number, videoDuration: number): {
+function classifyAssociation(startTimeDiffSecs: number, videoDuration: number): {
   associationStatus: AutoRenameAssociationStatus;
   startTimeDiffAbnormal: boolean;
   videoDurationAbnormal: boolean;
@@ -31,8 +31,8 @@ function classifyAssociation(startTimeDiff: number, videoDuration: number): {
 
   const videoDurationInRange = videoDuration >= minVideoDuration && videoDuration <= maxVideoDurationStrong;
 
-  const startTimeDiffStrong = startTimeDiff <= 60;
-  const startTimeDiffWeak = startTimeDiff <= 300;
+  const startTimeDiffStrong = startTimeDiffSecs <= 60;
+  const startTimeDiffWeak = startTimeDiffSecs <= 300;
 
   let associationStatus: AutoRenameAssociationStatus = AutoRenameAssociationStatus.UNMATCHED;
 
@@ -212,7 +212,7 @@ export async function autoRename(payload: unknown, {
           renameCompleted: false,
           videoDurationSecs,
           videoDurationAbnormal,
-          startTimeDiff: closestMatchDiff,
+          startTimeDiffSecs: closestMatchDiff,
           startTimeDiffAbnormal,
         },
       });
@@ -222,8 +222,7 @@ export async function autoRename(payload: unknown, {
     } else {
       console.log("inside the else");
       if (association.associationAttempts + 1 >= association.maxAssociationAttempts) {
-        console.log("here");
-        const updatedAssociation = await prisma.autoRenameAssociation.update({
+        await prisma.autoRenameAssociation.update({
           where: {
             filePath: association.filePath,
           },
@@ -237,7 +236,6 @@ export async function autoRename(payload: unknown, {
             videoDurationAbnormal,
           },
         });
-        console.log("updatedAssoc", updatedAssociation);
         workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
           filePath: association.filePath,
         });
