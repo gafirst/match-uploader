@@ -50,19 +50,22 @@ enum JobStatus {
 }
 
 model AutoRenameAssociation {
-  filePath              String                      @id @unique
-  videoFile             String
-  status                AutoRenameAssociationStatus @default(UNMATCHED)
-  statusReason          String?
-  videoTimestamp        DateTime?
-  startTimeDiffSecs     Int?
-  videoDurationSecs     Int?
-  startTimeDiffAbnormal Boolean?
-  videoDurationAbnormal Boolean?
+  filePath               String                      @id @unique
+  videoFile              String
+  status                 AutoRenameAssociationStatus @default(UNMATCHED)
+  statusReason           String?
+  videoTimestamp         DateTime?
+  startTimeDiffSecs      Int?
+  videoDurationSecs      Int?
+  startTimeDiffAbnormal  Boolean?
+  videoDurationAbnormal  Boolean?
+  orderingIssueMatchKey  String?
+  orderingIssueMatchName String?
 
   associationAttempts    Int     @default(0)
   maxAssociationAttempts Int     @default(5)
   matchKey               String?
+  matchName              String?
   videoLabel             String
 
   renameAfter     DateTime?
@@ -89,12 +92,10 @@ enum AutoRenameAssociationStatus {
 }
 
 model AutoRenameMetadata {
-  id                     Int      @id @default(autoincrement())
+  id                     Int     @id @default(autoincrement())
   eventKey               String
   label                  String
   lastAssociatedMatchKey String?
-  eventStart             DateTime
-  eventEnd               DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -6,8 +6,28 @@ import EnvVars from "@src/constants/EnvVars";
 import { PrismaClient } from "@prisma/client";
 import { autoRename } from "@src/tasks/autoRename";
 import { renameFile } from "@src/tasks/renameFile";
+import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
 
-export const prisma = new PrismaClient();
+export const prisma = new PrismaClient().$extends({
+    query: {
+        autoRenameAssociation: {
+            async update({ model, operation, args, query }) {
+                const association = await query(args);
+                workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
+                    filePath: association.filePath,
+                });
+            },
+            async upsert({ model, operation, args, query }) {
+                const association = await query(args);
+                workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
+                    filePath: association.filePath,
+                });
+            },
+        },
+    },
+});
+
+export type WorkerPrismaClient = typeof prisma;
 
 /**
  * Watches certain worker events and forwards them to a Socket.IO socket. Note that event
@@ -60,7 +80,6 @@ export let workerIo: Socket;
 
 async function main(): Promise<void> {
     // Run a worker to execute jobs:
-
     const runner = await run({
         connectionString: EnvVars.db.connectionString,
         concurrency: 5,

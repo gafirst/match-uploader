@@ -9,13 +9,62 @@
       <VRow>
         <VCol>
           <h2 class="mb-2">Video</h2>
-          <video :src="`videos/${props.association.filePath}`"
+          <video :src="videoFilePath"
                  controls
                  preload="metadata"
           />
         </VCol>
         <VCol>
           <h2>Association</h2>
+          <VAlert v-if="association.renameJobId &&
+                    (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.COMPLETED))
+                    || association.renameCompleted"
+                  variant="tonal"
+                  color="success"
+                  icon="mdi-lock"
+                  density="compact"
+                  class="mb-2"
+                  title="File rename completed"
+          >
+            To make edits, close this dialog and click <strong>Undo Rename</strong> to attempt to revert the rename.
+            Note the file might have already been uploaded.
+          </VAlert>
+
+          <VAlert v-if="association.renameJobId &&
+                    (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.PENDING))"
+                  variant="tonal"
+                  color="info"
+                  icon="mdi-clock-outline"
+                  density="compact"
+                  class="mb-2"
+                  title="File rename pending"
+          >
+            Job #{{ association.renameJobId }} will start after {{ dayjs(association.renameAfter).format("llll z") }}
+          </VAlert>
+
+          <VAlert v-if="association.renameJobId &&
+                    (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.STARTED))"
+                  variant="tonal"
+                  color="info"
+                  icon="mdi-clock-outline"
+                  density="compact"
+                  class="mb-2"
+          >
+            File rename in progress: Job #{{ association.renameJobId }}
+          </VAlert>
+
+          <VAlert v-if="association.renameJobId &&
+                    (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.FAILED))"
+                  variant="tonal"
+                  color="error"
+                  icon="mdi-alert-circle"
+                  density="compact"
+                  class="mb-2"
+                  title="File rename failed"
+          >
+            Job #{{ association.renameJobId }} failed:
+            {{ workerStore.jobs.get(association.renameJobId)?.error ?? "Unknown error" }}
+          </VAlert>
 
           <VAlert v-if="association.status === AutoRenameAssociationStatus.FAILED"
                   variant="tonal"
@@ -50,11 +99,16 @@
                       hide-default-header
                       hide-default-footer
           >
-            <!--            TODO: Edge case: Association becomes renamed (and locked for edits?) while the dialog is open -->
             <template v-slot:item.value="{ item }">
               <span v-if="item.key.toLowerCase() === 'match'">
-                <!--                FIXME: This doesn't appear sometimes. Example case is accepting a weak association, not refreshing > clicking Review on the Strong association-->
-                <MatchAutocompleteDropdown v-model="associatedMatchKey" />
+                <MatchAutocompleteDropdown v-if="isEditable"
+                                           v-model="associatedMatchKey"
+                />
+                <!--                TODO: Extract non-editable state into component -->
+                <template v-else>
+                  {{ association.matchName ?? "None" }}<br />
+                  <span style="color: gray">{{ association.matchKey ?? "" }}</span>
+                </template>
               </span>
               <span v-else-if="item.key.toLowerCase() === 'video start time'">
                 {{ dayjs(item.value).format("llll z") }}
@@ -78,7 +132,7 @@
         </VCol>
       </VRow>
     </VCardText>
-    <VCardActions>
+    <VCardActions v-if="isEditable">
       <VSpacer />
       <VBtn color="error"
             :disabled="confirmLoading || ignoreLoading"
@@ -98,8 +152,7 @@
   </VCard>
 </template>
 <script lang="ts" setup>
-import { AutoRenameAssociation } from "@/types/autoRename/AutoRenameAssociation";
-import { computed, ref, toRef } from "vue";
+import { computed, reactive, ref, toRef } from "vue";
 import { capitalizeFirstLetter } from "@/util/capitalize";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import MatchAutocompleteDropdown from "@/components/matches/MatchAutocompleteDropdown.vue";
@@ -110,9 +163,12 @@ import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import {
-  AutoRenameAssociationStatus, autoRenameAssociationStatusToColor,
+  AutoRenameAssociationStatus,
+  autoRenameAssociationStatusToColor,
   autoRenameAssociationStatusToUiString,
 } from "@/types/autoRename/AutoRenameAssociationStatus";
+import { useWorkerStore } from "@/stores/worker";
+import { WorkerJobStatus } from "@/types/WorkerJob";
 
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
@@ -120,15 +176,19 @@ dayjs.extend(localizedFormat);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
+const workerStore = useWorkerStore();
+workerStore.loadJobs();
+
 const emit = defineEmits(["close"]);
 
 const props = defineProps<{
-  association: AutoRenameAssociation;
+  associationFilePath: string;
 }>();
 
 const autoRenameStore = useAutoRenameStore();
 
 const confirmLoading = ref(false);
+
 // TODO: Implement confirmError and ignoreError
 
 async function onConfirm() {
@@ -139,6 +199,7 @@ async function onConfirm() {
 }
 
 const ignoreLoading = ref(false);
+
 async function onIgnore() {
   ignoreLoading.value = true;
   await autoRenameStore.ignoreAssociation(association.value);
@@ -146,10 +207,8 @@ async function onIgnore() {
   emit("close");
 }
 
-// TODO: Include match start time?
 const columnOrder = [
-  // "status",
-  "match",
+  "matchKey",
   "videoFile",
   "videoTimestamp",
   "videoLabel",
@@ -160,29 +219,32 @@ const columnOrder = [
 const prettyColumnNames = {
   videoLabel: "label",
   videoFile: "file name",
-  status: "status",
-  match: "match",
-  statusReason: "review reason",
+  matchKey: "match",
   videoTimestamp: "video start time",
-  associationAttempts : "association attempts",
+  associationAttempts: "association attempts",
   maxAssociationAttempts: "max association attempts",
   startTimeDiffSecs: "Start time difference",
   videoDurationSecs: "Video duration",
 };
 
-const association = toRef(props, "association");
-const associatedMatchKey = ref(association.value.matchKey);
+const filePath = toRef(props, "associationFilePath");
+console.log(filePath.value);
+const association = computed(() => {
+  return autoRenameStore.associationsMap.get(filePath.value);
+});
+console.log(association);
+const associatedMatchKey = ref(autoRenameStore.associationsMap.get(filePath.value).matchKey);
+console.log(associatedMatchKey.value);
 
-const associationAsEntries = computed(() => Object.entries(props.association)
-  .filter(([key]) => columnOrder.includes(key))
-  .sort(([key1], [key2]) => columnOrder.indexOf(key1) - columnOrder.indexOf(key2))
-  .map(([key, value]) => {
-    return {
-      key: capitalizeFirstLetter(prettyColumnNames[key]) ?? key,
-      value,
-    };
-  }),
-);
+const associationAsEntries = Object.entries(association.value)
+      .filter(([key]) => columnOrder.includes(key))
+      .sort(([key1], [key2]) => columnOrder.indexOf(key1) - columnOrder.indexOf(key2))
+      .map(([key, value]) => {
+        return {
+          key: capitalizeFirstLetter(prettyColumnNames[key]) ?? key,
+          value,
+        };
+});
 
 const renderDuration = (seconds: unknown) => {
   if (typeof seconds !== "number") {
@@ -213,6 +275,24 @@ const startTimeDiffColor = computed(() => {
   }
 
   return "success";
+});
+
+const videoFilePath = computed(() => {
+  const prefix = "videos/";
+
+  if (!association.value) {
+    return "";
+  }
+
+  if (association.value.renameCompleted) {
+    return `${prefix}${association.value.videoLabel}/${association.value.newFileName}`;
+  }
+
+  return `${prefix}${association.value.filePath}`;
+});
+
+const isEditable = computed(() => {
+  return autoRenameStore.isEditable(association.value);
 });
 
 </script>

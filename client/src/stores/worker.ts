@@ -112,7 +112,6 @@ export const useWorkerStore = defineStore("worker", () => {
   }
 
   async function loadJobs() {
-    // Load jobs by fetching from /api/v1/worker/jobs
     jobsLoading.value = true;
     jobsError.value = "";
 

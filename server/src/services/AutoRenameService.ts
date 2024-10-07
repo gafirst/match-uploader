@@ -50,7 +50,7 @@ export async function updateAssociationData(
     return;
   }
 
-  const extraUpdateProps: { matchKey?: string | null } = {};
+  const extraUpdateProps: { matchKey?: string; matchName?: string } = {};
 
   let matchKeyObj: MatchKey | null = null;
   if (!matchKey && !existingAssociation.matchKey) {
@@ -59,6 +59,8 @@ export async function updateAssociationData(
 
   if (matchKey) {
     extraUpdateProps.matchKey = matchKey;
+    const match = new Match(MatchKey.fromString(matchKey, playoffsType as PlayoffsType));
+    extraUpdateProps.matchName = match.matchName;
     matchKeyObj = MatchKey.fromString(matchKey, playoffsType as PlayoffsType);
   } else if (existingAssociation.matchKey) {
     matchKeyObj = MatchKey.fromString(existingAssociation.matchKey, playoffsType as PlayoffsType);
@@ -151,20 +153,10 @@ export async function processAutoRenameEvent(
             filePath: data.filePath,
         },
     });
-    console.log(event, association);
 
-    const { playoffsType } = await getSettings();
-    const extraProps: { match: string | null } = { match: null };
-    if (association.matchKey) {
-      const matchKey = MatchKey.fromString(association.matchKey, playoffsType as PlayoffsType);
-      extraProps.match = new Match(matchKey).matchName;
-    }
     socket.broadcast.emit("autorename", {
       event,
-      association: {
-        ...association,
-        ...extraProps,
-      },
+      association,
     });
   } catch (e) {
     logger.err(`Error handling ${event} event: ${e}`);

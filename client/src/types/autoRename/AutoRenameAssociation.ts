@@ -42,7 +42,7 @@ export function isAutoRenameAssociationApiResponse(x: unknown): x is AutoRenameA
 }
 
 export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation {
-  console.log("isAutoRenameAssociation payload", x, typeof x === "object" && x !== null);
+  console.log("isAutoRenameAssociation payload", x, typeof x === "object" );
   console.log("filePath", x.filePath, "filePath" in x);
   console.log("status", x.status, "status" in x && isAutoRenameAssociationStatus(x.status));
   console.log("statusReason", x.statusReason, "statusReason" in x);
@@ -58,6 +58,7 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
   console.log("createdAt", x.createdAt, "createdAt" in x);
   console.log("updatedAt", x.updatedAt, "updatedAt" in x);
   console.log("match", x.match, "match" in x);
+  console.log("matchName", x.matchName, "matchName" in x);
   console.log("isIgnored", x.isIgnored, "isIgnored" in x);
   console.log("videoDurationSecs", x.videoDurationSecs, "videoDurationSecs" in x);
   console.log("startTimeDiffSecs", x.startTimeDiffSecs, "startTimeDiffSecs" in x);
@@ -65,7 +66,6 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
   console.log("videoDurationAbnormal", x.videoDurationAbnormal, "videoDurationAbnormal" in x);
 
   return typeof x === "object" &&
-    x !== null &&
     "filePath" in x &&
     "status" in x &&
     isAutoRenameAssociationStatus(x.status) &&
@@ -81,6 +81,7 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
     "createdAt" in x &&
     "updatedAt" in x &&
     "matchKey" in x &&
+    "matchName" in x &&
     "videoDurationSecs" in x &&
     "startTimeDiffSecs" in x &&
     "startTimeDiffAbnormal" in x &&

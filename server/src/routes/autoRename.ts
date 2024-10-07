@@ -52,25 +52,10 @@ async function getAutoRenameAssociations(req: IReq, res: IRes): Promise<void> {
       where,
     },
   );
-  const associationsWithMatchNames = associations.map((association) => {
-    if (!association.matchKey) {
-      return {
-        ...association,
-        match: null,
-      };
-    }
-    const matchKey = MatchKey.fromString(association.matchKey, playoffsType as PlayoffsType);
-    const match = new Match(matchKey);
-
-    return {
-      ...association,
-      match: match.matchName,
-    };
-  });
 
   res.json({
     ok: true,
-    associations: associationsWithMatchNames,
+    associations,
   });
 }
 

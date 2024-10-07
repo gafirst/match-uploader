@@ -31,17 +31,8 @@
       </div>
     </template>
 
-    <template v-slot:item.videoFile="{ item }">
-      <video :src="`videos/${item.filePath}`"
-             controls
-             preload="metadata"
-             class="pa-3"
-             style="max-width: 300px;"
-      />
-    </template>
-
     <template v-slot:item.matchKey="{ item }">
-      {{ item.match ?? "None" }}<br />
+      {{ item.matchName ?? "None" }}<br />
       <span style="color: gray">{{ item.matchKey ?? "" }}</span>
     </template>
   </VDataTable>
@@ -54,7 +45,7 @@
   <VDialog v-model="showReviewDialog"
            max-width="1000"
   >
-    <AutoRenameReviewDialogContents :association="selectedAssociation" @close="showReviewDialog = false" />
+    <AutoRenameReviewDialogContents :association-file-path="selectedAssociation.filePath" @close="showReviewDialog = false" />
   </VDialog>
 </template>
 
@@ -98,13 +89,8 @@ const allowEdits = function(item: unknown) {
     console.error("Invalid item passed to allowReview computed property", item);
     return false;
   }
-  console.log(item);
-  if (props.includedAssociationStatuses.includes(AutoRenameAssociationStatus.STRONG)) {
-    console.log("Strong association, no review needed", item);
-    return !item.renameCompleted;
-  }
 
-  return true;
+  return autoRenameStore.isEditable(item);
 };
 
 

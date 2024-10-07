@@ -44,7 +44,7 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     }
 
     for (const association of resultJson.associations) {
-       associations.value.set(association.filePath, association);
+      associations.value.set(association.filePath, association);
     }
 
     loadingAssociations.value = false;
@@ -91,6 +91,19 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     // TODO: Error handling
   }
 
+  function isEditable(association: AutoRenameAssociation) {
+    console.log("Checking if association is editable:", association);
+
+    if (association.status === AutoRenameAssociationStatus.STRONG) {
+      const editable = !association.renameCompleted;
+      console.log("Association status is STRONG. Editable:", editable);
+      return editable;
+    }
+
+    console.log("Association status is not STRONG. Editable: true");
+    return true;
+  }
+
   const isConnected = ref(false);
   const isInitialConnectionPending = ref(true);
 
@@ -127,13 +140,14 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
 
   return {
     associations: associationsList,
-    associationsDict: associations,
+    associationsMap: associations,
     associationsInStatus,
     associationsError,
     bindEvents,
     confirmWeakAssociation,
     getAssociations,
     ignoreAssociation,
+    isEditable,
     loadingAssociations,
   };
 });

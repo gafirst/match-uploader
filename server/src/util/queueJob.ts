@@ -3,6 +3,7 @@ import { type AddJobFunction, type TaskSpec } from "graphile-worker";
 import { type Server as SocketIOServer } from "socket.io";
 import { type WorkerTask } from "@src/tasks/types/tasks";
 import { type Socket } from "socket.io-client";
+import { type WorkerPrismaClient } from "@src/worker";
 
 /**
  * Queues a job and creates a WorkerJob record in the database.
@@ -18,7 +19,7 @@ import { type Socket } from "socket.io-client";
  * @param taskSpec
  */
 export async function queueJob(
-  prisma: PrismaClient,
+  prisma: PrismaClient | WorkerPrismaClient,
   addJob: AddJobFunction,
   io: SocketIOServer | Socket,
   jobSummary: string,

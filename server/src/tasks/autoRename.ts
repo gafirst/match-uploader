@@ -16,6 +16,7 @@ import {
 } from "@src/repos/AutoRenameRepo";
 import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
 import { videoDuration } from "@numairawan/video-duration";
+import { Match } from "@src/models/Match";
 
 export interface AutoRenameCronPayload {
   _cron: CronPayload;
@@ -105,7 +106,7 @@ export async function autoRename(payload: unknown, {
     const parsedDate = DateTime.fromFormat(videoFile, "'Match_ - 'dd MMMM yyyy - hh-mm-ss a'.mp4'");
     logger.info(`File: ${file} / Parsed date: ${parsedDate.toISO()}`);
     if (parsedDate.isValid) {
-      const association = await prisma.autoRenameAssociation.upsert({
+      await prisma.autoRenameAssociation.upsert({
         where: {
           filePath: file,
         },
@@ -119,9 +120,6 @@ export async function autoRename(payload: unknown, {
         update: {
           videoTimestamp: parsedDate.toJSDate(),
         },
-      });
-      workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
-        filePath: association.filePath,
       });
     }
   }
@@ -174,7 +172,7 @@ export async function autoRename(payload: unknown, {
     } = classifyAssociation(closestMatchDiff, videoDurationSecs);
     if (closestMatch && associationStatus) {
       const matchKeyObj = MatchKey.fromString(closestMatch.key, playoffsType as PlayoffsType);
-
+      const closestMatchObj = new Match(matchKeyObj, false);
       const newFileName = getNewFileNamePreservingExtension(
         association.videoFile,
         getNewFileNameForAutoRename(matchKeyObj, false),
@@ -203,6 +201,7 @@ export async function autoRename(payload: unknown, {
         data: {
           status: associationStatus,
           matchKey: closestMatch.key,
+          matchName: closestMatchObj.matchName,
           associationAttempts: {
             increment: 1,
           },
@@ -215,9 +214,6 @@ export async function autoRename(payload: unknown, {
           startTimeDiffSecs: closestMatchDiff,
           startTimeDiffAbnormal,
         },
-      });
-      workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
-        filePath: association.filePath,
       });
     } else {
       console.log("inside the else");
@@ -236,9 +232,6 @@ export async function autoRename(payload: unknown, {
             videoDurationAbnormal,
           },
         });
-        workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
-          filePath: association.filePath,
-        });
       } else {
         await prisma.autoRenameAssociation.update({
           where: {
@@ -252,9 +245,6 @@ export async function autoRename(payload: unknown, {
             videoDurationSecs,
             videoDurationAbnormal,
           },
-        });
-        workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
-          filePath: association.filePath,
         });
       }
     }

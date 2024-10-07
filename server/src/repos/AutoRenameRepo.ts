@@ -7,6 +7,7 @@ import { queueJob } from "@src/util/queueJob";
 import { RENAME_FILE } from "@src/tasks/types/tasks";
 import { type Server as SocketIOServer } from "socket.io";
 import { type Socket } from "socket.io-client";
+import { type WorkerPrismaClient } from "@src/worker";
 
 export function getNewFileNamePreservingExtension(
   fileNameWithExtension: string,
@@ -22,7 +23,7 @@ export function getNewFileNameForAutoRename(matchKey: MatchKey, isReplay: boolea
 }
 
 export async function queueRenameJob(
-  prisma: PrismaClient,
+  prisma: PrismaClient | WorkerPrismaClient,
   addJob: AddJobFunction,
   io: SocketIOServer | Socket,
   association: AutoRenameAssociation,
