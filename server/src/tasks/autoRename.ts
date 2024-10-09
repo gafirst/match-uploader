@@ -14,7 +14,6 @@ import {
   getNewFileNamePreservingExtension,
   queueRenameJob,
 } from "@src/repos/AutoRenameRepo";
-import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
 import { videoDuration } from "@numairawan/video-duration";
 import { Match } from "@src/models/Match";
 
@@ -27,6 +26,7 @@ function classifyAssociation(startTimeDiffSecs: number, videoDuration: number): 
   startTimeDiffAbnormal: boolean;
   videoDurationAbnormal: boolean;
 } {
+  // FIXME: Make these settings
   const minVideoDuration = 3 * 60; // 3 minutes
   const maxVideoDurationStrong = 5 * 60; // 5 minutes FIXME
 
@@ -39,19 +39,56 @@ function classifyAssociation(startTimeDiffSecs: number, videoDuration: number): 
 
   if (startTimeDiffStrong) {
     if (videoDurationInRange) {
-        associationStatus = AutoRenameAssociationStatus.STRONG;
+      associationStatus = AutoRenameAssociationStatus.STRONG;
     } else {
-        associationStatus = AutoRenameAssociationStatus.WEAK;
+      associationStatus = AutoRenameAssociationStatus.WEAK;
     }
   } else if (startTimeDiffWeak) {
     associationStatus = AutoRenameAssociationStatus.WEAK;
   }
 
+  return {
+    associationStatus,
+    startTimeDiffAbnormal: !startTimeDiffWeak,
+    videoDurationAbnormal: !videoDurationInRange,
+  };
+}
+
+async function checkMatchOrdering(eventKey: string,
+  videoLabel: string,
+  proposedMatch: Match,
+  playoffsType: PlayoffsType): Promise<{
+  hasOrderingIssue: boolean;
+  orderingIssueMatch: Match | null;
+}> {
+  const metadata = await prisma.autoRenameMetadata.findUnique({
+    where: {
+      id: {
+        label: videoLabel, // TODO: Video label should be case sensitive
+        eventKey,
+      },
+    },
+  });
+
+  if (!metadata?.lastStrongAssociationMatchKey) {
     return {
-      associationStatus,
-      startTimeDiffAbnormal: !startTimeDiffWeak,
-      videoDurationAbnormal: !videoDurationInRange,
+      hasOrderingIssue: false,
+      orderingIssueMatch: null,
     };
+  }
+
+  const storedMatch = new Match(MatchKey.fromString(metadata.lastStrongAssociationMatchKey, playoffsType));
+  if (proposedMatch.isAfter(storedMatch)) {
+    return {
+      hasOrderingIssue: false,
+      orderingIssueMatch: null,
+    };
+  }
+
+  return {
+    hasOrderingIssue: true,
+    orderingIssueMatch: storedMatch,
+  };
 }
 
 async function getVideoDuration(filePath: string): Promise<{ seconds: number }> {
@@ -68,9 +105,7 @@ function assertIsAutoRenameCronPayload(payload: unknown): asserts payload is Aut
   assertIsCronPayload((payload as unknown as AutoRenameCronPayload)._cron);
 }
 
-// FIXME: Add event code checking
 // FIXME: Add customizable delay before renaming
-// FIXME: Add chronological order check
 export async function autoRename(payload: unknown, {
   logger,
   job,
@@ -79,7 +114,11 @@ export async function autoRename(payload: unknown, {
   logger.info(JSON.stringify(payload));
   assertIsAutoRenameCronPayload(payload);
 
-  const { playoffsType, videoSearchDirectory } = await getSettings();
+  const {
+    eventTbaCode,
+    playoffsType,
+    videoSearchDirectory,
+  } = await getSettings();
 
   const files = await getFilesMatchingPattern(
     videoSearchDirectory,
@@ -89,7 +128,7 @@ export async function autoRename(payload: unknown, {
   );
 
   for (const file of files) {
-    // FIXME: needs to be more robust
+    // TODO: needs to be more robust
     const videoLabel = file.split("/")[0];
     const videoFile = file.split("/")[1];
 
@@ -124,10 +163,14 @@ export async function autoRename(payload: unknown, {
     }
   }
 
+  // Make sure we get the associations to consider in chronological order from oldest to newest to preserve ordering
   const toProcess = await prisma.autoRenameAssociation.findMany(
     {
       where: {
         status: AutoRenameAssociationStatus.UNMATCHED,
+      },
+      orderBy: {
+        videoTimestamp: "asc",
       },
     },
   );
@@ -137,8 +180,7 @@ export async function autoRename(payload: unknown, {
   const matches = await getMatchList();
 
   for (const association of toProcess) {
-    // TODO: Check if file still exists
-
+    // FIXME: Check if file still exists
     let closestMatch: TbaMatchSimple | null = null;
     let closestMatchDiff = Infinity;
     logger.info(`Processing ${association.filePath}`);
@@ -151,13 +193,7 @@ export async function autoRename(payload: unknown, {
       const matchDate = DateTime.fromSeconds(match.actual_time);
       const diffSeconds = Math.abs(matchDate.diff(DateTime.fromJSDate(association.videoTimestamp)).as("seconds"));
       if (diffSeconds < closestMatchDiff) {
-        if (diffSeconds > 300) {
-          continue;
-        }
-
         closestMatchDiff = diffSeconds;
-
-        logger.info(`Match ${match.key} is within 5 minutes of the test date`);
         closestMatch = match;
       }
     }
@@ -165,14 +201,52 @@ export async function autoRename(payload: unknown, {
     // FIXME: error handling?
     const videoDurationSecs = (await getVideoDuration(`${videoSearchDirectory}/${association.filePath}`)).seconds;
 
-    const {
+    let {
       associationStatus,
       startTimeDiffAbnormal,
       videoDurationAbnormal,
     } = classifyAssociation(closestMatchDiff, videoDurationSecs);
-    if (closestMatch && associationStatus) {
+    if (closestMatch &&
+      associationStatus &&
+      ([AutoRenameAssociationStatus.STRONG, AutoRenameAssociationStatus.WEAK] as AutoRenameAssociationStatus[])
+        .includes(associationStatus)
+    ) {
       const matchKeyObj = MatchKey.fromString(closestMatch.key, playoffsType as PlayoffsType);
       const closestMatchObj = new Match(matchKeyObj, false);
+
+      const orderingCheckResult = await checkMatchOrdering(
+        eventTbaCode,
+        association.videoLabel,
+        closestMatchObj,
+        playoffsType as PlayoffsType,
+      );
+
+      // Downgrade the association status from STRONG to WEAK if there is an ordering issue
+      if (associationStatus === AutoRenameAssociationStatus.STRONG) {
+        if (!orderingCheckResult.hasOrderingIssue) {
+          await prisma.autoRenameMetadata.upsert({
+            where: {
+              id: {
+                label: association.videoLabel,
+                eventKey: eventTbaCode,
+              },
+            },
+            create: {
+              label: association.videoLabel,
+              eventKey: eventTbaCode,
+              lastStrongAssociationMatchKey: closestMatch.key,
+              lastStrongAssociationMatchName: closestMatchObj.matchName,
+            },
+            update: {
+              lastStrongAssociationMatchKey: closestMatch.key,
+              lastStrongAssociationMatchName: closestMatchObj.matchName,
+            },
+          });
+        }
+      } else {
+        associationStatus = AutoRenameAssociationStatus.WEAK;
+      }
+
       const newFileName = getNewFileNamePreservingExtension(
         association.videoFile,
         getNewFileNameForAutoRename(matchKeyObj, false),
@@ -213,10 +287,11 @@ export async function autoRename(payload: unknown, {
           videoDurationAbnormal,
           startTimeDiffSecs: closestMatchDiff,
           startTimeDiffAbnormal,
+          orderingIssueMatchKey: orderingCheckResult.orderingIssueMatch?.key.matchKey,
+          orderingIssueMatchName: orderingCheckResult.orderingIssueMatch?.matchName,
         },
       });
     } else {
-      console.log("inside the else");
       if (association.associationAttempts + 1 >= association.maxAssociationAttempts) {
         await prisma.autoRenameAssociation.update({
           where: {

@@ -22,7 +22,10 @@ import { Match } from "@src/models/Match";
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
 ): Promise<string | undefined> {
-  const { playoffsType, videoSearchDirectory } = await getSettings();
+  const {
+    playoffsType,
+    videoSearchDirectory,
+  } = await getSettings();
   const existingAssociation = await prisma.autoRenameAssociation.findFirst({
     where: {
       videoLabel,
@@ -68,6 +71,7 @@ export async function updateAssociationData(
     return "Cannot confirm association because it wouldn't have a match key";
   }
 
+  const match = new Match(matchKeyObj); // TODO: Consider replays here
   const newFileName = getNewFileNamePreservingExtension(
     existingAssociation.videoFile,
     getNewFileNameForAutoRename(matchKeyObj, false),
@@ -82,6 +86,7 @@ export async function updateAssociationData(
     videoSearchDirectory,
     renameAfter,
   );
+
   const association = await prisma.autoRenameAssociation.update({
     where: {
       videoLabel,
@@ -100,6 +105,47 @@ export async function updateAssociationData(
     event: AUTO_RENAME_ASSOCIATION_UPDATE,
     association,
   });
+
+  const currentLatestAssociation = await prisma.autoRenameMetadata.findUnique({
+    where: {
+      id: {
+        label: association.videoLabel,
+        eventKey: matchKeyObj.eventKey,
+      },
+    },
+  });
+
+  if (!currentLatestAssociation ||
+    (currentLatestAssociation.lastStrongAssociationMatchKey &&
+      match.isAfter(
+        new Match(
+          MatchKey.fromString(
+            currentLatestAssociation.lastStrongAssociationMatchKey,
+            playoffsType as PlayoffsType,
+          ),
+        ),
+      )
+    )
+  ) {
+    await prisma.autoRenameMetadata.upsert({
+      where: {
+        id: {
+          label: association.videoLabel,
+          eventKey: matchKeyObj.eventKey,
+        },
+      },
+      create: {
+        label: association.videoLabel,
+        eventKey: matchKeyObj.eventKey,
+        lastStrongAssociationMatchKey: matchKeyObj.matchKey,
+        lastStrongAssociationMatchName: match.matchName,
+      },
+      update: {
+        lastStrongAssociationMatchKey: matchKeyObj.matchKey,
+        lastStrongAssociationMatchName: match.matchName,
+      },
+    });
+  }
 }
 
 export async function markAssociationIgnored(videoLabel: string, filePath: string): Promise<string | undefined> {
@@ -119,7 +165,7 @@ export async function markAssociationIgnored(videoLabel: string, filePath: strin
       .permanentlyFailJobs([existingAssociation.renameJobId], "Association was manually ignored");
   }
 
- const association = await prisma.autoRenameAssociation.update({
+  const association = await prisma.autoRenameAssociation.update({
     where: {
       videoLabel,
       filePath,
@@ -144,14 +190,14 @@ export async function processAutoRenameEvent(
 ): Promise<void> {
   try {
     if (!isAutoRenameAssociationUpdateEvent(data)) {
-        logger.warn(`Dropping invalid autorename:association:update event: ${JSON.stringify(data)}`);
-        return;
+      logger.warn(`Dropping invalid autorename:association:update event: ${JSON.stringify(data)}`);
+      return;
     }
 
     const association: AutoRenameAssociation = await prisma.autoRenameAssociation.findUniqueOrThrow({
-        where: {
-            filePath: data.filePath,
-        },
+      where: {
+        filePath: data.filePath,
+      },
     });
 
     socket.broadcast.emit("autorename", {

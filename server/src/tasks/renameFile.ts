@@ -22,8 +22,7 @@ function assertIsRenameFilePayload(payload: unknown): asserts payload is RenameF
   }
 }
 
-// TODO: Add way to undo rename
-// FIXME: Just make this really specific to associations
+// FIXME: Add way to undo rename
 export async function renameFile(payload: unknown, {
   logger,
 }: JobHelpers): Promise<void> {

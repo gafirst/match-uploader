@@ -1,1 +1,1 @@
-# */1 * * * * autoRename ?max=1
+# */1 * * * * autoRename ?max=1&queue=autoRename&jobKey=autoRename&jobKeyMode=replace
