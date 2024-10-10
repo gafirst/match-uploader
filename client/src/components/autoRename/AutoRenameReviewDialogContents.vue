@@ -75,11 +75,22 @@
           >
             Automated association failed: {{ association.statusReason }}
           </VAlert>
+          <VAlert v-if="association.orderingIssueMatchKey"
+                  variant="tonal"
+                  color="warning"
+                  icon="mdi-alert-circle"
+                  density="compact"
+                  class="mb-2"
+          >
+            Is this association correct? A later match ({{ association.orderingIssueMatchName ?? orderingIssueMatchKey }})
+            has already been associated to a video.
+          </VAlert>
           <VAlert v-if="association.startTimeDiffAbnormal"
                   variant="tonal"
                   color="warning"
                   icon="mdi-alert-circle"
                   density="compact"
+                  class="mb-2"
           >
             Selected match may be inaccurate
           </VAlert>
@@ -88,9 +99,20 @@
                   color="warning"
                   icon="mdi-alert-circle"
                   density="compact"
+                  class="mb-2"
           >
             Video duration is outside the expected range
           </VAlert>
+          <VAlert v-if="association.status === AutoRenameAssociationStatus.UNMATCHED"
+                  variant="tonal"
+                  color="info"
+                  icon="mdi-information"
+                  density="compact"
+                  class="mb-2"
+          >
+            Automatic association pending: {{ association.associationAttempts }}/{{ association.maxAssociationAttempts }} attempts made
+          </VAlert>
+
           <VDataTable :headers="[
                         { title: 'Key', value: 'key', align: 'end' },
                         { title: 'Value', value: 'value' },
@@ -228,13 +250,10 @@ const prettyColumnNames = {
 };
 
 const filePath = toRef(props, "associationFilePath");
-console.log(filePath.value);
 const association = computed(() => {
   return autoRenameStore.associationsMap.get(filePath.value);
 });
-console.log(association);
 const associatedMatchKey = ref(autoRenameStore.associationsMap.get(filePath.value).matchKey);
-console.log(associatedMatchKey.value);
 
 const associationAsEntries = Object.entries(association.value)
       .filter(([key]) => columnOrder.includes(key))

@@ -30,6 +30,8 @@ export interface AutoRenameAssociation {
   startTimeDiffSecs: number | null;
   startTimeDiffAbnormal: boolean | null;
   videoDurationAbnormal: boolean | null;
+  orderingIssueMatchKey: string | null;
+  orderingIssueMatchName: string | null;
 }
 
 export function isAutoRenameAssociationApiResponse(x: unknown): x is AutoRenameAssociationApiResponse {
@@ -64,6 +66,8 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
   console.log("startTimeDiffSecs", x.startTimeDiffSecs, "startTimeDiffSecs" in x);
   console.log("startTimeDiffAbnormal", x.startTimeDiffAbnormal, "startTimeDiffAbnormal" in x);
   console.log("videoDurationAbnormal", x.videoDurationAbnormal, "videoDurationAbnormal" in x);
+  console.log("orderingIssueMatchKey", x.orderingIssueMatchKey, "orderingIssueMatchKey" in x);
+  console.log("orderingIssueMatchName", x.orderingIssueMatchName, "orderingIssueMatchName" in x);
 
   return typeof x === "object" &&
     "filePath" in x &&
@@ -85,7 +89,9 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
     "videoDurationSecs" in x &&
     "startTimeDiffSecs" in x &&
     "startTimeDiffAbnormal" in x &&
-    "videoDurationAbnormal" in x;
+    "videoDurationAbnormal" in x &&
+    "orderingIssueMatchKey" in x &&
+    "orderingIssueMatchName" in x;
 }
 
 export const AUTO_RENAME_ASSOCIATION_UPDATE = "autorename:association:update";
