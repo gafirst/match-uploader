@@ -91,6 +91,20 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     // TODO: Error handling
   }
 
+  async function undoRename(association: AutoRenameAssociation) {
+    const result = await fetch("/api/v1/autoRename/associations/undoRename", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filePath: association.filePath,
+      }),
+    });
+
+    // TODO: Error handling
+  }
+
   function isEditable(association: AutoRenameAssociation) {
     console.log("Checking if association is editable:", association);
 
@@ -149,6 +163,7 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     ignoreAssociation,
     isEditable,
     loadingAssociations,
+    undoRename,
   };
 });
 

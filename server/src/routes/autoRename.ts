@@ -8,7 +8,7 @@ import { type PlayoffsType } from "@src/models/PlayoffsType";
 import { Match } from "@src/models/Match";
 import { body, matchedData, query, validationResult } from "express-validator";
 import { type AutoRenameAssociationStatus } from "@prisma/client";
-import { markAssociationIgnored, updateAssociationData } from "@src/services/AutoRenameService";
+import { markAssociationIgnored, undoRename, updateAssociationData } from "@src/services/AutoRenameService";
 
 export const autoRenameRouter = Router();
 
@@ -119,6 +119,41 @@ async function ignoreAssociation(req: IReq, res: IRes): Promise<void> {
   } = matchedData(req);
 
   const error = await markAssociationIgnored(videoLabel as string, filePath as string);
+
+  res.json({
+    ok: !error,
+    message: error,
+  });
+}
+
+autoRenameAssociationsRouter.put(
+  Paths.AutoRename.Associations.UndoRename,
+  body("filePath").isString().notEmpty(),
+  undoRenameAssociation,
+);
+
+async function undoRenameAssociation(req: IReq, res: IRes): Promise<void> {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    res.status(400)
+      .json({
+        errors: errors.array(),
+      });
+    return;
+  }
+
+  const {
+    filePath,
+  } = matchedData(req);
+
+  const association = await prisma.autoRenameAssociation.findUniqueOrThrow({
+    where: {
+      filePath: filePath as string,
+    },
+  });
+
+  const error = await undoRename(association);
 
   res.json({
     ok: !error,

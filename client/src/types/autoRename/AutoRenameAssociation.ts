@@ -16,7 +16,8 @@ export interface AutoRenameAssociation {
   videoTimestamp: string | null;
   associationAttempts: number;
   maxAssociationAttempts: number;
-  matchKey: string;
+  matchKey: string | null;
+  matchName: string | null;
   videoLabel: string | null;
   newFileName: string | null;
   createdAt: string;
@@ -24,7 +25,6 @@ export interface AutoRenameAssociation {
   renameJobId: string | null;
   renameAfter: string | null;
   renameCompleted: boolean;
-  match?: string | null;
   isIgnored: boolean;
   videoDurationSecs: number | null;
   startTimeDiffSecs: number | null;
@@ -59,7 +59,6 @@ export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation 
   console.log("newFileName", x.newFileName, "newFileName" in x);
   console.log("createdAt", x.createdAt, "createdAt" in x);
   console.log("updatedAt", x.updatedAt, "updatedAt" in x);
-  console.log("match", x.match, "match" in x);
   console.log("matchName", x.matchName, "matchName" in x);
   console.log("isIgnored", x.isIgnored, "isIgnored" in x);
   console.log("videoDurationSecs", x.videoDurationSecs, "videoDurationSecs" in x);

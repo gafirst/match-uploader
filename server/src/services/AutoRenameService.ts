@@ -18,6 +18,8 @@ import { DateTime } from "luxon";
 import MatchKey from "@src/models/MatchKey";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
 import { Match } from "@src/models/Match";
+import fs from "fs-extra";
+import { cancelJob } from "@src/services/WorkerService";
 
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
@@ -180,6 +182,56 @@ export async function markAssociationIgnored(videoLabel: string, filePath: strin
   io.emit("autorename", {
     event: AUTO_RENAME_ASSOCIATION_UPDATE,
     association,
+  });
+}
+
+export async function undoRename(association: AutoRenameAssociation): Promise<string | undefined> {
+  if (!association.renameJobId) {
+    logger.info(`undoRename: Nothing to do because association ${association.filePath} has not been renamed`);
+    return;
+  }
+
+  if (association.status !== AutoRenameAssociationStatus.STRONG) {
+    logger.err(`undoRename: Cannot undo rename for ${association.filePath} because status is ${association.status}`);
+    return "Cannot undo rename on an association that is not STRONG (this should never happen)";
+  }
+
+  // FIXME: It would be good to check if the file actually needs to be renamed
+
+  try {
+    if (association.renameJobId) {
+      await cancelJob(association.renameJobId, "Cancelled by user");
+    }
+  } catch (error) {
+    logger.info(`undoRename could not cancel job: ${error} (Note: this is expected if the job has already finished)`);
+  }
+
+  try {
+    const { videoSearchDirectory } = await getSettings();
+    const directory = `${videoSearchDirectory}/${association.videoLabel}`;
+
+    logger.info(`Renaming ${directory}/${association.newFileName} to ${directory}/${association.videoFile}`);
+    await fs.rename(`${directory}/${association.newFileName}`, `${directory}/${association.videoFile}`);
+  } catch (error) {
+    logger.info(`undoRename: Failed to rename file: ${error} (Note: this is expected if the file was never renamed`);
+  }
+
+  const updatedAssociation = await prisma.autoRenameAssociation.update({
+    where: {
+      filePath: association.filePath,
+    },
+    data: {
+      renameCompleted: false,
+      renameJobId: null,
+      renameAfter: null,
+      newFileName: null,
+      status: AutoRenameAssociationStatus.WEAK,
+      statusReason: "Rename undone",
+    },
+  });
+  io.emit("autorename", {
+    event: AUTO_RENAME_ASSOCIATION_UPDATE,
+    association: updatedAssociation,
   });
 }
 

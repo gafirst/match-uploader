@@ -29,6 +29,8 @@ export async function renameFile(payload: unknown, {
   logger.info(JSON.stringify(payload));
   assertIsRenameFilePayload(payload);
 
+  // FIXME: Should fail if the new file name already exists
+
   const association = await prisma.autoRenameAssociation.findUniqueOrThrow({
     where: {
       filePath: payload.associationId,

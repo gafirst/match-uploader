@@ -57,6 +57,7 @@ const Paths = {
       Base: "/associations",
       Confirm: "/confirm",
       Ignore: "/ignore",
+      UndoRename: "/undoRename",
       List: "/",
     },
   },

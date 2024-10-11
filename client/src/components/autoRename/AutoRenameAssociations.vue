@@ -22,10 +22,18 @@
         >
           Review
         </VBtn>
-        <VBtn v-if="item.status === AutoRenameAssociationStatus.STRONG && !item.renameCompleted" color="error">
-          Unmatch
+        <VBtn v-if="item.renameJobId && !item.renameCompleted"
+              color="error"
+              :loading="undoRenameLoading"
+              @click="() => undoRename(item)"
+        >
+          Cancel rename
         </VBtn>
-        <VBtn v-else-if="item.status === AutoRenameAssociationStatus.STRONG && item.renameCompleted" color="error">
+        <VBtn v-if="item.renameJobId && item.renameCompleted"
+              color="error"
+              :loading="undoRenameLoading"
+              @click="() => undoRename(item)"
+        >
           Undo rename
         </VBtn>
       </div>
@@ -45,7 +53,9 @@
   <VDialog v-model="showReviewDialog"
            max-width="1000"
   >
-    <AutoRenameReviewDialogContents :association-file-path="selectedAssociation.filePath" @close="showReviewDialog = false" />
+    <AutoRenameReviewDialogContents :association-file-path="selectedAssociation.filePath"
+                                    @close="showReviewDialog = false"
+    />
   </VDialog>
 </template>
 
@@ -84,7 +94,7 @@ function statusToColor(status: string) {
   }
 }
 
-const allowEdits = function(item: unknown) {
+const allowEdits = function (item: unknown) {
   if (!isAutoRenameAssociation(item)) {
     console.error("Invalid item passed to allowReview computed property", item);
     return false;
@@ -93,7 +103,19 @@ const allowEdits = function(item: unknown) {
   return autoRenameStore.isEditable(item);
 };
 
+// TODO: Error handling
+const undoRenameLoading = ref(false);
 
+async function undoRename(item: unknown) {
+  if (!isAutoRenameAssociation(item)) {
+    console.error("Invalid item passed to undoRename function", item);
+    return;
+  }
+
+  undoRenameLoading.value = true;
+  await autoRenameStore.undoRename(item);
+  undoRenameLoading.value = false;
+}
 
 </script>
 <style scoped>
