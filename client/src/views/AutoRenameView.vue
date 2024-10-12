@@ -1,7 +1,6 @@
 <template>
   <VRow>
     <VCol cols="12">
-      <h1>Auto rename</h1>
       <AutoRename />
     </VCol>
   </VRow>

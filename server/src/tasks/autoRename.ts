@@ -105,7 +105,6 @@ function assertIsAutoRenameCronPayload(payload: unknown): asserts payload is Aut
   assertIsCronPayload((payload as unknown as AutoRenameCronPayload)._cron);
 }
 
-// FIXME: Add customizable delay before renaming
 export async function autoRename(payload: unknown, {
   logger,
   job,
@@ -114,11 +113,18 @@ export async function autoRename(payload: unknown, {
   logger.info(JSON.stringify(payload));
   assertIsAutoRenameCronPayload(payload);
 
+  // FIXME: Add remaining autorename settings
   const {
+    autoRenameEnabled,
     eventTbaCode,
     playoffsType,
     videoSearchDirectory,
   } = await getSettings();
+
+  if (!autoRenameEnabled) {
+    logger.info("Auto-rename is disabled, skipping");
+    return;
+  }
 
   const files = await getFilesMatchingPattern(
     videoSearchDirectory,

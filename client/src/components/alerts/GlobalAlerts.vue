@@ -5,6 +5,8 @@
     <PrivateUploads />
     <NoPlaylistMappings />
     <FrcEventsWarning />
+    <LiveModeActivated />
+    <AutoRenameEnabled />
   </div>
 </template>
 
@@ -14,4 +16,6 @@ import YouTubeAuthIncompleteAlert from "@/components/alerts/YouTubeAuthIncomplet
 import NoPlaylistMappings from "@/components/alerts/NoPlaylistMappings.vue";
 import PrivateUploads from "@/components/alerts/PrivateUploads.vue";
 import FrcEventsWarning from "@/components/alerts/FrcEventsWarning.vue";
+import AutoRenameEnabled from "@/components/alerts/AutoRenameEnabled.vue";
+import LiveModeActivated from "@/components/alerts/LiveModeActivated.vue";
 </script>
