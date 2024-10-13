@@ -20,6 +20,14 @@
                                 @on-choice-selected="saveAutoRenameEnabled"
       />
 
+      <VAlert v-if="autoRenameStore.undoRenameError"
+              class="mb-2"
+              variant="tonal"
+              color="error"
+      >
+        Undo rename failed: {{ autoRenameStore.undoRenameError }}
+      </VAlert>
+
       <h2>Review required</h2>
       <VAlert v-if="autoRenameStore.associationsError"
               class="mt-2"

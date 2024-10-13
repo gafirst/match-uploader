@@ -19,12 +19,11 @@
     </template>
 
     <template v-slot:item.actions="{ item }">
-      <div class="d-flex">
-        <VBtn v-if="allowEdits(item)"
-              class="mr-2"
+      <div class="d-flex mt-2 mb-2">
+        <VBtn class="mr-2"
               @click="selectedAssociation = item; showReviewDialog = true"
         >
-          Review
+          {{ allowEdits(item) ? "Review" : "View" }}
         </VBtn>
         <VBtn v-if="item.renameJobId && !item.renameCompleted"
               color="error"
@@ -39,6 +38,13 @@
               @click="() => undoRename(item)"
         >
           Undo rename
+        </VBtn>
+        <VBtn v-if="[AutoRenameAssociationStatus.FAILED, AutoRenameAssociationStatus.WEAK].includes(item.status)"
+              color="error"
+              :loading="ignoreAssociationLoading"
+              @click="() => ignoreAssociation(item)"
+        >
+          Ignore
         </VBtn>
       </div>
     </template>
@@ -80,7 +86,6 @@ import duration from "dayjs/plugin/duration";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 dayjs.extend(localizedFormat);
@@ -137,6 +142,20 @@ async function undoRename(item: unknown) {
   undoRenameLoading.value = true;
   await autoRenameStore.undoRename(item);
   undoRenameLoading.value = false;
+}
+
+// TODO: Error handling
+const ignoreAssociationLoading = ref(false);
+
+async function ignoreAssociation(item: unknown) {
+  if (!isAutoRenameAssociation(item)) {
+    console.error("Invalid item passed to ignoreAssociation function", item);
+    return;
+  }
+
+  ignoreAssociationLoading.value = true;
+  await autoRenameStore.ignoreAssociation(item);
+  ignoreAssociationLoading.value = false;
 }
 
 </script>

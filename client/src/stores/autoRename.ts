@@ -91,6 +91,8 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     // TODO: Error handling
   }
 
+  const undoRenameError = ref("");
+
   async function undoRename(association: AutoRenameAssociation) {
     const result = await fetch("/api/v1/autoRename/associations/undoRename", {
       method: "PUT",
@@ -102,7 +104,10 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
       }),
     });
 
-    // TODO: Error handling
+    if (!result.ok) {
+      const errorResponse = await result.json();
+      undoRenameError.value = errorResponse.message || "Unable to undo rename";
+    }
   }
 
   function isEditable(association: AutoRenameAssociation) {
@@ -164,6 +169,7 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     isEditable,
     loadingAssociations,
     undoRename,
+    undoRenameError,
   };
 });
 

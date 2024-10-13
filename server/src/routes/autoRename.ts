@@ -154,7 +154,8 @@ async function undoRenameAssociation(req: IReq, res: IRes): Promise<void> {
 
   const error = await undoRename(association);
 
-  res.json({
+  const status = error ? 400 : 200;
+  res.status(status).json({
     ok: !error,
     message: error,
   });

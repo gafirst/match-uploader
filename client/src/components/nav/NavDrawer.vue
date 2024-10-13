@@ -16,7 +16,6 @@
           <VBadge v-if="item.badge?.show"
                   :color="item.badge.color"
                   :content="item.badge.content"
-                  class="mr-8"
           >
             <VIcon :icon="item.icon" />
           </VBadge>

@@ -16,9 +16,7 @@
         </VCol>
         <VCol>
           <h2>Association</h2>
-          <VAlert v-if="association.renameJobId &&
-                    (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.COMPLETED))
-                    || association.renameCompleted"
+          <VAlert v-if="renameComplete"
                   variant="tonal"
                   color="success"
                   icon="mdi-lock"
@@ -75,15 +73,30 @@
           >
             Automated association failed: {{ association.statusReason }}
           </VAlert>
-          <VAlert v-if="association.orderingIssueMatchKey"
+          <VAlert v-if="!renameComplete && association.orderingIssueMatchKey
+                    && association.orderingIssueMatchKey === association.matchKey"
+                  variant="tonal"
+                  color="warning"
+                  icon="mdi-content-duplicate"
+                  density="compact"
+                  class="mb-2"
+                  title="Possible duplicate video"
+          >
+            {{ association.orderingIssueMatchName ?? orderingIssueMatchKey }} has already been associated to a video
+            for this label
+          </VAlert>
+          <VAlert v-else-if="!renameComplete && association.orderingIssueMatchKey &&
+                    association.orderingIssueMatchKey !== association.matchKey"
                   variant="tonal"
                   color="warning"
                   icon="mdi-alert-circle"
                   density="compact"
                   class="mb-2"
+                  title="Is this association correct?"
           >
-            Is this association correct? A later match ({{ association.orderingIssueMatchName ?? orderingIssueMatchKey }})
-            has already been associated to a video.
+            A later match
+            ({{ association.orderingIssueMatchName ?? orderingIssueMatchKey }}) has already been associated to a video
+            for this label
           </VAlert>
           <VAlert v-if="association.startTimeDiffAbnormal"
                   variant="tonal"
@@ -319,6 +332,12 @@ const videoFilePath = computed(() => {
 
 const isEditable = computed(() => {
   return autoRenameStore.isEditable(association.value);
+});
+
+const renameComplete = computed(() => {
+  return association.value.renameJobId &&
+    (workerStore.jobHasStatus(association.value.renameJobId, WorkerJobStatus.COMPLETED))
+    || association.value.renameCompleted;
 });
 
 </script>

@@ -16,6 +16,7 @@ import {
 } from "@src/repos/AutoRenameRepo";
 import { videoDuration } from "@numairawan/video-duration";
 import { Match } from "@src/models/Match";
+import fs from "fs-extra";
 
 export interface AutoRenameCronPayload {
   _cron: CronPayload;
@@ -156,6 +157,19 @@ export async function autoRename(payload: unknown, {
       logger.info(`Skipping ${file} because it is not unmatched`);
       continue;
     }
+
+    const isRenamedFile = (await prisma.autoRenameAssociation.count({
+      where: {
+        newFileName: videoFile,
+        videoLabel,
+      },
+    })) > 0;
+
+    if (isRenamedFile) {
+      logger.info(`Skipping ${file} because it is a renamed file`);
+      continue;
+    }
+
     // FIXME: Need to handle "'Match_ - 'dd MMMM yyyy - hh-mm-ss a' - Output 3.mp4'"
     const parsedDate = DateTime.fromFormat(videoFile, "'Match_ - 'dd MMMM yyyy - hh-mm-ss a'.mp4'");
 
@@ -177,7 +191,6 @@ export async function autoRename(payload: unknown, {
         },
       });
     } else {
-      // FIXME: This should ignore filenames that are matches
       await prisma.autoRenameAssociation.upsert({
         where: {
           filePath: file,
@@ -211,7 +224,19 @@ export async function autoRename(payload: unknown, {
   const matches = await getMatchList();
 
   for (const association of toProcess) {
-    // FIXME: Check if file still exists
+    if (!(await fs.exists(`${videoSearchDirectory}/${association.filePath}`))) {
+      await prisma.autoRenameAssociation.update({
+        where: {
+          filePath: association.filePath,
+        },
+        data: {
+          status: AutoRenameAssociationStatus.FAILED,
+          statusReason: "File no longer exists",
+        },
+      });
+      continue;
+    }
+
     let closestMatch: TbaMatchSimple | null = null;
     let closestMatchDiff = Infinity;
     logger.info(`Processing ${association.filePath}`);
@@ -229,7 +254,7 @@ export async function autoRename(payload: unknown, {
       }
     }
 
-    // FIXME: error handling?
+    // TODO: Would be good to catch errors here
     const videoDurationSecs = (await getVideoDuration(`${videoSearchDirectory}/${association.filePath}`)).seconds;
 
     let {
@@ -259,9 +284,13 @@ export async function autoRename(payload: unknown, {
         playoffsType as PlayoffsType,
       );
 
+      logger.info(`Ordering check result: ${JSON.stringify(orderingCheckResult)}`);
+
       // Downgrade the association status from STRONG to WEAK if there is an ordering issue
       if (associationStatus === AutoRenameAssociationStatus.STRONG) {
-        if (!orderingCheckResult.hasOrderingIssue) {
+        if (orderingCheckResult.hasOrderingIssue) {
+          associationStatus = AutoRenameAssociationStatus.WEAK;
+        } else {
           await prisma.autoRenameMetadata.upsert({
             where: {
               id: {
@@ -281,8 +310,6 @@ export async function autoRename(payload: unknown, {
             },
           });
         }
-      } else {
-        associationStatus = AutoRenameAssociationStatus.WEAK;
       }
 
       const newFileName = getNewFileNamePreservingExtension(

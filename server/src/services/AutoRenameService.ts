@@ -213,8 +213,20 @@ export async function undoRename(association: AutoRenameAssociation): Promise<st
     const { videoSearchDirectory } = await getSettings();
     const directory = `${videoSearchDirectory}/${association.videoLabel}`;
 
-    logger.info(`Renaming ${directory}/${association.newFileName} to ${directory}/${association.videoFile}`);
-    await fs.rename(`${directory}/${association.newFileName}`, `${directory}/${association.videoFile}`);
+    const renameTo = `${directory}/${association.videoFile}`;
+    const renameFrom = `${directory}/${association.newFileName}`;
+    const renameFromUploaded = `${directory}/uploaded/${association.newFileName}`;
+
+    logger.info(`undoRename: Request to rename ${renameFrom} to ${renameTo}`);
+    if (!await fs.exists(renameFrom) && await fs.exists(renameFromUploaded)) {
+      return `File ${renameFrom} can't be renamed because it was already uploaded`;
+    }
+
+    if (!await fs.exists(renameTo)) {
+      await fs.rename(`${directory}/${association.newFileName}`, `${directory}/${association.videoFile}`);
+    } else {
+      logger.warn(`undoRename: File ${renameTo} already exists, not renaming ${renameFrom}`);
+    }
   } catch (error) {
     logger.info(`undoRename: Failed to rename file: ${error} (Note: this is expected if the file was never renamed`);
   }
