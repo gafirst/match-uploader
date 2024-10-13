@@ -25,6 +25,7 @@ export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
 ): Promise<string | undefined> {
   const {
+    autoRenameFileRenameJobDelaySecs,
     playoffsType,
     videoSearchDirectory,
   } = await getSettings();
@@ -79,7 +80,9 @@ export async function updateAssociationData(
     getNewFileNameForAutoRename(matchKeyObj, false),
   );
 
-  const renameAfter = DateTime.now().plus({ seconds: 10 }); // FIXME: decide on delay before renames
+  const renameAfter = DateTime.now().plus({
+    seconds: Number.parseInt(autoRenameFileRenameJobDelaySecs, 10), // TODO: Better type checking here
+  });
   const renameJob = await queueRenameJob(
     prisma,
     graphileWorkerUtils.addJob,

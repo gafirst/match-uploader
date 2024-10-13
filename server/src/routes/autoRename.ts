@@ -26,7 +26,6 @@ autoRenameAssociationsRouter.get(
 );
 
 async function getAutoRenameAssociations(req: IReq, res: IRes): Promise<void> {
-  const { playoffsType } = await getSettings();
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {

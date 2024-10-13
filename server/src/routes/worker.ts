@@ -166,6 +166,7 @@ async function triggerAutoRename(req: IReq, res: IRes): Promise<IRes> {
             ts: new Date().toISOString(),
             backfill: false,
         },
+        manualTrigger: true,
     }, {
         maxAttempts: 1,
     });

@@ -19,21 +19,25 @@ import { Match } from "@src/models/Match";
 
 export interface AutoRenameCronPayload {
   _cron: CronPayload;
+  manualTrigger?: boolean;
 }
 
-function classifyAssociation(startTimeDiffSecs: number, videoDuration: number): {
+function classifyAssociation(startTimeDiffSecs: number,
+  videoDuration: number,
+  maxStartTimeDiffSecStrong: number,
+  maxStartTimeDiffSecWeak: number,
+  minExpectedVideoDurationSecs: number,
+  maxExpectedVideoDurationSecs: number,
+): {
   associationStatus: AutoRenameAssociationStatus;
   startTimeDiffAbnormal: boolean;
   videoDurationAbnormal: boolean;
 } {
-  // FIXME: Make these settings
-  const minVideoDuration = 3 * 60; // 3 minutes
-  const maxVideoDurationStrong = 5 * 60; // 5 minutes FIXME
+  const videoDurationInRange = videoDuration >= minExpectedVideoDurationSecs &&
+    videoDuration <= maxExpectedVideoDurationSecs;
 
-  const videoDurationInRange = videoDuration >= minVideoDuration && videoDuration <= maxVideoDurationStrong;
-
-  const startTimeDiffStrong = startTimeDiffSecs <= 60;
-  const startTimeDiffWeak = startTimeDiffSecs <= 300;
+  const startTimeDiffStrong = startTimeDiffSecs <= maxStartTimeDiffSecStrong;
+  const startTimeDiffWeak = startTimeDiffSecs <= maxStartTimeDiffSecWeak;
 
   let associationStatus: AutoRenameAssociationStatus = AutoRenameAssociationStatus.UNMATCHED;
 
@@ -113,15 +117,19 @@ export async function autoRename(payload: unknown, {
   logger.info(JSON.stringify(payload));
   assertIsAutoRenameCronPayload(payload);
 
-  // FIXME: Add remaining autorename settings
   const {
     autoRenameEnabled,
+    autoRenameFileRenameJobDelaySecs,
+    autoRenameMaxStartTimeDiffSecStrong,
+    autoRenameMaxStartTimeDiffSecWeak,
+    autoRenameMinExpectedVideoDurationSecs,
+    autoRenameMaxExpectedVideoDurationSecs,
     eventTbaCode,
     playoffsType,
     videoSearchDirectory,
   } = await getSettings();
 
-  if (!autoRenameEnabled) {
+  if (!autoRenameEnabled && !payload.manualTrigger) {
     logger.info("Auto-rename is disabled, skipping");
     return;
   }
@@ -148,7 +156,9 @@ export async function autoRename(payload: unknown, {
       logger.info(`Skipping ${file} because it is not unmatched`);
       continue;
     }
+    // FIXME: Need to handle "'Match_ - 'dd MMMM yyyy - hh-mm-ss a' - Output 3.mp4'"
     const parsedDate = DateTime.fromFormat(videoFile, "'Match_ - 'dd MMMM yyyy - hh-mm-ss a'.mp4'");
+
     logger.info(`File: ${file} / Parsed date: ${parsedDate.toISO()}`);
     if (parsedDate.isValid) {
       await prisma.autoRenameAssociation.upsert({
@@ -165,6 +175,21 @@ export async function autoRename(payload: unknown, {
         update: {
           videoTimestamp: parsedDate.toJSDate(),
         },
+      });
+    } else {
+      // FIXME: This should ignore filenames that are matches
+      await prisma.autoRenameAssociation.upsert({
+        where: {
+          filePath: file,
+        },
+        create: {
+          filePath: file,
+          videoFile,
+          videoLabel,
+          status: AutoRenameAssociationStatus.FAILED,
+          statusReason: "Parsed date from file name was invalid",
+        },
+        update: {},
       });
     }
   }
@@ -211,7 +236,14 @@ export async function autoRename(payload: unknown, {
       associationStatus,
       startTimeDiffAbnormal,
       videoDurationAbnormal,
-    } = classifyAssociation(closestMatchDiff, videoDurationSecs);
+    } = classifyAssociation(
+      closestMatchDiff,
+      videoDurationSecs,
+      Number.parseInt(autoRenameMaxStartTimeDiffSecStrong, 10),
+      Number.parseInt(autoRenameMaxStartTimeDiffSecWeak, 10),
+      Number.parseInt(autoRenameMinExpectedVideoDurationSecs, 10),
+      Number.parseInt(autoRenameMaxExpectedVideoDurationSecs, 10),
+    );
     if (closestMatch &&
       associationStatus &&
       ([AutoRenameAssociationStatus.STRONG, AutoRenameAssociationStatus.WEAK] as AutoRenameAssociationStatus[])
@@ -258,8 +290,9 @@ export async function autoRename(payload: unknown, {
         getNewFileNameForAutoRename(matchKeyObj, false),
       );
 
-      // TODO: decide on delay before renames
-      const renameAfter = DateTime.now().plus({ seconds: 10 });
+      const renameAfter = DateTime.now().plus({
+        seconds: Number.parseInt(autoRenameFileRenameJobDelaySecs, 10), // TODO: Better type checking here
+      });
       let renameJobId: string | undefined;
 
       if (associationStatus === AutoRenameAssociationStatus.STRONG) {

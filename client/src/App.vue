@@ -16,7 +16,7 @@ const autoRenameStore = useAutoRenameStore();
 // remove any existing listeners (after a hot module replacement)
 socket.off();
 
-// FIXME: Navbar needs to consider both stores' connection status
+// TODO: Unify websocket connection monitoring in the future
 workerStore.bindEvents();
 autoRenameStore.bindEvents();
 

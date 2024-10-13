@@ -38,9 +38,13 @@
         AutoRenameAssociationStatus.STRONG,
       ]"
       />
-      <h2>Everything else</h2>
+      <h2>Unmatched</h2>
       <AutoRenameAssociations :included-association-statuses="[
         AutoRenameAssociationStatus.UNMATCHED,
+      ]"
+      />
+      <h2>Ignored</h2>
+      <AutoRenameAssociations :included-association-statuses="[
         AutoRenameAssociationStatus.IGNORED,
       ]"
       />

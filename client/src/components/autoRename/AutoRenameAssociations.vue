@@ -4,11 +4,15 @@
               no-data-text="No associations found"
               :headers="[
                 { title: 'Label', value: 'videoLabel' },
+                { title: 'Date', value: 'videoTimestamp'},
+                // TODO: Change videoFile -> videoFileName everywhere?
                 { title: 'File', key: 'videoFileName', value: item => item.videoFile },
                 { title: 'Match', value: 'matchKey' },
                 { title: 'Status', value: 'status' },
                 { title: 'Actions', key: 'actions'}
               ]"
+              multi-sort
+              :sort-by="[{ key: 'videoLabel', order: 'asc' }, { key: 'videoTimestamp', order: 'asc' }]"
   >
     <template v-slot:item.status="{ item }">
       <VChip :color="statusToColor(item.status)">{{ item.status }}</VChip>
@@ -39,6 +43,10 @@
       </div>
     </template>
 
+    <template v-slot:item.videoTimestamp="{ item }">
+      {{ dayjs(item.videoTimestamp).format("llll z") }}
+    </template>
+
     <template v-slot:item.matchKey="{ item }">
       {{ item.matchName ?? "None" }}<br />
       <span style="color: gray">{{ item.matchKey ?? "" }}</span>
@@ -66,6 +74,18 @@ import { ref } from "vue";
 import { isAutoRenameAssociation } from "@/types/autoRename/AutoRenameAssociation";
 import AutoRenameReviewDialogContents from "@/components/autoRename/AutoRenameReviewDialogContents.vue";
 import { useDisplay } from "vuetify";
+import dayjs from "dayjs";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+import duration from "dayjs/plugin/duration";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(advancedFormat);
+dayjs.extend(duration);
+dayjs.extend(localizedFormat);
+dayjs.extend(timezone);
+dayjs.extend(utc);
 
 const props = defineProps<{
   includedAssociationStatuses: AutoRenameAssociationStatus[];
@@ -89,6 +109,8 @@ function statusToColor(status: string) {
       return "warning";
     case "FAILED":
       return "error";
+    case "UNMATCHED":
+      return "purple";
     default:
       return "grey";
   }

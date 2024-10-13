@@ -145,9 +145,16 @@
                   {{ renderDuration(item.value) }}
                 </VChip>
               </span>
-              <VChip v-else-if="item.key.toLowerCase() === 'video duration'" :color="videoDurationColor">
-                {{ renderDuration(item.value) }}
-              </VChip>
+              <span v-else-if="item.key.toLowerCase() === 'video duration'">
+                <template v-if="item.value === null">
+                  Unknown
+                </template>
+                <VChip v-else
+                       :color="videoDurationColor"
+                >
+                  {{ renderDuration(item.value) }}
+                </VChip>
+              </span>
               <span v-else>{{ item.value }}</span>
             </template>
           </VDataTable>

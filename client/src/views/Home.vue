@@ -58,12 +58,12 @@
         </VCol>
       </VRow>
     </VCol>
-    <VCol v-if="workerStore.jobsList.length"
+    <VCol v-if="workerStore.jobsForTask(UPLOAD_VIDEO_TASK).length"
           cols="12"
           md="4"
     >
-      <h2>Worker queue</h2>
-      <JobsList :jobs-list="workerStore.jobsListAsQueue" />
+      <h2>Upload queue</h2>
+      <JobsList :jobs-list="workerStore.jobsListAsQueue" :included-tasks="[UPLOAD_VIDEO_TASK]" />
     </VCol>
   </VRow>
 </template>
@@ -83,6 +83,7 @@ import JobsList from "@/components/jobs/JobsList.vue";
 import {useWorkerStore} from "@/stores/worker";
 import MatchMetadata from "@/components/matches/MatchMetadata.vue";
 import LiveMode from "@/components/liveMode/LiveMode.vue";
+import { UPLOAD_VIDEO_TASK } from "@/types/WorkerJob";
 
 const error = ref("");
 

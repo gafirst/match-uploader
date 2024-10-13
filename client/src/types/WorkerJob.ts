@@ -4,6 +4,11 @@ export const WORKER_JOB_COMPLETE = "worker:job:complete";
 
 export type WorkerEvent = typeof WORKER_JOB_CREATED | typeof WORKER_JOB_START | typeof WORKER_JOB_COMPLETE;
 
+export const UPLOAD_VIDEO_TASK = "uploadVideo";
+export const RENAME_VIDEO_TASK = "renameVideo";
+export const AUTO_RENAME_TASK = "autoRename";
+
+export const WorkerTask = typeof UPLOAD_VIDEO_TASK | typeof RENAME_VIDEO_TASK | typeof AUTO_RENAME_TASK;
 
 export enum WorkerJobStatus {
   PENDING = "PENDING",

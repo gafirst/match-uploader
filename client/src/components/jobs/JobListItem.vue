@@ -2,7 +2,7 @@
   <!-- TODO: 1) can we merge this with MatchVideoListItem? https://github.com/gafirst/match-uploader/issues/83 -->
   <VListItem>
     <VListItemTitle class="text-wrap">
-      <strong>#{{ job.jobId }}</strong> {{ job.task }}: {{ job.title }}
+      <strong>#{{ job.jobId }}</strong> {{ job.task }}{{ job.title !== "Unknown" ? `: ${job.title}` : "" }}
     </VListItemTitle>
     <VListItemSubtitle class="text-wrap force-text-wrap">{{ subtitle }}</VListItemSubtitle>
     <template v-slot:prepend>
@@ -35,7 +35,7 @@
   </VListItem>
 </template>
 <script lang="ts" setup>
-import { WorkerJob, WorkerJobStatus, workerJobStatusToUiString } from "@/types/WorkerJob";
+import { UPLOAD_VIDEO_TASK, WorkerJob, WorkerJobStatus, workerJobStatusToUiString } from "@/types/WorkerJob";
 import { computed, ref, watch } from "vue";
 import { capitalizeFirstLetter } from "@/util/capitalize";
 import { useWorkerStore } from "@/stores/worker";
@@ -76,6 +76,10 @@ const subtitle = computed(() => {
     return `${baseSubtitle} | ${props.job.error}`;
   }
 
+  if (props.job.task !== UPLOAD_VIDEO_TASK) {
+    return baseSubtitle;
+  }
+
   let postUploadStatus = "";
   let playlistStatus = "";
   let tbaStatus = "";
@@ -104,6 +108,7 @@ const subtitle = computed(() => {
 // Merge the icon and iconColor computed properties into a single object (duplicate the logic here). call it `icon`
 const icon = computed(() => {
   if (props.job.status === WorkerJobStatus.COMPLETED &&
+    props.job.task === UPLOAD_VIDEO_TASK &&
     (!props.job.addedToYouTubePlaylist || !props.job.linkedOnTheBlueAlliance)) {
     return {
       icon: "mdi-alert-circle",
