@@ -19,7 +19,7 @@
   />
 </template>
 <script lang="ts" setup>
-
+import { defineModel } from "vue";
 import { useMatchListStore } from "@/stores/matchList";
 
 const props = defineProps<{

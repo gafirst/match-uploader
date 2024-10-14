@@ -59,7 +59,9 @@ export function isWorkerJobCompleteEvent(x: unknown): x is CommonEvents[typeof W
         "success" in x;
 }
 
-export function isAutoRenameAssociationUpdateEvent(x: unknown): x is CommonEvents[typeof AUTO_RENAME_ASSOCIATION_UPDATE] {
+export function isAutoRenameAssociationUpdateEvent(
+  x: unknown,
+): x is CommonEvents[typeof AUTO_RENAME_ASSOCIATION_UPDATE] {
     return typeof x === "object" &&
         x !== null &&
         "filePath" in x;
