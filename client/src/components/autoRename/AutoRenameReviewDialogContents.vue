@@ -41,7 +41,7 @@
           </VAlert>
 
           <VAlert v-if="association.renameJobId &&
-                    (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.STARTED))"
+                    workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.STARTED)"
                   variant="tonal"
                   color="info"
                   icon="mdi-clock-outline"
@@ -52,7 +52,7 @@
           </VAlert>
 
           <VAlert v-if="association.renameJobId &&
-                    (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.FAILED))"
+                    workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.FAILED)"
                   variant="tonal"
                   color="error"
                   icon="mdi-alert-circle"
@@ -123,7 +123,8 @@
                   density="compact"
                   class="mb-2"
           >
-            Automatic association pending: {{ association.associationAttempts }}/{{ association.maxAssociationAttempts }} attempts made
+            Automatic association pending:
+            {{ association.associationAttempts }}/{{ association.maxAssociationAttempts }} attempts made
           </VAlert>
 
           <VDataTable :headers="[
@@ -139,7 +140,7 @@
                 <MatchAutocompleteDropdown v-if="isEditable"
                                            v-model="associatedMatchKey"
                 />
-                <!--                TODO: Extract non-editable state into component -->
+                <!-- TODO: Extract non-editable state into component -->
                 <template v-else>
                   {{ association.matchName ?? "None" }}<br />
                   <span style="color: gray">{{ association.matchKey ?? "" }}</span>
@@ -171,21 +172,31 @@
               <span v-else>{{ item.value }}</span>
             </template>
           </VDataTable>
+          <VAlert v-if="noMatchSelected"
+                  variant="tonal"
+                  density="compact"
+                  color="error"
+                  icon="mdi-alert-circle"
+          >
+            To accept this association, select a match above.
+          </VAlert>
         </VCol>
       </VRow>
     </VCardText>
     <VCardActions v-if="isEditable">
       <VSpacer />
       <VBtn color="error"
-            :disabled="confirmLoading || ignoreLoading"
-            :loading="ignoreLoading"
+            :disabled="autoRenameStore.confirmWeakAssociationLoading || autoRenameStore.ignoreAssociationLoading"
+            :loading="autoRenameStore.ignoreAssociationLoading"
             @click="onIgnore"
       >
         Ignore
       </VBtn>
       <VBtn color="success"
             variant="tonal"
-            :loading="confirmLoading || ignoreLoading"
+            :loading="autoRenameStore.confirmWeakAssociationLoading"
+            :disabled="autoRenameStore.confirmWeakAssociationLoading || autoRenameStore.ignoreAssociationLoading
+              || noMatchSelected"
             @click="onConfirm"
       >
         Accept
@@ -229,23 +240,13 @@ const props = defineProps<{
 
 const autoRenameStore = useAutoRenameStore();
 
-const confirmLoading = ref(false);
-
-// TODO: Implement confirmError and ignoreError
-
 async function onConfirm() {
-  confirmLoading.value = true;
   await autoRenameStore.confirmWeakAssociation(association.value, associatedMatchKey.value);
-  confirmLoading.value = false;
   emit("close");
 }
 
-const ignoreLoading = ref(false);
-
 async function onIgnore() {
-  ignoreLoading.value = true;
   await autoRenameStore.ignoreAssociation(association.value);
-  ignoreLoading.value = false;
   emit("close");
 }
 
@@ -338,6 +339,10 @@ const renameComplete = computed(() => {
   return association.value.renameJobId &&
     (workerStore.jobHasStatus(association.value.renameJobId, WorkerJobStatus.COMPLETED))
     || association.value.renameCompleted;
+});
+
+const noMatchSelected = computed(() => {
+  return !associatedMatchKey.value;
 });
 
 </script>

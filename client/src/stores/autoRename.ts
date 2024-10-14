@@ -58,10 +58,15 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     return associationsList.value.filter((association) => statuses.includes(association.status));
   }
 
+  const confirmWeakAssociationError = ref("");
+  const confirmWeakAssociationLoading = ref(false);
+
   async function confirmWeakAssociation(association: AutoRenameAssociation, newMatchKey: string | null = null) {
+    confirmWeakAssociationError.value = "";
+    confirmWeakAssociationLoading.value = true;
     const matchKeyExtra = newMatchKey ? { matchKey: newMatchKey } : {};
 
-    const result = await fetch("/api/v1/autoRename/associations/confirm", {
+    const response = await fetch("/api/v1/autoRename/associations/confirm", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -71,13 +76,32 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
         videoLabel: association.videoLabel,
         ...matchKeyExtra,
       }),
-    });
+    })
+      .catch((error) => {
+        confirmWeakAssociationError.value = `Unable to confirm association: ${error}`;
+        confirmWeakAssociationLoading.value = false;
+        return null;
+      });
 
-    // TODO: Error handling
+    if (!response) {
+      return;
+    }
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      confirmWeakAssociationError.value = errorResponse.message || "Unable to confirm association";
+    }
+    confirmWeakAssociationLoading.value = false;
   }
 
+  const ignoreAssociationError = ref("");
+  const ignoreAssociationLoading = ref(false);
+
   async function ignoreAssociation(association: AutoRenameAssociation) {
-    const result = await fetch("/api/v1/autoRename/associations/ignore", {
+    console.log("Ignoring association", association);
+    ignoreAssociationError.value = "";
+    ignoreAssociationLoading.value = true;
+    const response = await fetch("/api/v1/autoRename/associations/ignore", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -86,15 +110,31 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
         filePath: association.filePath,
         videoLabel: association.videoLabel,
       }),
-    });
+    })
+      .catch((error) => {
+        ignoreAssociationError.value = `Unable to ignore association: ${error}`;
+        ignoreAssociationLoading.value = false;
+        return null;
+      });
 
-    // TODO: Error handling
+    if (!response) {
+      return;
+    }
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      ignoreAssociationError.value = errorResponse.message || "Unable to ignore association";
+    }
+    ignoreAssociationLoading.value = false;
   }
 
   const undoRenameError = ref("");
+  const undoRenameLoading = ref(false);
 
   async function undoRename(association: AutoRenameAssociation) {
-    const result = await fetch("/api/v1/autoRename/associations/undoRename", {
+    undoRenameError.value = "";
+    undoRenameLoading.value = true;
+    const response = await fetch("/api/v1/autoRename/associations/undoRename", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -102,24 +142,30 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
       body: JSON.stringify({
         filePath: association.filePath,
       }),
-    });
+    })
+      .catch((error) => {
+        undoRenameError.value = `Unable to undo rename: ${error}`;
+        undoRenameLoading.value = false;
+        return null;
+      });
 
-    if (!result.ok) {
-      const errorResponse = await result.json();
+    if (!response) {
+      return;
+    }
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
       undoRenameError.value = errorResponse.message || "Unable to undo rename";
     }
+    undoRenameLoading.value = false;
   }
 
   function isEditable(association: AutoRenameAssociation) {
-    console.log("Checking if association is editable:", association);
-
     if (association.status === AutoRenameAssociationStatus.STRONG) {
       const editable = !association.renameCompleted;
-      console.log("Association status is STRONG. Editable:", editable);
       return editable;
     }
 
-    console.log("Association status is not STRONG. Editable: true");
     return true;
   }
 
@@ -164,12 +210,17 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     associationsError,
     bindEvents,
     confirmWeakAssociation,
+    confirmWeakAssociationError,
+    confirmWeakAssociationLoading,
     getAssociations,
     ignoreAssociation,
+    ignoreAssociationError,
+    ignoreAssociationLoading,
     isEditable,
     loadingAssociations,
     undoRename,
     undoRenameError,
+    undoRenameLoading,
   };
 });
 

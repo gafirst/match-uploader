@@ -40,10 +40,6 @@ export async function updateAssociationData(
     return `An association with the video label "${videoLabel}" and file path "${filePath}" does not exist`;
   }
 
-  if (existingAssociation.status === AutoRenameAssociationStatus.IGNORED) {
-    return "Cannot update ignored association";
-  }
-
   if (existingAssociation.renameCompleted) {
     return "Cannot modify association because the associated video file has already been renamed";
   }
@@ -51,7 +47,7 @@ export async function updateAssociationData(
   if (existingAssociation.status === AutoRenameAssociationStatus.STRONG &&
     (!matchKey || existingAssociation.matchKey === matchKey)
   ) {
-    logger.info(`Not updating association (${videoLabel}, ${filePath}) because its status is already STRONG, and the` +
+    logger.info(`Not updating association (${videoLabel}, ${filePath}) because its status is already STRONG, and the ` +
       "match key is not changing");
     return;
   }
@@ -199,8 +195,6 @@ export async function undoRename(association: AutoRenameAssociation): Promise<st
     return "Cannot undo rename on an association that is not STRONG (this should never happen)";
   }
 
-  // FIXME: It would be good to check if the file actually needs to be renamed
-
   try {
     if (association.renameJobId) {
       await cancelJob(association.renameJobId, "Cancelled by user");
@@ -226,6 +220,7 @@ export async function undoRename(association: AutoRenameAssociation): Promise<st
       await fs.rename(`${directory}/${association.newFileName}`, `${directory}/${association.videoFile}`);
     } else {
       logger.warn(`undoRename: File ${renameTo} already exists, not renaming ${renameFrom}`);
+      return `File ${renameTo} already exists, not renaming ${renameFrom}`;
     }
   } catch (error) {
     logger.info(`undoRename: Failed to rename file: ${error} (Note: this is expected if the file was never renamed`);

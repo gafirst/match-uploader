@@ -15,10 +15,20 @@
               :sort-by="[{ key: 'videoLabel', order: 'asc' }, { key: 'videoTimestamp', order: 'asc' }]"
   >
     <template v-slot:item.status="{ item }">
-      <VChip :color="statusToColor(item.status)">{{ item.status }}</VChip>
+      <VChip :color="statusToColor(item.status)">{{ statusIncludingRenames(item) }}</VChip>
     </template>
 
     <template v-slot:item.actions="{ item }">
+      <VAlert v-if="item.renameJobId &&
+                workerStore.jobHasStatus(item.renameJobId, WorkerJobStatus.FAILED)"
+              variant="tonal"
+              color="error"
+              icon="mdi-alert-circle"
+              density="compact"
+              class="mt-2 mb-2"
+      >
+        File rename failed. Click Review for details.
+      </VAlert>
       <div class="d-flex mt-2 mb-2">
         <VBtn class="mr-2"
               @click="selectedAssociation = item; showReviewDialog = true"
@@ -27,21 +37,21 @@
         </VBtn>
         <VBtn v-if="item.renameJobId && !item.renameCompleted"
               color="error"
-              :loading="undoRenameLoading"
+              :loading="autoRenameStore.undoRenameLoading"
               @click="() => undoRename(item)"
         >
           Cancel rename
         </VBtn>
         <VBtn v-if="item.renameJobId && item.renameCompleted"
               color="error"
-              :loading="undoRenameLoading"
+              :loading="autoRenameStore.undoRenameLoading"
               @click="() => undoRename(item)"
         >
           Undo rename
         </VBtn>
         <VBtn v-if="[AutoRenameAssociationStatus.FAILED, AutoRenameAssociationStatus.WEAK].includes(item.status)"
               color="error"
-              :loading="ignoreAssociationLoading"
+              :loading="autoRenameStore.ignoreAssociationLoading"
               @click="() => ignoreAssociation(item)"
         >
           Ignore
@@ -79,13 +89,14 @@ import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssoci
 import { ref } from "vue";
 import { isAutoRenameAssociation } from "@/types/autoRename/AutoRenameAssociation";
 import AutoRenameReviewDialogContents from "@/components/autoRename/AutoRenameReviewDialogContents.vue";
-import { useDisplay } from "vuetify";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import duration from "dayjs/plugin/duration";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
+import { useWorkerStore } from "@/stores/worker";
+import { WorkerJobStatus } from "@/types/WorkerJob";
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 dayjs.extend(localizedFormat);
@@ -96,12 +107,12 @@ const props = defineProps<{
   includedAssociationStatuses: AutoRenameAssociationStatus[];
 }>();
 
-const display = useDisplay();
-
-console.log(display);
 
 const autoRenameStore = useAutoRenameStore();
 autoRenameStore.getAssociations();
+
+const workerStore = useWorkerStore();
+workerStore.loadJobs();
 
 const selectedAssociation = ref(null);
 const showReviewDialog = ref(false);
@@ -130,32 +141,35 @@ const allowEdits = function (item: unknown) {
   return autoRenameStore.isEditable(item);
 };
 
-// TODO: Error handling
-const undoRenameLoading = ref(false);
-
 async function undoRename(item: unknown) {
   if (!isAutoRenameAssociation(item)) {
     console.error("Invalid item passed to undoRename function", item);
     return;
   }
-
-  undoRenameLoading.value = true;
   await autoRenameStore.undoRename(item);
-  undoRenameLoading.value = false;
 }
-
-// TODO: Error handling
-const ignoreAssociationLoading = ref(false);
 
 async function ignoreAssociation(item: unknown) {
   if (!isAutoRenameAssociation(item)) {
     console.error("Invalid item passed to ignoreAssociation function", item);
     return;
   }
-
-  ignoreAssociationLoading.value = true;
   await autoRenameStore.ignoreAssociation(item);
-  ignoreAssociationLoading.value = false;
+}
+
+function statusIncludingRenames(item: unknown) {
+  if (!isAutoRenameAssociation(item)) {
+    console.error("Invalid item passed to ignoreAssociation function", item);
+    return;
+  }
+
+  if (item.renameJobId) {
+    if (item.renameCompleted || workerStore.jobHasStatus(item.renameJobId, WorkerJobStatus.COMPLETED)) {
+      return "RENAMED";
+    }
+  }
+
+  return item.status;
 }
 
 </script>

@@ -20,12 +20,26 @@
                                 @on-choice-selected="saveAutoRenameEnabled"
       />
 
+      <VAlert v-if="autoRenameStore.confirmWeakAssociationError"
+              class="mb-2"
+              variant="tonal"
+              color="error"
+      >
+        Confirm weak association failed: {{ autoRenameStore.confirmWeakAssociationError }}
+      </VAlert>
       <VAlert v-if="autoRenameStore.undoRenameError"
               class="mb-2"
               variant="tonal"
               color="error"
       >
         Undo rename failed: {{ autoRenameStore.undoRenameError }}
+      </VAlert>
+      <VAlert v-if="autoRenameStore.ignoreAssociationError"
+              class="mb-2"
+              variant="tonal"
+              color="error"
+      >
+        Ignore association failed: {{ autoRenameStore.ignoreAssociationError }}
       </VAlert>
 
       <h2>Review required</h2>

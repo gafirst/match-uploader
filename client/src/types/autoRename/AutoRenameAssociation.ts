@@ -44,30 +44,6 @@ export function isAutoRenameAssociationApiResponse(x: unknown): x is AutoRenameA
 }
 
 export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation {
-  console.log("isAutoRenameAssociation payload", x, typeof x === "object" );
-  console.log("filePath", x.filePath, "filePath" in x);
-  console.log("status", x.status, "status" in x && isAutoRenameAssociationStatus(x.status));
-  console.log("statusReason", x.statusReason, "statusReason" in x);
-  console.log("videoTimestamp", x.videoTimestamp, "videoTimestamp" in x);
-  console.log("associationAttempts", x.associationAttempts, "associationAttempts" in x);
-  console.log("maxAssociationAttempts", x.maxAssociationAttempts, "maxAssociationAttempts" in x);
-  console.log("matchKey", x.matchKey, "matchKey" in x);
-  console.log("videoLabel", x.videoLabel, "videoLabel" in x);
-  console.log("renameJobId", x.renameJobId, "renameJobId" in x);
-  console.log("renameAfter", x.renameAfter, "renameAfter" in x);
-  console.log("renameCompleted", x.renameCompleted, "renameCompleted" in x);
-  console.log("newFileName", x.newFileName, "newFileName" in x);
-  console.log("createdAt", x.createdAt, "createdAt" in x);
-  console.log("updatedAt", x.updatedAt, "updatedAt" in x);
-  console.log("matchName", x.matchName, "matchName" in x);
-  console.log("isIgnored", x.isIgnored, "isIgnored" in x);
-  console.log("videoDurationSecs", x.videoDurationSecs, "videoDurationSecs" in x);
-  console.log("startTimeDiffSecs", x.startTimeDiffSecs, "startTimeDiffSecs" in x);
-  console.log("startTimeDiffAbnormal", x.startTimeDiffAbnormal, "startTimeDiffAbnormal" in x);
-  console.log("videoDurationAbnormal", x.videoDurationAbnormal, "videoDurationAbnormal" in x);
-  console.log("orderingIssueMatchKey", x.orderingIssueMatchKey, "orderingIssueMatchKey" in x);
-  console.log("orderingIssueMatchName", x.orderingIssueMatchName, "orderingIssueMatchName" in x);
-
   return typeof x === "object" &&
     "filePath" in x &&
     "status" in x &&

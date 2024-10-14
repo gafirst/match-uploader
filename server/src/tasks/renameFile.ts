@@ -28,8 +28,6 @@ export async function renameFile(payload: unknown, {
   logger.info(JSON.stringify(payload));
   assertIsRenameFilePayload(payload);
 
-  // FIXME: Should fail if the new file name already exists
-
   const association = await prisma.autoRenameAssociation.findUniqueOrThrow({
     where: {
       filePath: payload.associationId,
@@ -40,10 +38,17 @@ export async function renameFile(payload: unknown, {
     throw new Error(`Association ${association.filePath} does not have a new file name`);
   }
 
-  logger.info(`Renaming ${payload.directory}/${payload.oldFileName} to ${payload.directory}/${association.newFileName}`);
+  const renameFrom = `${payload.directory}/${payload.oldFileName}`;
+  const renameTo = `${payload.directory}/${association.newFileName}`;
+
+  if (await fs.exists(renameTo)) {
+    throw new Error(`File name to rename to (${renameTo}) already exists`);
+  }
+
+  logger.info(`Renaming ${renameFrom} to ${renameTo}`);
+
   // Rename the file
-  // FIXME: error handling?
-  await fs.rename(`${payload.directory}/${payload.oldFileName}`, `${payload.directory}/${association.newFileName}`);
+  await fs.rename(renameFrom, renameTo);
 
   await prisma.autoRenameAssociation.update({
     where: {
