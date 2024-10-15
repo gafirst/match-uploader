@@ -1,0 +1,69 @@
+name: Auto Rename association issues
+description: Inaccurate or unexpected associations made by the Auto Rename feature
+labels: ["area / auto rename", "type / bug", "status / grooming"]
+body:
+  - type: dropdown
+    attributes:
+      label: Association problem type
+      options:
+        - Select a value...
+        - Strong association to the wrong match
+        - Association status unexpectedly weak
+        - Association was expected but not made
+        - Something else (describe in Additional Information)
+  - type: input
+    attributes:
+      label: Video file path
+      description: Relative path of the video file (within the videos directory) that was incorrectly associated. If multiple related instances, add more details in the Additional Information section below
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Expected match key
+      description: The full match key (e.g., 2024gadal_qm1) of the match that should have been associated with the video file
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Actual associated match key
+      description: The full match key (e.g., 2024gadal_qm1) of the match that Auto Rename associated with the video file. Enter N/A if no association was made, but you were expecting one.
+    validations:
+      required: false
+  - type: dropdown
+    attributes:
+      label: Association status
+      description: The full match key (e.g., 2024gadal_qm1) of the match that Auto Rename associated with the video file. Enter N/A if no association was made, but you were expecting one.
+      options:
+        - Select a value...
+        - Unmatched
+        - Strong
+        - Weak
+        - Failed
+        - Ignored
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: For instance, a screenshot of the association review dialog, errors you saw, etc.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Match Uploader version
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Are you running Match Uploader using the official Docker Compose setup?
+      options:
+        - Select a value...
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Relevant error or log output
+      description: If there are logs or errors related to this problem, include them here. Make sure to note which component the logs came from. This will be automatically formatted into code, so no need for backticks.
+      render: shell

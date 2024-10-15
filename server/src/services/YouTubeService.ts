@@ -7,10 +7,12 @@ import FullPaths from "@src/routes/constants/FullPaths";
 import { type YouTubeChannelList } from "@src/models/YouTubeChannel";
 import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
 import type MatchKey from "@src/models/MatchKey";
-import { queueJob } from "@src/services/WorkerService";
 import { UPLOAD_VIDEO } from "@src/tasks/types/tasks";
 import { type WorkerJob } from "@prisma/client";
 import { getYouTubeApiClient } from "@src/repos/YouTubeRepo";
+import { graphileWorkerUtils, prisma } from "@src/server";
+import { queueJob } from "@src/util/queueJob";
+import { io } from "@src/index";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
     const port = EnvVars.port;
@@ -89,7 +91,7 @@ export async function queueYouTubeVideoUpload(title: string,
                                               matchKey: MatchKey,
                                               label: string,
 ): Promise<WorkerJob> {
-    return await queueJob(title, UPLOAD_VIDEO, {
+    return await queueJob(prisma, graphileWorkerUtils.addJob, io, title, UPLOAD_VIDEO, {
         title,
         description,
         videoPath,

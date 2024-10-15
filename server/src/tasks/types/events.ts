@@ -1,24 +1,28 @@
 export const WORKER_JOB_START = "worker:job:start";
 export const WORKER_JOB_COMPLETE = "worker:job:complete";
+export const AUTO_RENAME_ASSOCIATION_UPDATE = "autorename:association:update";
 
 export interface CommonEvents {
     [WORKER_JOB_START]: {
         workerId: string;
         jobId: string;
         jobName: string;
-        attempts: number,
-        maxAttempts: number,
+        attempts: number;
+        maxAttempts: number;
         payload: unknown;
     };
     [WORKER_JOB_COMPLETE]: {
-        workerId: string | null,
-        jobId: string,
-        attempts: number,
+        workerId: string | null;
+        jobId: string;
+        attempts: number;
         maxAttempts: number,
-        payload: unknown,
-        error: string,
-        success: boolean,
-    }
+        payload: unknown;
+        error: string;
+        success: boolean;
+    };
+    [AUTO_RENAME_ASSOCIATION_UPDATE]: {
+        filePath: string;
+    };
 }
 
 export interface ServerToClientEvents {
@@ -26,6 +30,10 @@ export interface ServerToClientEvents {
         event: keyof CommonEvents;
         data: CommonEvents[keyof CommonEvents];
     };
+    autorename: {
+        event: keyof CommonEvents;
+        data: CommonEvents[keyof CommonEvents];
+    }
 }
 export interface ClientToServerEvents extends CommonEvents {}
 
@@ -49,4 +57,12 @@ export function isWorkerJobCompleteEvent(x: unknown): x is CommonEvents[typeof W
         "payload" in x &&
         "error" in x &&
         "success" in x;
+}
+
+export function isAutoRenameAssociationUpdateEvent(
+  x: unknown,
+): x is CommonEvents[typeof AUTO_RENAME_ASSOCIATION_UPDATE] {
+    return typeof x === "object" &&
+        x !== null &&
+        "filePath" in x;
 }

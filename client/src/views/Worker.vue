@@ -10,7 +10,10 @@
       <VAlert v-else-if="!workerStore.jobsList.length">
         <p>No pending, started, or retryable failed jobs currently</p>
       </VAlert>
-      <JobsList v-else :jobs-list="workerStore.jobsListAsQueue" />
+      <JobsList v-else
+                :jobs-list="workerStore.jobsListAsQueue"
+                :included-tasks="[]"
+      />
     </VCol>
   </VRow>
 </template>

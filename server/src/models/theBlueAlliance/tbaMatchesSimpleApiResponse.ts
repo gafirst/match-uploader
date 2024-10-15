@@ -5,7 +5,14 @@ import { type TbaCompLevel } from "@src/models/theBlueAlliance/tbaCompLevel";
 export type TbaMatchesSimpleApiResponse = TbaMatchSimple[];
 export type TbaMatchSimpleApiResponse = TbaMatchSimple;
 
+/**
+ * A simple match object from The Blue Alliance API
+ *
+ * Note that other properties may be included in the response that aren't in this interface; however, only the
+ * properties listed in this interface are guaranteed to be present.
+ */
 export interface TbaMatchSimple {
+    actual_time: number | null;
     alliances: {
         blue: TbaAlliance;
         red: TbaAlliance;

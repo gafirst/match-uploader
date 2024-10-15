@@ -1,6 +1,4 @@
-import { type WorkerTask } from "@src/tasks/types/tasks";
 import { graphileWorkerUtils, prisma } from "@src/server";
-import { type TaskSpec } from "graphile-worker";
 import { JobStatus, type WorkerJob } from "@prisma/client";
 import logger from "jet-logger";
 import { io } from "@src/index";
@@ -13,52 +11,6 @@ import {
 } from "@src/tasks/types/events";
 import { type Socket } from "socket.io";
 import { isPrismaClientKnownRequestError } from "@src/util/prisma";
-
-/**
- * Queues a job and creates a WorkerJob record in the database.
- *
- * Will also emit a Socket.IO event to notify clients of the new job.
- *
- * @param jobSummary
- * @param taskName
- * @param payload
- * @param taskSpec
- */
-export async function queueJob(jobSummary: string,
-  taskName: WorkerTask,
-  payload: object,
-  taskSpec: TaskSpec = {}): Promise<WorkerJob> {
-  const job = await graphileWorkerUtils.addJob(taskName, payload, taskSpec);
-  const upsertResult = await prisma.workerJob.upsert({
-    where: {
-      jobId: job.id,
-    },
-    create: {
-      jobId: job.id,
-      task: taskName,
-      queue: taskSpec.queueName,
-      payload,
-      title: jobSummary,
-      attempts: 0,
-      maxAttempts: taskSpec.maxAttempts ?? 25, // 25 is the Graphile default
-    },
-    update: {
-      status: JobStatus.PENDING,
-      title: jobSummary,
-      workerId: null,
-      error: null,
-      attempts: 0,
-      maxAttempts: taskSpec.maxAttempts ?? 25, // 25 is the Graphile default
-    },
-  });
-
-  io.emit("worker", {
-    event: "worker:job:created", // TODO: Use constant, change created->create
-    workerJob: upsertResult,
-  });
-
-  return upsertResult;
-}
 
 export async function cancelJob(jobId: string, reason: string): Promise<void> {
   const [graphileResult, workerJob] = await Promise.all([
@@ -191,6 +143,14 @@ export async function processWorkerEvent(
     }
 
     let workerJob: WorkerJob | null = null;
+
+    if (!("jobId" in data)) {
+      logger.warn(
+        `Error processing ${event} event: event data missing jobId key: ${JSON.stringify(data)}`,
+      );
+      return;
+    }
+
     if (data.jobId) {
       workerJob = await prisma.workerJob.findUnique({
         where: {

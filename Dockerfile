@@ -23,7 +23,7 @@ COPY client/public ./public
 COPY client/src ./src
 COPY client/index.html .
 COPY client/tsconfig*.json .
-COPY client/vite.config.ts .
+COPY client/vite.config.mts .
 
 RUN yarn run build
 
@@ -46,6 +46,8 @@ COPY server/tsconfig*.json .
 COPY server/build.ts .
 
 RUN yarn run build
+
+COPY server/src/crontab.txt ./dist/crontab.txt
 
 FROM base as run_server_prod
 
@@ -86,5 +88,8 @@ RUN chown -R node:node /home/node/app/server/settings && \
     chown -R node:node /home/node/app/server/env
 
 USER node
+
+# TODO: Allow customizing TZ
+ENV TZ="America/New_York"
 EXPOSE 8080
 CMD ["yarn", "start"]

@@ -317,6 +317,81 @@
                                :you-tube-auth-state="settingsStore.youTubeAuthState"
                                @trigger-refresh="refreshData"
         />
+        <h2 class="mt-4 mb-2">
+          Auto rename <VChip color="purple">Beta</VChip>
+        </h2>
+        <VAlert color="purple"
+                variant="tonal"
+                density="compact"
+                icon="mdi-bug-outline"
+        >
+          Report bugs and send feedback
+          <a target="_blank" href="https://github.com/gafirst/match-uploader/issues/new/choose">on GitHub</a>.
+        </VAlert>
+        <h3 class="mt-4 mb-2">Advanced auto rename settings</h3>
+        <VAlert class="mb-2"
+                variant="tonal"
+                color="warning"
+        >
+          Changing these settings can affect the accuracy of automated associations made by Auto Rename. Proceed with
+          caution.
+        </VAlert>
+        <AutoRenameFileNamePatterns v-if="!settingsStore.isFirstLoad
+                                      && settingsStore.settings?.autoRenameFileNamePatterns"
+                                    :initial-patterns="settingsStore.settings
+                                      .autoRenameFileNamePatterns.split(',').map((value) => { return { value }; })"
+        />
+        <AutosavingTextInput :on-submit="submit"
+                             class="mb-2"
+                             :initial-value="settingsStore.settings?.autoRenameMinExpectedVideoDurationSecs"
+                             name="autoRenameMinExpectedVideoDurationSecs"
+                             label="Minimum expected video duration (seconds)"
+                             input-type="text"
+                             help-text="Default: 180 | Associations will be marked weak if the video duration is
+                             shorter than this"
+                             setting-type="setting"
+        />
+        <AutosavingTextInput :on-submit="submit"
+                             class="mb-2"
+                             :initial-value="settingsStore.settings?.autoRenameMaxExpectedVideoDurationSecs"
+                             name="autoRenameMaxExpectedVideoDurationSecs"
+                             label="Maximum expected video duration (seconds)"
+                             input-type="text"
+                             help-text="Default: 420 | Associations will be marked weak if the video duration is
+                             longer than this"
+                             setting-type="setting"
+        />
+        <AutosavingTextInput :on-submit="submit"
+                             class="mb-2"
+                             :initial-value="settingsStore.settings?.autoRenameMaxStartTimeDiffSecStrong"
+                             name="autoRenameMaxStartTimeDiffSecStrong"
+                             label="Max start time difference (seconds) for a strong association"
+                             input-type="text"
+                             help-text="Default: 60 | Associations will be marked strong when the match start time and
+                             video filename timestamp are not more than this many seconds apart"
+                             setting-type="setting"
+        />
+        <AutosavingTextInput :on-submit="submit"
+                             class="mb-2"
+                             :initial-value="settingsStore.settings?.autoRenameMaxStartTimeDiffSecWeak"
+                             name="autoRenameMaxStartTimeDiffSecWeak"
+                             label="Max start time difference (seconds) for a weak association"
+                             input-type="text"
+                             help-text="Default: 300 | Associations will be marked weak when the match start time and
+                             video filename timestamp are not more than this many seconds apart"
+                             setting-type="setting"
+        />
+        <AutosavingTextInput :on-submit="submit"
+                             class="mb-2"
+                             :initial-value="settingsStore.settings?.autoRenameFileRenameJobDelaySecs"
+                             name="autoRenameFileRenameJobDelaySecs"
+                             label="Rename job delay for strong associations"
+                             input-type="text"
+                             help-text="Default: 300 | After a strong association is made, the job to rename the file
+                             (and thus make it available to upload) will be delayed this many seconds to allow undoing
+                             or modifying the association if needed"
+                             setting-type="setting"
+        />
       </div>
     </VCol>
   </VRow>
@@ -333,6 +408,7 @@ import {useSettingsStore} from "@/stores/settings";
 import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.vue";
 import { useMatchStore } from "@/stores/match";
 import { useMatchListStore } from "@/stores/matchList";
+import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNamePatterns.vue";
 
 // const loading = ref(true);
 const loading = computed(() => {
@@ -466,7 +542,6 @@ async function saveFrcEventsEnabled(value: string): Promise<void> {
   savingFrcEventsEnabled.value = false;
   await matchListStore.getMatchList(true);
 }
-
 </script>
 
 <style scoped>

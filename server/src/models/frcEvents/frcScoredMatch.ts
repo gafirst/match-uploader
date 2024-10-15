@@ -3,8 +3,10 @@ import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpl
 import { type TbaWinningAlliance } from "@src/models/theBlueAlliance/tbaWinningAlliance";
 import { type TbaCompLevel } from "@src/models/theBlueAlliance/tbaCompLevel";
 import { CompLevel } from "@src/models/CompLevel";
+import { DateTime } from "luxon";
 
 export interface FrcScoredMatch {
+    autoStartTime: string | null; // ISO 8601 date
     tournamentLevel: string;
     matchNumber: number;
     scoreRedFinal: number | null | undefined;
@@ -138,6 +140,7 @@ function getTbaEventKey(year: string, eventCode: string): string {
 export function asTbaMatchSimple(match: FrcScoredMatch, year: string, eventCode: string): TbaMatchSimple {
     const eventKey = getTbaEventKey(year, eventCode);
     return {
+        actual_time: match.autoStartTime ? DateTime.fromISO(match.autoStartTime).toSeconds() : null,
         alliances: {
             blue: {
                 score: match.scoreBlueFinal ?? null,

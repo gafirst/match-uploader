@@ -9,6 +9,13 @@ export interface ISettings {
     youTubeVideoPrivacy: string,
     linkVideosOnTheBlueAlliance: boolean;
     useFrcEventsApi: boolean;
+    autoRenameEnabled: boolean;
+    autoRenameMinExpectedVideoDurationSecs: string;
+    autoRenameMaxExpectedVideoDurationSecs: string;
+    autoRenameMaxStartTimeDiffSecStrong: string;
+    autoRenameMaxStartTimeDiffSecWeak: string;
+    autoRenameFileRenameJobDelaySecs: string;
+    autoRenameFileNamePatterns: string;
 }
 
 export type SettingsKey = keyof ISettings;

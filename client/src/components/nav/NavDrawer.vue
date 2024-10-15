@@ -16,7 +16,6 @@
           <VBadge v-if="item.badge?.show"
                   :color="item.badge.color"
                   :content="item.badge.content"
-                  class="mr-8"
           >
             <VIcon :icon="item.icon" />
           </VBadge>
@@ -32,8 +31,11 @@ import {computed, ref} from "vue";
 import {INavItem} from "@/types/INavItem";
 import {useWorkerStore} from "@/stores/worker";
 import {WorkerJobStatus} from "@/types/WorkerJob";
+import { useAutoRenameStore } from "@/stores/autoRename";
+import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssociationStatus";
 
 const workerStore = useWorkerStore();
+const autoRenameStore = useAutoRenameStore();
 
 const navItems = computed(() => {
   return [
@@ -41,6 +43,20 @@ const navItems = computed(() => {
       title: "Upload",
       to: "/upload",
       icon: "mdi-cloud-upload-outline",
+    },
+    {
+      title: "Auto rename",
+      to: "/autoRename",
+      icon: "mdi-auto-mode",
+      badge: {
+        show: autoRenameStore.associationsInStatus(
+          [AutoRenameAssociationStatus.WEAK, AutoRenameAssociationStatus.FAILED],
+        ).length > 0,
+        color: "warning",
+        content: autoRenameStore.associationsInStatus(
+          [AutoRenameAssociationStatus.WEAK, AutoRenameAssociationStatus.FAILED],
+        ).length,
+      },
     },
     {
       title: "Worker queue",

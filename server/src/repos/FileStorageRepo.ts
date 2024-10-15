@@ -39,7 +39,14 @@ export async function readSettingsJson<T>(filePath: PathLike,
 ): Promise<T> {
     // Paths are relative to the directory the server is running out of
     try {
-        return await readJsonFileContents(filePath);
+        if (!templateFilePath) {
+            return await readJsonFileContents(filePath);
+        }
+
+        return {
+            ...await readJsonFileContents(templateFilePath),
+            ...await readJsonFileContents(filePath),
+        };
     } catch (error) {
         if (isFileDoesNotExistError(error)) {
             if (templateFilePath) {

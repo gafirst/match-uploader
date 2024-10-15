@@ -73,7 +73,7 @@ const uploadStatus = computed(() => {
       }
 
       if (workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.FAILED)) {
-        return job.error ?? "Unknown error"; // TODO: error might not be set
+        return job.error ?? "Unknown error";
       }
 
       if (workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.FAILED_RETRYABLE)) {

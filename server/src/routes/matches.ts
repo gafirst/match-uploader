@@ -2,9 +2,9 @@ import { Router } from "express";
 import Paths from "@src/routes/constants/Paths";
 import { type IReq, type IRes } from "@src/routes/types/types";
 import {
-    generateMatchVideoDescription,
-    getLocalVideoFilesForMatch,
-    getMatchList,
+  generateMatchVideoDescription,
+  getLocalVideoFilesForMatch,
+  getMatchList,
 } from "@src/services/MatchesService";
 import { matchedData, param, query, validationResult } from "express-validator";
 import MatchKey from "@src/models/MatchKey";
@@ -17,94 +17,100 @@ import { PlayoffsType } from "@src/models/PlayoffsType";
 export const matchesRouter = Router();
 
 matchesRouter.get(
-    Paths.Matches.List,
-    getEventMatchList,
+  Paths.Matches.List,
+  getEventMatchList,
 );
 
 async function getEventMatchList(req: IReq, res: IRes): Promise<void> {
-    const { playoffsType: playoffsTypeRaw } = await getSettings();
-    const playoffsType = playoffsTypeRaw as PlayoffsType;
+  const { playoffsType: playoffsTypeRaw } = await getSettings();
+  const playoffsType = playoffsTypeRaw as PlayoffsType;
+  const matchList = (await getMatchList()).map((match) => {
+    return {
+      key: match.key,
+      actualTime: match.actual_time,
+      verboseName: capitalizeFirstLetter(
+        new Match(
+          MatchKey.fromString(match.key, playoffsType),
+        ).verboseMatchName,
+      ),
+    };
+  });
 
-    const matchList = (await getMatchList()).map((match) => {
-        return {
-            key: match.key,
-            verboseName: capitalizeFirstLetter(
-                new Match(
-                    MatchKey.fromString(match.key, playoffsType),
-                ).verboseMatchName,
-            ),
-        };
-    });
-
-    res.json({
-        ok: true,
-        matches: matchList,
-    });
+  res.json({
+    ok: true,
+    matches: matchList,
+  });
 }
 
 matchesRouter.get(
-    Paths.Matches.RecommendVideoFiles,
-    param(
-        "matchKey",
-        "Match key is required and must pass a format test. (See MatchKey class for regex.)",
-    ).isString().matches(MatchKey.matchKeyRegex),
-    query("isReplay", "isReplay must be a boolean").isBoolean().toBoolean(),
-    recommendVideoFiles,
+  Paths.Matches.RecommendVideoFiles,
+  param(
+    "matchKey",
+    "Match key is required and must pass a format test. (See MatchKey class for regex.)",
+  ).isString().matches(MatchKey.matchKeyRegex),
+  query("isReplay", "isReplay must be a boolean").isBoolean().toBoolean(),
+  recommendVideoFiles,
 );
 
 async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
-    const errors = validationResult(req);
+  const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        res.status(400)
-            .json({
-                errors: errors.array(),
-            });
-        return;
-    }
+  if (!errors.isEmpty()) {
+    res.status(400)
+      .json({
+        errors: errors.array(),
+      });
+    return;
+  }
 
-    const { matchKey, isReplay } = matchedData(req);
+  const {
+    matchKey,
+    isReplay,
+  } = matchedData(req);
 
-    const { playoffsType: playoffsTypeRaw } = await getSettings();
-    const playoffsType = playoffsTypeRaw as PlayoffsType;
+  const { playoffsType: playoffsTypeRaw } = await getSettings();
+  const playoffsType = playoffsTypeRaw as PlayoffsType;
 
-    const matchKeyObject = MatchKey.fromString(matchKey as string, playoffsType);
+  const matchKeyObject = MatchKey.fromString(matchKey as string, playoffsType);
 
-    const recommendedVideoFiles = await getLocalVideoFilesForMatch(matchKeyObject, isReplay as boolean);
-    res.json({
-        ok: true,
-        recommendedVideoFiles: recommendedVideoFiles.map((recommendation: MatchVideoInfo) => recommendation.toJson()),
-    });
+  const recommendedVideoFiles = await getLocalVideoFilesForMatch(matchKeyObject, isReplay as boolean);
+  res.json({
+    ok: true,
+    recommendedVideoFiles: recommendedVideoFiles.map((recommendation: MatchVideoInfo) => recommendation.toJson()),
+  });
 }
 
 matchesRouter.get(
-    Paths.Matches.GenerateDescription,
-    param(
-        "matchKey",
-        "Match key is required and must pass a format test. (See MatchKey class for regex.)",
-    ).isString().matches(MatchKey.matchKeyRegex),
-    generateDescription,
+  Paths.Matches.GenerateDescription,
+  param(
+    "matchKey",
+    "Match key is required and must pass a format test. (See MatchKey class for regex.)",
+  ).isString().matches(MatchKey.matchKeyRegex),
+  generateDescription,
 );
 
 async function generateDescription(req: IReq, res: IRes): Promise<void> {
-    const errors = validationResult(req);
+  const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        res.status(400)
-            .json({
-                errors: errors.array(),
-            });
-        return;
-    }
+  if (!errors.isEmpty()) {
+    res.status(400)
+      .json({
+        errors: errors.array(),
+      });
+    return;
+  }
 
-    const { eventName, playoffsType } = await getSettings();
-    const { matchKey: matchKeyRaw } = matchedData(req);
-    const matchKey = MatchKey.fromString(matchKeyRaw as string, playoffsType as PlayoffsType);
-    const match = new Match(matchKey);
-    res.json({
-        ok: true,
-        description: await generateMatchVideoDescription(match, eventName),
-    });
+  const {
+    eventName,
+    playoffsType,
+  } = await getSettings();
+  const { matchKey: matchKeyRaw } = matchedData(req);
+  const matchKey = MatchKey.fromString(matchKeyRaw as string, playoffsType as PlayoffsType);
+  const match = new Match(matchKey);
+  res.json({
+    ok: true,
+    description: await generateMatchVideoDescription(match, eventName),
+  });
 }
 
 matchesRouter.get(
@@ -120,7 +126,7 @@ async function getPossibleNextMatches(req: IReq, res: IRes): Promise<IRes> {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-      return res.status(400)
+    return res.status(400)
       .json({
         errors: errors.array(),
       });
@@ -129,7 +135,7 @@ async function getPossibleNextMatches(req: IReq, res: IRes): Promise<IRes> {
   const { playoffsType } = await getSettings();
 
   if ((playoffsType as PlayoffsType) !== PlayoffsType.DoubleElimination) {
-      return res.status(400)
+    return res.status(400)
       .json({
         errors: "Possible next matches are only available for double elimination playoffs mode",
       });

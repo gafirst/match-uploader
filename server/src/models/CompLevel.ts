@@ -31,6 +31,38 @@ export function compLevelFromString(compLevelString: string): CompLevel {
     }
 }
 
+export function compLevelToNumber(compLevel: CompLevel): number {
+    switch (compLevel) {
+        case CompLevel.Qualification:
+            return 0;
+        case CompLevel.Quarterfinal:
+            return 1;
+        case CompLevel.Semifinal:
+            return 2;
+        case CompLevel.Final:
+            return 3;
+        default:
+            throw new Error(`Comp level ${compLevel} is invalid.`);
+    }
+}
+
+/**
+ * Compare two CompLevels.
+ *
+ * Returns a positive value if a > b (which means `a` is *later* in the competition compared to `b`), a negative value
+ * if a < b (which means `b` is *later* in the competition compared to `a`), and 0 if a === b (which means `a` and `b`
+ * are the same competition level).
+ *
+ * @param a
+ * @param b
+ */
+export function compareCompLevel(a: CompLevel, b: CompLevel): number {
+    const aValue = compLevelToNumber(a);
+    const bValue = compLevelToNumber(b);
+
+    return aValue - bValue;
+}
+
 /**
  * Given a CompLevel, return it as an abbreviated string, suitable for use in match keys.
  *

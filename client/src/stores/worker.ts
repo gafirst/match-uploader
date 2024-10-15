@@ -4,7 +4,7 @@ import {computed, ref, watch} from "vue";
 import {
   isWorkerEvent,
   isWorkerJobCompleteEvent, isWorkerJobCreatedEvent,
-  isWorkerJobStartEvent, WORKER_JOB_CREATED, WorkerEvent, WorkerEvents,
+  isWorkerJobStartEvent, WorkerEvent, WorkerTask,
   WorkerJob,
   WorkerJobEvent,
   WorkerJobStatus, workerJobStatusAsNumber,
@@ -60,6 +60,14 @@ export const useWorkerStore = defineStore("worker", () => {
   const jobsLoading = ref(false);
   const jobsError = ref("");
 
+  function jobsForTask(tasks: WorkerTask | WorkerTask[]) {
+    if (!Array.isArray(tasks)) {
+      tasks = [tasks];
+    }
+
+    return jobsList.value.filter((job) => tasks.includes(job.task));
+  }
+
   function jobsInStatus(statuses: WorkerJobStatus | WorkerJobStatus[]) {
     if (!Array.isArray(statuses)) {
       statuses = [statuses];
@@ -112,7 +120,6 @@ export const useWorkerStore = defineStore("worker", () => {
   }
 
   async function loadJobs() {
-    // Load jobs by fetching from /api/v1/worker/jobs
     jobsLoading.value = true;
     jobsError.value = "";
 
@@ -240,6 +247,7 @@ export const useWorkerStore = defineStore("worker", () => {
     jobHasStatus,
     jobs,
     jobsError,
+    jobsForTask,
     jobsList,
     jobsListAsQueue,
     jobsLoading,

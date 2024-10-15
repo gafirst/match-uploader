@@ -48,3 +48,57 @@ enum JobStatus {
   // Job completed successfully.
   COMPLETED
 }
+
+model AutoRenameAssociation {
+  filePath               String                      @id @unique
+  videoFile              String
+  status                 AutoRenameAssociationStatus @default(UNMATCHED)
+  statusReason           String?
+  videoTimestamp         DateTime?
+  startTimeDiffSecs      Int?
+  videoDurationSecs      Int?
+  startTimeDiffAbnormal  Boolean?
+  videoDurationAbnormal  Boolean?
+  orderingIssueMatchKey  String?
+  orderingIssueMatchName String?
+
+  associationAttempts    Int     @default(0)
+  maxAssociationAttempts Int     @default(5)
+  matchKey               String?
+  matchName              String?
+  videoLabel             String
+
+  renameAfter     DateTime?
+  renameJobId     String?
+  renameCompleted Boolean   @default(false)
+  newFileName     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum AutoRenameAssociationStatus {
+  // No association has been made yet
+  UNMATCHED
+  // Max attempts for associations was reached
+  FAILED
+  // A weak association (requires human review) was made
+  WEAK
+  // A strong association was made (manually set by a human, manually approved by a human, or automatically classified
+  // as strong)
+  STRONG
+  // Do not try to associate this file again / TODO: Implement this everywhere else
+  IGNORED
+}
+
+model AutoRenameMetadata {
+  eventKey                       String
+  label                          String
+  lastStrongAssociationMatchKey  String?
+  lastStrongAssociationMatchName String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([eventKey, label], name: "id")
+}
