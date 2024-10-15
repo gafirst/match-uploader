@@ -291,7 +291,7 @@ export const useMatchStore = defineStore("match", () => {
     descriptionLoading.value = true;
     descriptionFetchError.value = "";
 
-    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/description`)
+    const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/description?isReplay=${isReplay.value}`)
       .catch((error) => {
         descriptionFetchError.value = `Unable to retrieve description for ${selectedMatchKey.value}: ${error}`;
         descriptionLoading.value = false;
@@ -347,6 +347,7 @@ export const useMatchStore = defineStore("match", () => {
 
   watch(isReplay, async (value, oldValue, onCleanup) => {
     await getMatchVideos();
+    await getSuggestedDescription();
   });
 
   return {

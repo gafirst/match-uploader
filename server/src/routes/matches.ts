@@ -13,6 +13,7 @@ import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { getSettings } from "@src/services/SettingsService";
 import { PlayoffsType } from "@src/models/PlayoffsType";
+import logger from "jet-logger";
 
 export const matchesRouter = Router();
 
@@ -86,6 +87,7 @@ matchesRouter.get(
     "matchKey",
     "Match key is required and must pass a format test. (See MatchKey class for regex.)",
   ).isString().matches(MatchKey.matchKeyRegex),
+  query("isReplay").default(false).isBoolean().toBoolean(),
   generateDescription,
 );
 
@@ -104,9 +106,11 @@ async function generateDescription(req: IReq, res: IRes): Promise<void> {
     eventName,
     playoffsType,
   } = await getSettings();
-  const { matchKey: matchKeyRaw } = matchedData(req);
+
+  const { matchKey: matchKeyRaw, isReplay } = matchedData(req);
   const matchKey = MatchKey.fromString(matchKeyRaw as string, playoffsType as PlayoffsType);
-  const match = new Match(matchKey);
+  const match = new Match(matchKey, isReplay as boolean);
+
   res.json({
     ok: true,
     description: await generateMatchVideoDescription(match, eventName),

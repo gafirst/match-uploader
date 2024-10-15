@@ -3,6 +3,8 @@
     <VSwitch v-model="matchStore.isReplay"
              color="primary"
              label="Replay"
+             :loading="matchStore.descriptionLoading || matchStore.matchVideosLoading"
+             :disabled="matchStore.descriptionLoading || matchStore.matchVideosLoading"
              inset
     />
   </div>
