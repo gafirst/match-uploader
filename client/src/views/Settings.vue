@@ -317,10 +317,18 @@
                                :you-tube-auth-state="settingsStore.youTubeAuthState"
                                @trigger-refresh="refreshData"
         />
-        <h2 class="mt-4">
-          Auto rename
+        <h2 class="mt-4 mb-2">
+          Auto rename <VChip color="purple">Beta</VChip>
         </h2>
-        <h2 class="mt-4 mb-2">Advanced auto rename settings</h2>
+        <VAlert color="purple"
+                variant="tonal"
+                density="compact"
+                icon="mdi-bug-outline"
+        >
+          Report bugs and send feedback
+          <a target="_blank" href="https://github.com/gafirst/match-uploader/issues/new/choose">on GitHub</a>.
+        </VAlert>
+        <h3 class="mt-4 mb-2">Advanced auto rename settings</h3>
         <VAlert class="mb-2"
                 variant="tonal"
                 color="warning"
@@ -328,6 +336,11 @@
           Changing these settings can affect the accuracy of automated associations made by Auto Rename. Proceed with
           caution.
         </VAlert>
+        <AutoRenameFileNamePatterns v-if="!settingsStore.isFirstLoad
+                                      && settingsStore.settings?.autoRenameFileNamePatterns"
+                                    :initial-patterns="settingsStore.settings
+                                      .autoRenameFileNamePatterns.split(',').map((value) => { return { value }; })"
+        />
         <AutosavingTextInput :on-submit="submit"
                              class="mb-2"
                              :initial-value="settingsStore.settings?.autoRenameMinExpectedVideoDurationSecs"
@@ -395,6 +408,7 @@ import {useSettingsStore} from "@/stores/settings";
 import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.vue";
 import { useMatchStore } from "@/stores/match";
 import { useMatchListStore } from "@/stores/matchList";
+import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNamePatterns.vue";
 
 // const loading = ref(true);
 const loading = computed(() => {

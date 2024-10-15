@@ -14,5 +14,6 @@
   "autoRenameMaxExpectedVideoDurationSecs": "420",
   "autoRenameMaxStartTimeDiffSecStrong": "60",
   "autoRenameMaxStartTimeDiffSecWeak": "300",
-  "autoRenameFileRenameJobDelaySecs": "300"
+  "autoRenameFileRenameJobDelaySecs": "300",
+  "autoRenameFileNamePatterns": "'Match_ - 'dd MMMM yyyy - hh-mm-ss a'.mp4','Match_ - 'dd MMMM yyyy - hh-mm-ss a' - Output 3.mp4'"
 }

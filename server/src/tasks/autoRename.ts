@@ -110,6 +110,18 @@ function assertIsAutoRenameCronPayload(payload: unknown): asserts payload is Aut
   assertIsCronPayload((payload as unknown as AutoRenameCronPayload)._cron);
 }
 
+function parseDateFromFileName(fileName: string, patterns: string[]): DateTime | null {
+  let parsedDate: DateTime;
+  for (const pattern of patterns) {
+    parsedDate = DateTime.fromFormat(fileName, pattern);
+    if (parsedDate.isValid) {
+      return parsedDate;
+    }
+  }
+
+  return null;
+}
+
 export async function autoRename(payload: unknown, {
   logger,
   job,
@@ -120,6 +132,7 @@ export async function autoRename(payload: unknown, {
 
   const {
     autoRenameEnabled,
+    autoRenameFileNamePatterns,
     autoRenameFileRenameJobDelaySecs,
     autoRenameMaxStartTimeDiffSecStrong,
     autoRenameMaxStartTimeDiffSecWeak,
@@ -170,11 +183,10 @@ export async function autoRename(payload: unknown, {
       continue;
     }
 
-    // FIXME: Need to handle "'Match_ - 'dd MMMM yyyy - hh-mm-ss a' - Output 3.mp4'"
-    const parsedDate = DateTime.fromFormat(videoFile, "'Match_ - 'dd MMMM yyyy - hh-mm-ss a'.mp4'");
+    const parsedDate = parseDateFromFileName(videoFile, autoRenameFileNamePatterns.split(","));
 
-    logger.info(`File: ${file} / Parsed date: ${parsedDate.toISO()}`);
-    if (parsedDate.isValid) {
+    if (parsedDate && parsedDate.isValid) {
+      logger.info(`File: ${file} / Parsed date: ${parsedDate.toISO()}`);
       await prisma.autoRenameAssociation.upsert({
         where: {
           filePath: file,
@@ -200,7 +212,7 @@ export async function autoRename(payload: unknown, {
           videoFile,
           videoLabel,
           status: AutoRenameAssociationStatus.FAILED,
-          statusReason: "Parsed date from file name was invalid",
+          statusReason: "Unable to parse date from file name",
         },
         update: {},
       });

@@ -18,6 +18,7 @@ export interface ISettings {
   autoRenameMaxStartTimeDiffSecStrong: string;
   autoRenameMaxStartTimeDiffSecWeak: string;
   autoRenameFileRenameJobDelaySecs: string;
+  autoRenameFileNamePatterns: string;
   [key: string]: string | boolean,
 }
 

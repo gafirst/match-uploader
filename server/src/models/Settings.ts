@@ -15,6 +15,7 @@ export interface ISettings {
     autoRenameMaxStartTimeDiffSecStrong: string;
     autoRenameMaxStartTimeDiffSecWeak: string;
     autoRenameFileRenameJobDelaySecs: string;
+    autoRenameFileNamePatterns: string;
 }
 
 export type SettingsKey = keyof ISettings;

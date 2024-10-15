@@ -1,14 +1,22 @@
 import { type ISettings } from "@src/models/Settings";
 
 export const sampleSettings: ISettings = {
-    eventName: "Example Event",
-    eventTbaCode: "2023gacmp",
+    eventName: "Demo Event",
+    eventTbaCode: "",
     videoSearchDirectory: "./videos",
-    googleAuthStatus: "",
     googleClientId: "",
+    googleAuthStatus: "Not started",
+    sandboxModeEnabled: true,
     playoffsType: "Double elimination playoff",
-    sandboxModeEnabled: false,
     youTubeVideoPrivacy: "private",
     linkVideosOnTheBlueAlliance: false,
     useFrcEventsApi: false,
+    autoRenameEnabled: false,
+    autoRenameMinExpectedVideoDurationSecs: "180",
+    autoRenameMaxExpectedVideoDurationSecs: "420",
+    autoRenameMaxStartTimeDiffSecStrong: "60",
+    autoRenameMaxStartTimeDiffSecWeak: "300",
+    autoRenameFileRenameJobDelaySecs: "300",
+    autoRenameFileNamePatterns:
+      "'Match_ - 'dd MMMM yyyy - hh-mm-ss a'.mp4','Match_ - 'dd MMMM yyyy - hh-mm-ss a' - Output 3.mp4'",
 };
