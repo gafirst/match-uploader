@@ -39,5 +39,6 @@ export default {
     },
     worker: {
         webServerUrl: process.env.WORKER_WEB_SERVER_URL ?? "",
+        crontabFilePath: process.env.CRONTAB_FILE_PATH ?? "./dist/crontab.txt",
     },
 } as const;

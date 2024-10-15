@@ -33,6 +33,9 @@ services:
     shm_size: '256mb' # https://github.com/docker-library/docs/blob/d94174bea5222aa95674ac156b710648a186afb8/postgres/README.md#caveats#caveats
     env_file:
       - ./server/env/production.env
+    environment:
+      TZ: America/New_York
+      PGTZ: America/New_York
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck: # https://stackoverflow.com/a/55835081

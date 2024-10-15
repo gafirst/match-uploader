@@ -83,7 +83,7 @@ async function main(): Promise<void> {
     const runner = await run({
         connectionString: EnvVars.db.connectionString,
         concurrency: 5,
-        crontabFile: "./src/crontab.txt",
+        crontabFile: EnvVars.worker.crontabFilePath,
         // Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
         noHandleSignals: false,
         pollInterval: 1000,
