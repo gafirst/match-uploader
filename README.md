@@ -117,6 +117,11 @@ defined in the file that are not specified below; please leave those intact.
 | `DB_CONNECTION_STRING`  | Used by the `web` and `worker` containers. Connection string to connect to the PostgreSQL server.                                                                                                                                                                    | Recommended value: `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}` (replace values with environment variables already defined; `POSTGRES_HOST` with the default Match Uploader Docker Compose configuration would be `db`; `POSTGRES_PORT` should be the default Postgres port, `5432`) |
 | `WORKER_WEB_SERVER_URL` | Used by the `worker` container. The URL (include protocol, domain, and port) where the backend server can be reached from _inside_ the `worker` container. This value is provided to Socket.IO to connect to the WebSocket server hosted out of the `web` container. | Leave set to default: `http://web:8080`                                                                                                                                                                                                                                                                    |
 
+#### Timezones
+The Docker Compose setup defaults to using the `America/New_York` timezone. If your timezone is different, you'll need
+to build the Dockerfile from scratch with the correct timezone (sorry this isn't easier!) and also update the `TZ` and
+`PGTZ` environment variables for the Postgres container in `docker-compose.yaml`.
+
 #### Docker volumes
 
 There are 3 required Docker volumes for the `web` and `worker` containers:
