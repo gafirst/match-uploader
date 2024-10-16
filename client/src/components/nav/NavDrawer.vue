@@ -84,6 +84,10 @@ const autoRenameBadge = computed(() => {
       dot: true,
     };
   }
+
+  return {
+    show: false,
+  };
 });
 
 const navItems = computed(() => {
