@@ -28,7 +28,7 @@
                   class="pa-3 video-preview"
           >
             <h3>{{ video.videoLabel ?? "Unlabeled" }}</h3>
-            <VAlert v-if="video.videoLabel && !playlistStore.playlistMappings[video.videoLabel.toLowerCase()]"
+            <VAlert v-if="isVideoMissingPlaylistMapping(video)"
                     density="compact"
                     class="mb-2"
                     variant="tonal"
@@ -84,6 +84,7 @@ import {useWorkerStore} from "@/stores/worker";
 import MatchMetadata from "@/components/matches/MatchMetadata.vue";
 import LiveMode from "@/components/liveMode/LiveMode.vue";
 import { UPLOAD_VIDEO_TASK } from "@/types/WorkerJob";
+import { MatchVideoInfo } from "@/types/MatchVideoInfo";
 
 const error = ref("");
 
@@ -99,6 +100,14 @@ const videosMdColWidth = computed(() => {
     return 6;
   }
 });
+
+function isVideoMissingPlaylistMapping(video: MatchVideoInfo) {
+  if (!video.videoLabel) {
+    return !playlistStore.playlistMappings["unlabeled"];
+  }
+
+  return !playlistStore.playlistMappings[video.videoLabel.toLowerCase()];
+}
 
 </script>
 

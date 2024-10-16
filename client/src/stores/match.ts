@@ -290,7 +290,7 @@ export const useMatchStore = defineStore("match", () => {
 
     descriptionLoading.value = true;
     descriptionFetchError.value = "";
-
+    description.value = "";
     const result = await fetch(`/api/v1/matches/${selectedMatchKey.value}/description?isReplay=${isReplay.value}`)
       .catch((error) => {
         descriptionFetchError.value = `Unable to retrieve description for ${selectedMatchKey.value}: ${error}`;

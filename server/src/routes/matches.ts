@@ -13,7 +13,6 @@ import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { getSettings } from "@src/services/SettingsService";
 import { PlayoffsType } from "@src/models/PlayoffsType";
-import logger from "jet-logger";
 
 export const matchesRouter = Router();
 
