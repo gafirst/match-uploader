@@ -16,6 +16,7 @@
           <VBadge v-if="item.badge?.show"
                   :color="item.badge.color"
                   :content="item.badge.content"
+                  :dot="item.badge.dot"
           >
             <VIcon :icon="item.icon" />
           </VBadge>
@@ -33,9 +34,61 @@ import {useWorkerStore} from "@/stores/worker";
 import {WorkerJobStatus} from "@/types/WorkerJob";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssociationStatus";
+import { useLiveModeStore } from "@/stores/liveMode";
+import { LiveModeStatus } from "@/types/liveMode/LiveModeStatus";
+import { useSettingsStore } from "@/stores/settings";
 
 const workerStore = useWorkerStore();
 const autoRenameStore = useAutoRenameStore();
+const liveModeStore = useLiveModeStore();
+const settingsStore = useSettingsStore();
+autoRenameStore.getAssociations();
+
+const liveModeDotColor = computed(() => {
+  if (!liveModeStore.isActive) {
+    return "";
+  }
+
+  if ([LiveModeStatus.ERROR, LiveModeStatus.STOPPED].includes(liveModeStore.state)) {
+    return "error";
+  }
+
+  if (liveModeStore.state === LiveModeStatus.WAITING && liveModeStore.error) {
+    return "error";
+  }
+
+  if (liveModeStore.missingPlaylistLabels.length > 0) {
+    return "warning";
+  }
+
+  return "success";
+});
+
+const autoRenameBadge = computed(() => {
+  const numAssociationsToReview = autoRenameStore.associationsInStatus(
+    [AutoRenameAssociationStatus.WEAK, AutoRenameAssociationStatus.FAILED],
+  ).length;
+
+  if (numAssociationsToReview > 0) {
+    return {
+      show: true,
+      color: "warning",
+      content: numAssociationsToReview,
+    };
+  }
+
+  if (!settingsStore.isFirstLoad && settingsStore.settings.autoRenameEnabled) {
+    return {
+      show: true,
+      color: "success",
+      dot: true,
+    };
+  }
+
+  return {
+    show: false,
+  };
+});
 
 const navItems = computed(() => {
   return [
@@ -43,20 +96,17 @@ const navItems = computed(() => {
       title: "Upload",
       to: "/upload",
       icon: "mdi-cloud-upload-outline",
+      badge: {
+        show: liveModeStore.isActive,
+        color: liveModeDotColor.value,
+        dot: true,
+      },
     },
     {
       title: "Auto rename",
       to: "/autoRename",
       icon: "mdi-auto-mode",
-      badge: {
-        show: autoRenameStore.associationsInStatus(
-          [AutoRenameAssociationStatus.WEAK, AutoRenameAssociationStatus.FAILED],
-        ).length > 0,
-        color: "warning",
-        content: autoRenameStore.associationsInStatus(
-          [AutoRenameAssociationStatus.WEAK, AutoRenameAssociationStatus.FAILED],
-        ).length,
-      },
+      badge: autoRenameBadge.value,
     },
     {
       title: "Worker queue",

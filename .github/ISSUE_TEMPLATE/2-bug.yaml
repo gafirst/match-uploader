@@ -17,7 +17,6 @@ body:
     attributes:
       label: Are you running Match Uploader using the official Docker Compose setup?
       options:
-        - Select a value...
         - "Yes"
         - "No"
     validations:
@@ -34,6 +33,8 @@ body:
         - YouTube integration
         - The Blue Alliance integration
         - FRC Events integration
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Relevant error or log output

@@ -6,17 +6,18 @@ body:
     attributes:
       label: Association problem type
       options:
-        - Select a value...
         - Strong association to the wrong match
         - Association status unexpectedly weak
         - Association was expected but not made
         - Something else (describe in Additional Information)
+    validations:
+      required: true
   - type: input
     attributes:
       label: Video file path
       description: Relative path of the video file (within the videos directory) that was incorrectly associated. If multiple related instances, add more details in the Additional Information section below
     validations:
-      required: false
+      required: true
   - type: input
     attributes:
       label: Expected match key
@@ -28,13 +29,13 @@ body:
       label: Actual associated match key
       description: The full match key (e.g., 2024gadal_qm1) of the match that Auto Rename associated with the video file. Enter N/A if no association was made, but you were expecting one.
     validations:
-      required: false
+      required: true
   - type: dropdown
     attributes:
       label: Association status
-      description: The full match key (e.g., 2024gadal_qm1) of the match that Auto Rename associated with the video file. Enter N/A if no association was made, but you were expecting one.
+      description: The full match key (e.g., 2024gadal_qm1) of the match that Auto Rename associated with the video file.
       options:
-        - Select a value...
+        - N/A (No association created)
         - Unmatched
         - Strong
         - Weak
@@ -57,7 +58,6 @@ body:
     attributes:
       label: Are you running Match Uploader using the official Docker Compose setup?
       options:
-        - Select a value...
         - "Yes"
         - "No"
     validations:
