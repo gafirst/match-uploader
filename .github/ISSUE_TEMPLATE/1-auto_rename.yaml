@@ -29,7 +29,7 @@ body:
       label: Actual associated match key
       description: The full match key (e.g., 2024gadal_qm1) of the match that Auto Rename associated with the video file. Enter N/A if no association was made, but you were expecting one.
     validations:
-      required: false
+      required: true
   - type: dropdown
     attributes:
       label: Association status
