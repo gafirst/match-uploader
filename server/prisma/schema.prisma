@@ -102,3 +102,20 @@ model AutoRenameMetadata {
 
   @@id([eventKey, label], name: "id")
 }
+
+model UploadedVideo {
+  youTubeVideoId String @id @unique
+
+  filePath String
+  matchKey String
+  eventKey String
+
+  label    String
+  isReplay Boolean @default(false)
+
+  addToYouTubePlaylistSucceeded  Boolean?
+  linkOnTheBlueAllianceSucceeded Boolean?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

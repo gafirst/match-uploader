@@ -104,6 +104,16 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                     youTubeVideoId: uploadResult.videoId,
                 },
             });
+            await prisma.uploadedVideo.create({
+                data: {
+                    matchKey: matchKeyObject.matchKey,
+                    eventKey: matchKeyObject.eventKey,
+                    filePath: payload.videoPath,
+                    label: payload.label,
+                    youTubeVideoId: uploadResult.videoId,
+                    // FIXME: Handle replays
+                },
+            });
         } catch (e) { // Catch the prisma update error
             if (isPrismaClientKnownRequestError(e, "P2025")) {
                 logger.warn(`Unable to attach YouTube video with ID ${uploadResult.videoId} to job with ID ` +
@@ -131,6 +141,15 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                 data: {
                     addedToYouTubePlaylist: postUploadStepsResult.addToYouTubePlaylist,
                     linkedOnTheBlueAlliance: postUploadStepsResult.linkOnTheBlueAlliance,
+                },
+            });
+            await prisma.uploadedVideo.update({
+                where: {
+                    youTubeVideoId: uploadResult.videoId,
+                },
+                data: {
+                    linkOnTheBlueAllianceSucceeded: postUploadStepsResult.linkOnTheBlueAlliance,
+                    addToYouTubePlaylistSucceeded: postUploadStepsResult.addToYouTubePlaylist,
                 },
             });
         } catch (e: unknown) { // Catch the prisma update error
