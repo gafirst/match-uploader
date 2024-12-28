@@ -1,16 +1,17 @@
 <template>
   <!--  TODO: These need to have an error state -->
   <div class="d-flex flex-wrap">
-    <VBtn v-for="value in choices"
-          :key="value"
-          class="mr-2 mb-2 text-none no-transition"
-          :variant="valueIsSelected(value) ? 'flat' : 'outlined'"
-          :value="value"
-          :disabled="!!loading"
-          color="primary"
-          :ripple="false"
-          :prepend-icon="getPrependIcon(value)"
-          @click="() => onChoiceSelected(value)"
+    <VBtn
+      v-for="value in choices"
+      :key="value"
+      class="mr-2 mb-2 text-none no-transition"
+      :variant="valueIsSelected(value) ? 'flat' : 'outlined'"
+      :value="value"
+      :disabled="!!loading"
+      color="primary"
+      :ripple="false"
+      :prepend-icon="getPrependIcon(value)"
+      @click="() => onChoiceSelected(value)"
     >
       {{ value }}
     </VBtn>
@@ -19,11 +20,6 @@
 
 <script lang="ts" setup>
 import {ref} from "vue";
-
-interface IBtnSelectGroupChoice {
-  value: string,
-  label: string,
-}
 
 interface IProps {
   /**

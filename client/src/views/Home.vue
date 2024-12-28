@@ -1,44 +1,60 @@
 <template>
   <VRow>
-    <VCol cols="12" md="4">
+    <VCol
+      cols="12"
+      md="4"
+    >
       <LiveMode />
       <h1>Upload match</h1>
-      <VAlert v-if="!!error"
-              color="error"
+      <VAlert
+        v-if="!!error"
+        color="error"
       >
         {{ error }}
       </VAlert>
 
-      <h2 class="mb-2">Match info</h2>
+      <h2 class="mb-2">
+        Match info
+      </h2>
       <MatchSelector />
 
       <h2 class="mb-2">
         Video metadata
       </h2>
       <MatchMetadata />
-      <h3 class="mb-2">Description</h3>
+      <h3 class="mb-2">
+        Description
+      </h3>
       <MatchDescription />
     </VCol>
-    <VCol cols="12" :md="videosMdColWidth">
-      <h2 class="mb-2">Videos</h2>
+    <VCol
+      cols="12"
+      :md="videosMdColWidth"
+    >
+      <h2 class="mb-2">
+        Videos
+      </h2>
       <VRow>
         <VSheet class="d-flex flex-wrap">
-          <VSheet v-for="video in matchStore.matchVideos"
-                  :key="video.path"
-                  class="pa-3 video-preview"
+          <VSheet
+            v-for="video in matchStore.matchVideos"
+            :key="video.path"
+            class="pa-3 video-preview"
           >
             <h3>{{ video.videoLabel ?? "Unlabeled" }}</h3>
-            <VAlert v-if="isVideoMissingPlaylistMapping(video)"
-                    density="compact"
-                    class="mb-2"
-                    variant="tonal"
-                    color="warning"
+            <VAlert
+              v-if="isVideoMissingPlaylistMapping(video)"
+              density="compact"
+              class="mb-2"
+              variant="tonal"
+              color="warning"
             >
               Missing playlist mapping
             </VAlert>
-            <video :src="`videos/${video.path}`"
-                   controls
-                   preload="metadata"
+            <video
+              :src="`videos/${video.path}`"
+              controls
+              preload="metadata"
             />
           </VSheet>
         </VSheet>
@@ -48,7 +64,9 @@
       </VRow>
       <VRow>
         <VCol>
-          <h2 class="mb-2">Help</h2>
+          <h2 class="mb-2">
+            Help
+          </h2>
           <VExpansionPanels>
             <NameMatchVideoFilesHelp />
             <MissingMatchVideosHelp />
@@ -58,12 +76,16 @@
         </VCol>
       </VRow>
     </VCol>
-    <VCol v-if="workerStore.jobsForTask(UPLOAD_VIDEO_TASK).length"
-          cols="12"
-          md="4"
+    <VCol
+      v-if="workerStore.jobsForTask(UPLOAD_VIDEO_TASK).length"
+      cols="12"
+      md="4"
     >
       <h2>Upload queue</h2>
-      <JobsList :jobs-list="workerStore.jobsListAsQueue" :included-tasks="[UPLOAD_VIDEO_TASK]" />
+      <JobsList
+        :jobs-list="workerStore.jobsListAsQueue"
+        :included-tasks="[UPLOAD_VIDEO_TASK]"
+      />
     </VCol>
   </VRow>
 </template>

@@ -35,6 +35,6 @@ export interface ISecretSettings {
 export type SecretSettingsKey = keyof ISecretSettings;
 
 export type ISecretSettingsHidden = {
-    // eslint-disable-next-line no-unused-vars
+     
     [key in keyof ISecretSettings]: boolean;
 }

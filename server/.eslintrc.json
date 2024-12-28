@@ -7,8 +7,7 @@
     "standard-with-typescript",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:node/recommended",
-    "../.eslint/.eslintrc.js"
+    "plugin:node/recommended"
   ],
   "parserOptions": {
     "project": "./tsconfig.json"
@@ -51,7 +50,20 @@
     "no-extra-boolean-cast": "off",
     "node/no-missing-import": "off",
     "node/no-unpublished-import": "off",
-    "no-unused-vars": "off"
+    "no-unused-vars": "off",
+    "comma-dangle": ["error", "always-multiline"],
+    "comma-style": ["error", "last"],
+    "semi": ["error", "always"],
+    "max-len": [
+      "error",
+      {
+        "code": 120
+      }
+    ],
+    "no-warning-comments": ["warn", {
+      "terms": ["fixme"],
+      "location": "anywhere"
+    }]
   },
   "ignorePatterns": ["**/.eslintrc.*", "src/public/"],
   "settings": {

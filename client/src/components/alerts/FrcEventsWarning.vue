@@ -1,12 +1,13 @@
 <template>
-  <VAlert v-if="!settingsStore.isFirstLoad && settingsStore.settings?.useFrcEventsApi"
-          color="warning"
-          variant="tonal"
-          density="comfortable"
-          :rounded="props.rounded ?? 0"
-          icon="mdi-alert-outline"
+  <VAlert
+    v-if="!settingsStore.isFirstLoad && settingsStore.settings?.useFrcEventsApi"
+    color="warning"
+    variant="tonal"
+    density="comfortable"
+    :rounded="props.rounded ?? 0"
+    icon="mdi-alert-outline"
   >
-    <template v-slot:text>
+    <template #text>
       <strong>Using FRC Events API.</strong> This is not recommended unless match data is unavailable on The Blue
       Alliance.
     </template>

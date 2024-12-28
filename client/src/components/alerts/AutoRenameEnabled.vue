@@ -1,12 +1,13 @@
 <template>
-  <VAlert v-if="!settingsStore.isFirstLoad && settingsStore.settings?.autoRenameEnabled"
-          color="success"
-          variant="tonal"
-          density="comfortable"
-          :rounded="props.rounded ?? 0"
-          icon="mdi-auto-mode"
+  <VAlert
+    v-if="!settingsStore.isFirstLoad && settingsStore.settings?.autoRenameEnabled"
+    color="success"
+    variant="tonal"
+    density="comfortable"
+    :rounded="props.rounded ?? 0"
+    icon="mdi-auto-mode"
   >
-    <template v-slot:text>
+    <template #text>
       <strong>Auto Rename is enabled.</strong> It triggers every 5 minutes and continues running until you disable it,
       even if you close this page.
     </template>

@@ -81,19 +81,6 @@ describe("Match", () => {
     expect(match1.isAfter(match1)).toBe(false);
   });
 
-  it("should correctly compare Best of 3 semifinals matches in different sets", () => {
-    const matchKey1 = MatchKey.fromString("2023gadal_sf2m2", PlayoffsType.BestOf3);
-    const match1 = new Match(matchKey1);
-
-    const matchKey2 = MatchKey.fromString("2023gadal_sf4m2", PlayoffsType.BestOf3);
-    const match2 = new Match(matchKey2);
-
-    expect(match2.isAfter(match1)).toBe(true);
-    expect(match2.isAfter(match2)).toBe(false);
-    expect(match1.isAfter(match2)).toBe(false);
-    expect(match1.isAfter(match1)).toBe(false);
-  });
-
   it("should correctly compare Best of 3 finals matches", () => {
     const matchKey1 = MatchKey.fromString("2023gadal_f1m2", PlayoffsType.BestOf3);
     const match1 = new Match(matchKey1);

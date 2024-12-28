@@ -1,7 +1,8 @@
 <template>
-  <VBtn :color="btnColor"
-        :prepend-icon="btnIcon"
-        @click="resetYouTubeConnection"
+  <VBtn
+    :color="btnColor"
+    :prepend-icon="btnIcon"
+    @click="resetYouTubeConnection"
   >
     {{ btnText }}
   </VBtn>

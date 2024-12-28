@@ -5,8 +5,10 @@
       <VSpacer />
       <VChip class="mr-4">
         Worker
-        <template v-slot:prepend>
-          <VIcon :color="socketStatusColor">mdi-circle-medium</VIcon>
+        <template #prepend>
+          <VIcon :color="socketStatusColor">
+            mdi-circle-medium
+          </VIcon>
         </template>
       </VChip>
     </VAppBar>
@@ -14,7 +16,10 @@
     <NavDrawer />
     <VMain>
       <GlobalAlerts />
-      <VContainer fluid class="ml-0 mr-0">
+      <VContainer
+        fluid
+        class="ml-0 mr-0"
+      >
         <RouterView />
       </VContainer>
     </VMain>

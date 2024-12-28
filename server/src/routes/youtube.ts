@@ -107,7 +107,7 @@ async function handleYouTubeOAuth2Callback(req: IReq, res: IRes): Promise<void> 
                 logger.warn("OAuth2 code exchange: no expiry_date was received.");
             }
         } catch (codeExchangeError) {
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+             
             await setSetting("googleAuthStatus", `YouTube connection failed: ${codeExchangeError}`);
         }
     } else if (error) {

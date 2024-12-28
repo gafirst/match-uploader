@@ -1,12 +1,13 @@
 <template>
-  <VAlert v-if="!settingsStore.isFirstLoad && settingsStore.settings?.sandboxModeEnabled"
-          color="warning"
-          variant="tonal"
-          density="comfortable"
-          :rounded="props.rounded ?? 0"
-          icon="mdi-upload-off"
+  <VAlert
+    v-if="!settingsStore.isFirstLoad && settingsStore.settings?.sandboxModeEnabled"
+    color="warning"
+    variant="tonal"
+    density="comfortable"
+    :rounded="props.rounded ?? 0"
+    icon="mdi-upload-off"
   >
-    <template v-slot:text>
+    <template #text>
       <strong>Sandbox mode enabled.</strong> No videos will be uploaded to YouTube.
     </template>
   </VAlert>

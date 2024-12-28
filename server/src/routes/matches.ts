@@ -13,6 +13,7 @@ import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { getSettings } from "@src/services/SettingsService";
 import { PlayoffsType } from "@src/models/PlayoffsType";
+import { getMatchUploadStatuses as getMatchUploadStatusesImpl } from "@src/services/MatchesService";
 
 export const matchesRouter = Router();
 
@@ -155,5 +156,17 @@ async function getPossibleNextMatches(req: IReq, res: IRes): Promise<IRes> {
     ok: true,
     sameLevel: nextMatchSameLevel,
     nextLevel: firstMatchNextLevel,
+  });
+}
+
+matchesRouter.get(
+  Paths.Matches.UploadStatuses,
+  getMatchUploadStatuses,
+);
+
+async function getMatchUploadStatuses(req: IReq, res: IRes): Promise<void> {
+  res.json({
+    ok: true,
+    ...(await getMatchUploadStatusesImpl()),
   });
 }

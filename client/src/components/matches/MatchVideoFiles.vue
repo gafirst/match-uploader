@@ -1,33 +1,42 @@
 <template>
   <div v-if="matchStore.selectedMatchKey">
-    <VProgressCircular v-if="matchStore.matchVideosLoading"
-                       indeterminate
-                       class="mb-2"
+    <VProgressCircular
+      v-if="matchStore.matchVideosLoading"
+      indeterminate
+      class="mb-2"
     />
     <div v-else-if="matchStore.matchVideos.length">
       <VList>
-        <VListItem v-for="file in matchStore.matchVideos"
-                   :key="file.path"
-                   :title="file.path"
-                   :subtitle="file.videoLabel ? `Label: ${file.videoLabel}`: 'Unlabeled'"
+        <VListItem
+          v-for="file in matchStore.matchVideos"
+          :key="file.path"
+          :title="file.path"
+          :subtitle="file.videoLabel ? `Label: ${file.videoLabel}`: 'Unlabeled'"
         />
       </VList>
-      <VBtn prepend-icon="mdi-refresh"
-            variant="outlined"
-            class="mb-2"
-            @click="matchStore.getMatchVideos()"
+      <VBtn
+        prepend-icon="mdi-refresh"
+        variant="outlined"
+        class="mb-2"
+        @click="matchStore.getMatchVideos()"
       >
         Refresh
       </VBtn>
     </div>
-    <VAlert v-else
-            class="mb-2"
-            color="warning"
+    <VAlert
+      v-else
+      class="mb-2"
+      color="warning"
     >
       No video files found.
     </VAlert>
   </div>
-  <p v-else class="mb-2">No match selected</p>
+  <p
+    v-else
+    class="mb-2"
+  >
+    No match selected
+  </p>
   <VExpansionPanels>
     <NameMatchVideoFilesHelp />
     <MissingMatchVideosHelp />

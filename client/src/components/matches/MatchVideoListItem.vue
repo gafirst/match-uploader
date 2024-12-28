@@ -1,33 +1,44 @@
 <template>
   <VListItem>
-    <VListItemTitle class="text-wrap">{{ video.videoTitle }}</VListItemTitle>
-    <VListItemSubtitle class="text-wrap force-text-wrap">{{ subtitle }}</VListItemSubtitle>
-    <template v-slot:prepend>
-      <VIcon :icon="icon.icon"
-             :color="icon.color"
-             size="large"
+    <VListItemTitle class="text-wrap">
+      {{ video.videoTitle }}
+    </VListItemTitle>
+    <VListItemSubtitle class="text-wrap force-text-wrap">
+      {{ subtitle }}
+    </VListItemSubtitle>
+    <template #prepend>
+      <VIcon
+        :icon="icon.icon"
+        :color="icon.color"
+        size="large"
       />
     </template>
-    <template v-if="!video.isUploaded" v-slot:append>
-      <VBtn v-if="videoJob?.youTubeVideoId"
-            variant="text"
-            icon="mdi-open-in-new"
-            :href="`https://www.youtube.com/watch?v=${videoJob?.youTubeVideoId}`"
-            target="_blank"
+    <template
+      v-if="!video.isUploaded"
+      #append
+    >
+      <VBtn
+        v-if="videoJob?.youTubeVideoId"
+        variant="text"
+        icon="mdi-open-in-new"
+        :href="`https://www.youtube.com/watch?v=${videoJob?.youTubeVideoId}`"
+        target="_blank"
       />
-      <VBtn v-else-if="!!video.jobCreationError || videoJob?.status === WorkerJobStatus.FAILED"
-            variant="text"
-            prepend-icon="mdi-refresh"
-            :disabled="matchStore.uploadInProgress"
-            @click="matchStore.uploadSingleVideo(video)"
+      <VBtn
+        v-else-if="!!video.jobCreationError || videoJob?.status === WorkerJobStatus.FAILED"
+        variant="text"
+        prepend-icon="mdi-refresh"
+        :disabled="matchStore.uploadInProgress"
+        @click="matchStore.uploadSingleVideo(video)"
       >
         Retry
       </VBtn>
-      <VBtn v-else-if="!video.workerJobId"
-            variant="text"
-            prepend-icon="mdi-upload"
-            :disabled="matchStore.uploadInProgress"
-            @click="matchStore.uploadSingleVideo(video)"
+      <VBtn
+        v-else-if="!video.workerJobId"
+        variant="text"
+        prepend-icon="mdi-upload"
+        :disabled="matchStore.uploadInProgress"
+        @click="matchStore.uploadSingleVideo(video)"
       >
         Upload
       </VBtn>

@@ -21,30 +21,41 @@
       </VExpansionPanel>
     </VExpansionPanels>
 
-    <h3 class="mt-2">Current mappings</h3>
-    <VProgressCircular v-if="playlistsStore.loading && !playlistsStore.playlists?.length"
-                       class="mt-2"
-                       indeterminate
+    <h3 class="mt-2">
+      Current mappings
+    </h3>
+    <VProgressCircular
+      v-if="playlistsStore.loading && !playlistsStore.playlists?.length"
+      class="mt-2"
+      indeterminate
     />
-    <VList v-else
-           :disabled=" playlistsStore.loading"
+    <VList
+      v-else
+      :disabled=" playlistsStore.loading"
     >
-      <VListItem v-for="playlist in playlistsStore.playlists" :key="playlist.playlist_id">
+      <VListItem
+        v-for="playlist in playlistsStore.playlists"
+        :key="playlist.playlist_id"
+      >
         <VListItemTitle>
           Label <strong>{{ playlist.label }}</strong> →
-          <a :href="youtubePlaylistUrl(playlist.playlist_id)" target="_blank">{{
+          <a
+            :href="youtubePlaylistUrl(playlist.playlist_id)"
+            target="_blank"
+          >{{
             playlist.name ?? "Unknown playlist"
           }}</a>
         </VListItemTitle>
         <VListItemSubtitle>
           ID: {{ playlist.playlist_id }}
         </VListItemSubtitle>
-        <template v-slot:prepend>
-          <VBtn icon
-                :loading="playlistsStore.loading"
-                variant="text"
-                color="error"
-                @click="deletePlaylistMapping(playlist.label)"
+        <template #prepend>
+          <VBtn
+            icon
+            :loading="playlistsStore.loading"
+            variant="text"
+            color="error"
+            @click="deletePlaylistMapping(playlist.label)"
           >
             <VIcon>mdi-delete</VIcon>
           </VBtn>
@@ -52,61 +63,76 @@
       </VListItem>
     </VList>
 
-    <VAlert v-if="!playlistsStore.loading && !playlistsStore.playlists?.length"
-            class="mb-2"
+    <VAlert
+      v-if="!playlistsStore.loading && !playlistsStore.playlists?.length"
+      class="mb-2"
     >
       No playlist mappings found. Add one below!
     </VAlert>
-    <VAlert v-if="!!playlistsStore.error"
-            color="error"
+    <VAlert
+      v-if="!!playlistsStore.error"
+      color="error"
     >
       {{ playlistsStore.error }}
     </VAlert>
 
-    <h3 class="mt-2">Add mapping</h3>
-    <VAlert v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
-            color="error"
-            variant="tonal"
-            :rounded="0"
-            icon="mdi-alert-circle"
+    <h3 class="mt-2">
+      Add mapping
+    </h3>
+    <VAlert
+      v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
+      color="error"
+      variant="tonal"
+      :rounded="0"
+      icon="mdi-alert-circle"
     >
       Complete YouTube authentication setup steps before adding playlist mappings.
     </VAlert>
-    <VAlert v-else
-            variant="tonal"
-            color="info"
-            class="mt-2"
-            density="compact"
+    <VAlert
+      v-else
+      variant="tonal"
+      color="info"
+      class="mt-2"
+      density="compact"
     >
       Enter <strong>Unlabeled</strong> to add videos with no label to a playlist.
     </VAlert>
     <VRow>
-      <VCol cols="12" md="6">
-        <VTextField v-model="newMappingLabel"
-                    variant="underlined"
-                    label="Video label"
-                    hint="Not case-sensitive"
-                    persistent-hint
-                    type="text"
-                    :disabled="playlistsStore.loading || !settingsStore.youTubeAuthState?.accessTokenStored"
+      <VCol
+        cols="12"
+        md="6"
+      >
+        <VTextField
+          v-model="newMappingLabel"
+          variant="underlined"
+          label="Video label"
+          hint="Not case-sensitive"
+          persistent-hint
+          type="text"
+          :disabled="playlistsStore.loading || !settingsStore.youTubeAuthState?.accessTokenStored"
         />
       </VCol>
-      <VCol cols="12" md="6">
-        <VTextField v-model="newMappingPlaylistUrl"
-                    variant="underlined"
-                    label="Playlist ID"
-                    hint="Playlist ID starting with PL"
-                    persistent-hint
-                    type="text"
-                    :disabled="playlistsStore.loading || !settingsStore.youTubeAuthState?.accessTokenStored"
+      <VCol
+        cols="12"
+        md="6"
+      >
+        <VTextField
+          v-model="newMappingPlaylistUrl"
+          variant="underlined"
+          label="Playlist ID"
+          hint="Playlist ID starting with PL"
+          persistent-hint
+          type="text"
+          :disabled="playlistsStore.loading || !settingsStore.youTubeAuthState?.accessTokenStored"
         />
       </VCol>
     </VRow>
-    <VBtn color="primary"
-          class="mt-2"
-          :disabled="!newMappingLabel || !newMappingPlaylistUrl"
-          :loading="playlistsStore.loading"
-          @click="saveNewMapping"
+    <VBtn
+      color="primary"
+      class="mt-2"
+      :disabled="!newMappingLabel || !newMappingPlaylistUrl"
+      :loading="playlistsStore.loading"
+      @click="saveNewMapping"
     >
       Save mapping
     </VBtn>

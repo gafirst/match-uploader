@@ -1,5 +1,3 @@
-import {WorkerJob} from "@/types/WorkerJob";
-
 export interface MatchVideoInfo {
     path: string;
     videoLabel: string | null;

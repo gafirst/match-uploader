@@ -1,70 +1,78 @@
 <template>
-  <VDataTable :items="autoRenameStore.associationsInStatus(includedAssociationStatuses)"
-              :loading="autoRenameStore.loadingAssociations"
-              no-data-text="No associations found"
-              :headers="[
-                { title: 'Label', value: 'videoLabel' },
-                { title: 'Date', value: 'videoTimestamp'},
-                // TODO: Change videoFile -> videoFileName everywhere?
-                { title: 'File', key: 'videoFileName', value: item => item.videoFile },
-                { title: 'Match', value: 'matchKey' },
-                { title: 'Status', value: 'status' },
-                { title: 'Actions', key: 'actions'}
-              ]"
-              multi-sort
-              :sort-by="[{ key: 'videoLabel', order: 'asc' }, { key: 'videoTimestamp', order: 'asc' }]"
+  <VDataTable
+    :items="autoRenameStore.associationsInStatus(includedAssociationStatuses)"
+    :loading="autoRenameStore.loadingAssociations"
+    no-data-text="No associations found"
+    :headers="[
+      { title: 'Label', value: 'videoLabel' },
+      { title: 'Date', value: 'videoTimestamp'},
+      // TODO: Change videoFile -> videoFileName everywhere?
+      { title: 'File', key: 'videoFileName', value: item => item.videoFile },
+      { title: 'Match', value: 'matchKey' },
+      { title: 'Status', value: 'status' },
+      { title: 'Actions', key: 'actions'}
+    ]"
+    multi-sort
+    :sort-by="[{ key: 'videoLabel', order: 'asc' }, { key: 'videoTimestamp', order: 'asc' }]"
   >
-    <template v-slot:item.status="{ item }">
-      <VChip :color="statusToColor(item.status)">{{ statusIncludingRenames(item) }}</VChip>
+    <template #item.status="{ item }">
+      <VChip :color="statusToColor(item.status)">
+        {{ statusIncludingRenames(item) }}
+      </VChip>
     </template>
 
-    <template v-slot:item.actions="{ item }">
-      <VAlert v-if="item.renameJobId &&
-                workerStore.jobHasStatus(item.renameJobId, WorkerJobStatus.FAILED)"
-              variant="tonal"
-              color="error"
-              icon="mdi-alert-circle"
-              density="compact"
-              class="mt-2 mb-2"
+    <template #item.actions="{ item }">
+      <VAlert
+        v-if="item.renameJobId &&
+          workerStore.jobHasStatus(item.renameJobId, WorkerJobStatus.FAILED)"
+        variant="tonal"
+        color="error"
+        icon="mdi-alert-circle"
+        density="compact"
+        class="mt-2 mb-2"
       >
         File rename failed. Click Review for details.
       </VAlert>
       <div class="d-flex mt-2 mb-2">
-        <VBtn class="mr-2"
-              @click="selectedAssociation = item; showReviewDialog = true"
+        <VBtn
+          class="mr-2"
+          @click="selectedAssociation = item; showReviewDialog = true"
         >
           {{ allowEdits(item) ? "Review" : "View" }}
         </VBtn>
-        <VBtn v-if="item.renameJobId && !item.renameCompleted"
-              color="error"
-              :loading="autoRenameStore.undoRenameLoading"
-              @click="() => undoRename(item)"
+        <VBtn
+          v-if="item.renameJobId && !item.renameCompleted"
+          color="error"
+          :loading="autoRenameStore.undoRenameLoading"
+          @click="() => undoRename(item)"
         >
           Cancel rename
         </VBtn>
-        <VBtn v-if="item.renameJobId && item.renameCompleted"
-              color="error"
-              :loading="autoRenameStore.undoRenameLoading"
-              @click="() => undoRename(item)"
+        <VBtn
+          v-if="item.renameJobId && item.renameCompleted"
+          color="error"
+          :loading="autoRenameStore.undoRenameLoading"
+          @click="() => undoRename(item)"
         >
           Undo rename
         </VBtn>
-        <VBtn v-if="[AutoRenameAssociationStatus.FAILED, AutoRenameAssociationStatus.WEAK].includes(item.status)"
-              color="error"
-              :loading="autoRenameStore.ignoreAssociationLoading"
-              @click="() => ignoreAssociation(item)"
+        <VBtn
+          v-if="[AutoRenameAssociationStatus.FAILED, AutoRenameAssociationStatus.WEAK].includes(item.status)"
+          color="error"
+          :loading="autoRenameStore.ignoreAssociationLoading"
+          @click="() => ignoreAssociation(item)"
         >
           Ignore
         </VBtn>
       </div>
     </template>
 
-    <template v-slot:item.videoTimestamp="{ item }">
+    <template #item.videoTimestamp="{ item }">
       {{ dayjs(item.videoTimestamp).format("llll z") }}
     </template>
 
-    <template v-slot:item.matchKey="{ item }">
-      {{ item.matchName ?? "None" }}<br />
+    <template #item.matchKey="{ item }">
+      {{ item.matchName ?? "None" }}<br>
       <span style="color: gray">{{ item.matchKey ?? "" }}</span>
     </template>
   </VDataTable>
@@ -74,11 +82,13 @@
   <!--           transition="dialog-bottom-transition"-->
   <!--           :fullscreen="true"-->
   <!--  >-->
-  <VDialog v-model="showReviewDialog"
-           max-width="1000"
+  <VDialog
+    v-model="showReviewDialog"
+    max-width="1000"
   >
-    <AutoRenameReviewDialogContents :association-file-path="selectedAssociation.filePath"
-                                    @close="showReviewDialog = false"
+    <AutoRenameReviewDialogContents
+      :association-file-path="selectedAssociation.filePath"
+      @close="showReviewDialog = false"
     />
   </VDialog>
 </template>

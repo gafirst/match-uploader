@@ -1,6 +1,6 @@
 import type MatchKey from "@src/models/MatchKey";
 import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
-import { getDescriptionTemplate, getSecrets, getSettings } from "@src/services/SettingsService";
+import { getDescriptionTemplate, getSecrets, getSettings, getYouTubePlaylists } from "@src/services/SettingsService";
 import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { MatchVideoInfo } from "@src/models/MatchVideoInfo";
@@ -12,6 +12,13 @@ import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
 import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 import Mustache from "mustache";
+import { UploadedVideo } from "@prisma/client";
+import {
+    EventUploadStatusByMatch,
+    getUploadedVideos,
+    getUploadedVideosByPlaylist,
+} from "@src/repos/UploadedVideosRepo";
+import { prisma } from "@src/server";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: boolean): Promise<MatchVideoInfo[]> {
     const { eventName, videoSearchDirectory } = await getSettings();
@@ -209,4 +216,14 @@ export async function generateMatchVideoDescription(match: Match, eventName: str
     };
 
     return Mustache.render(templateString, view);
+}
+
+export async function getMatchUploadStatuses(): Promise<EventUploadStatusByMatch> {
+    const { eventTbaCode, playoffsType } = await getSettings();
+    const playlists = await getYouTubePlaylists();
+
+    return await getUploadedVideosByPlaylist(prisma,
+      eventTbaCode,
+      new Set(Object.keys(playlists)),
+      playoffsType as PlayoffsType);
 }

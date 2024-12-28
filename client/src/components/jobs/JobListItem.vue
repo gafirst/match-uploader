@@ -4,32 +4,40 @@
     <VListItemTitle class="text-wrap">
       <strong>#{{ job.jobId }}</strong> {{ job.task }}{{ job.title !== "Unknown" ? `: ${job.title}` : "" }}
     </VListItemTitle>
-    <VListItemSubtitle class="text-wrap force-text-wrap">{{ subtitle }}</VListItemSubtitle>
-    <template v-slot:prepend>
-      <VIcon :color="icon.color" :icon="icon.icon" />
+    <VListItemSubtitle class="text-wrap force-text-wrap">
+      {{ subtitle }}
+    </VListItemSubtitle>
+    <template #prepend>
+      <VIcon
+        :color="icon.color"
+        :icon="icon.icon"
+      />
     </template>
-    <template v-slot:append>
-      <VBtn v-if="job.youTubeVideoId"
-            variant="text"
-            icon="mdi-open-in-new"
-            :href="`https://www.youtube.com/watch?v=${job.youTubeVideoId}`"
-            target="_blank"
+    <template #append>
+      <VBtn
+        v-if="job.youTubeVideoId"
+        variant="text"
+        icon="mdi-open-in-new"
+        :href="`https://www.youtube.com/watch?v=${job.youTubeVideoId}`"
+        target="_blank"
       />
-      <VBtn v-else-if="[WorkerJobStatus.PENDING, WorkerJobStatus.FAILED_RETRYABLE].includes(job.status)
-              && !showConfirmCancel"
-            variant="text"
-            color="gray"
-            icon="mdi-trash-can-outline"
-            @click="showConfirmCancel = true"
+      <VBtn
+        v-else-if="[WorkerJobStatus.PENDING, WorkerJobStatus.FAILED_RETRYABLE].includes(job.status)
+          && !showConfirmCancel"
+        variant="text"
+        color="gray"
+        icon="mdi-trash-can-outline"
+        @click="showConfirmCancel = true"
       />
-      <VBtn v-else-if="[WorkerJobStatus.PENDING, WorkerJobStatus.FAILED_RETRYABLE].includes(job.status)
-              && showConfirmCancel"
-            variant="text"
-            prepend-icon="mdi-trash-can-outline"
-            color="error"
-            :loading="cancelJobLoading"
-            text="Cancel?"
-            @click="cancelJob"
+      <VBtn
+        v-else-if="[WorkerJobStatus.PENDING, WorkerJobStatus.FAILED_RETRYABLE].includes(job.status)
+          && showConfirmCancel"
+        variant="text"
+        prepend-icon="mdi-trash-can-outline"
+        color="error"
+        :loading="cancelJobLoading"
+        text="Cancel?"
+        @click="cancelJob"
       />
     </template>
   </VListItem>
@@ -71,7 +79,7 @@ async function cancelJob() {
 }
 
 const subtitle = computed(() => {
-  let baseSubtitle = capitalizeFirstLetter(workerJobStatusToUiString(props.job.status));
+  const baseSubtitle = capitalizeFirstLetter(workerJobStatusToUiString(props.job.status));
   if (props.job.error) {
     return `${baseSubtitle} | ${props.job.error}`;
   }
@@ -105,7 +113,6 @@ const subtitle = computed(() => {
   return `${baseSubtitle}${postUploadStatus ? " | ": ""}${postUploadStatus}`;
 });
 
-// Merge the icon and iconColor computed properties into a single object (duplicate the logic here). call it `icon`
 const icon = computed(() => {
   if (props.job.status === WorkerJobStatus.COMPLETED &&
     props.job.task === UPLOAD_VIDEO_TASK &&

@@ -95,7 +95,7 @@ export async function setYouTubePlaylist(videoLabel: string,
 export async function deleteYouTubePlaylistMapping(videoLabel: string): Promise<void> {
   const currentPlaylists = await getYouTubePlaylists();
 
-  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+   
   delete currentPlaylists[videoLabel];
 
   return await writeSettingsJson<YouTubePlaylists>(EnvVars.settingsLocations.youTubePlaylistsFile, currentPlaylists);

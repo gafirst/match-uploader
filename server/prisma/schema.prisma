@@ -34,6 +34,8 @@ model WorkerJob {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  UploadedVideo UploadedVideo[]
 }
 
 enum JobStatus {
@@ -104,7 +106,9 @@ model AutoRenameMetadata {
 }
 
 model UploadedVideo {
-  youTubeVideoId String @id @unique
+  youTubeVideoId String     @id @unique
+  workerJobId    String?
+  workerJob      WorkerJob? @relation(fields: [workerJobId], references: [jobId])
 
   filePath String
   matchKey String

@@ -17,6 +17,7 @@ describe("readSettingsJson", () => {
 
     await expectAsync(readSettingsJson("houdini.json")).toBeRejectedWithError();
     const settings = await readSettingsJson("houdini.json", "settings/settings.example.json");
+
     expect(settings).toEqual(sampleSettings);
     mockFs.restore();
   });
@@ -32,6 +33,7 @@ describe("readSettingsJson", () => {
     });
 
     const settings = await readSettingsJson("settings/settings.json");
+
     expect(settings).toEqual({ ...sampleSettings, eventName: "Rosstravaganza 2023" });
     mockFs.restore();
   });

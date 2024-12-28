@@ -1,148 +1,166 @@
 <template>
   <VCard>
     <VToolbar :color="autoRenameAssociationStatusToColor(association.status)">
-      <VBtn icon="mdi-close" @click="$emit('close')" />
+      <VBtn
+        icon="mdi-close"
+        @click="$emit('close')"
+      />
       <VToolbarTitle>Review {{ autoRenameAssociationStatusToUiString(association.status) }} association</VToolbarTitle>
       <VSpacer />
     </VToolbar>
     <VCardText>
       <VRow>
         <VCol>
-          <h2 class="mb-2">Video</h2>
-          <video :src="videoFilePath"
-                 controls
-                 preload="metadata"
+          <h2 class="mb-2">
+            Video
+          </h2>
+          <video
+            :src="videoFilePath"
+            controls
+            preload="metadata"
           />
         </VCol>
         <VCol>
           <h2>Association</h2>
-          <VAlert v-if="renameComplete"
-                  variant="tonal"
-                  color="success"
-                  icon="mdi-lock"
-                  density="compact"
-                  class="mb-2"
-                  title="File rename completed"
+          <VAlert
+            v-if="renameComplete"
+            variant="tonal"
+            color="success"
+            icon="mdi-lock"
+            density="compact"
+            class="mb-2"
+            title="File rename completed"
           >
             To make edits, close this dialog and click <strong>Undo Rename</strong> to attempt to revert the rename.
             Note the file might have already been uploaded.
           </VAlert>
 
-          <VAlert v-if="association.renameJobId &&
-                    (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.PENDING))"
-                  variant="tonal"
-                  color="info"
-                  icon="mdi-clock-outline"
-                  density="compact"
-                  class="mb-2"
-                  title="File rename pending"
+          <VAlert
+            v-if="association.renameJobId &&
+              (workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.PENDING))"
+            variant="tonal"
+            color="info"
+            icon="mdi-clock-outline"
+            density="compact"
+            class="mb-2"
+            title="File rename pending"
           >
             Job #{{ association.renameJobId }} will start after {{ dayjs(association.renameAfter).format("llll z") }}
           </VAlert>
 
-          <VAlert v-if="association.renameJobId &&
-                    workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.STARTED)"
-                  variant="tonal"
-                  color="info"
-                  icon="mdi-clock-outline"
-                  density="compact"
-                  class="mb-2"
+          <VAlert
+            v-if="association.renameJobId &&
+              workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.STARTED)"
+            variant="tonal"
+            color="info"
+            icon="mdi-clock-outline"
+            density="compact"
+            class="mb-2"
           >
             File rename in progress: Job #{{ association.renameJobId }}
           </VAlert>
 
-          <VAlert v-if="association.renameJobId &&
-                    workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.FAILED)"
-                  variant="tonal"
-                  color="error"
-                  icon="mdi-alert-circle"
-                  density="compact"
-                  class="mb-2"
-                  title="File rename failed"
+          <VAlert
+            v-if="association.renameJobId &&
+              workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.FAILED)"
+            variant="tonal"
+            color="error"
+            icon="mdi-alert-circle"
+            density="compact"
+            class="mb-2"
+            title="File rename failed"
           >
             Job #{{ association.renameJobId }} failed:
             {{ workerStore.jobs.get(association.renameJobId)?.error ?? "Unknown error" }}
           </VAlert>
 
-          <VAlert v-if="association.status === AutoRenameAssociationStatus.FAILED"
-                  variant="tonal"
-                  color="error"
-                  icon="mdi-alert-circle"
-                  density="compact"
-                  class="mb-2"
+          <VAlert
+            v-if="association.status === AutoRenameAssociationStatus.FAILED"
+            variant="tonal"
+            color="error"
+            icon="mdi-alert-circle"
+            density="compact"
+            class="mb-2"
           >
             Automated association failed: {{ association.statusReason }}
           </VAlert>
-          <VAlert v-if="!renameComplete && association.orderingIssueMatchKey
-                    && association.orderingIssueMatchKey === association.matchKey"
-                  variant="tonal"
-                  color="warning"
-                  icon="mdi-content-duplicate"
-                  density="compact"
-                  class="mb-2"
-                  title="Possible duplicate video"
+          <VAlert
+            v-if="!renameComplete && association.orderingIssueMatchKey
+              && association.orderingIssueMatchKey === association.matchKey"
+            variant="tonal"
+            color="warning"
+            icon="mdi-content-duplicate"
+            density="compact"
+            class="mb-2"
+            title="Possible duplicate video"
           >
             {{ association.orderingIssueMatchName ?? orderingIssueMatchKey }} has already been associated to a video
             for this label
           </VAlert>
-          <VAlert v-else-if="!renameComplete && association.orderingIssueMatchKey &&
-                    association.orderingIssueMatchKey !== association.matchKey"
-                  variant="tonal"
-                  color="warning"
-                  icon="mdi-alert-circle"
-                  density="compact"
-                  class="mb-2"
-                  title="Is this association correct?"
+          <VAlert
+            v-else-if="!renameComplete && association.orderingIssueMatchKey &&
+              association.orderingIssueMatchKey !== association.matchKey"
+            variant="tonal"
+            color="warning"
+            icon="mdi-alert-circle"
+            density="compact"
+            class="mb-2"
+            title="Is this association correct?"
           >
             A later match
             ({{ association.orderingIssueMatchName ?? orderingIssueMatchKey }}) has already been associated to a video
             for this label
           </VAlert>
-          <VAlert v-if="association.startTimeDiffAbnormal"
-                  variant="tonal"
-                  color="warning"
-                  icon="mdi-alert-circle"
-                  density="compact"
-                  class="mb-2"
+          <VAlert
+            v-if="association.startTimeDiffAbnormal"
+            variant="tonal"
+            color="warning"
+            icon="mdi-alert-circle"
+            density="compact"
+            class="mb-2"
           >
             Selected match may be inaccurate
           </VAlert>
-          <VAlert v-if="association.videoDurationAbnormal"
-                  variant="tonal"
-                  color="warning"
-                  icon="mdi-alert-circle"
-                  density="compact"
-                  class="mb-2"
+          <VAlert
+            v-if="association.videoDurationAbnormal"
+            variant="tonal"
+            color="warning"
+            icon="mdi-alert-circle"
+            density="compact"
+            class="mb-2"
           >
             Video duration is outside the expected range
           </VAlert>
-          <VAlert v-if="association.status === AutoRenameAssociationStatus.UNMATCHED"
-                  variant="tonal"
-                  color="info"
-                  icon="mdi-information"
-                  density="compact"
-                  class="mb-2"
+          <VAlert
+            v-if="association.status === AutoRenameAssociationStatus.UNMATCHED"
+            variant="tonal"
+            color="info"
+            icon="mdi-information"
+            density="compact"
+            class="mb-2"
           >
             Automatic association pending:
             {{ association.associationAttempts }}/{{ association.maxAssociationAttempts }} attempts made
           </VAlert>
 
-          <VDataTable :headers="[
-                        { title: 'Key', value: 'key', align: 'end' },
-                        { title: 'Value', value: 'value' },
-                      ]"
-                      :items="associationAsEntries"
-                      hide-default-header
-                      hide-default-footer
+          <VDataTable
+            :headers="[
+              { title: 'Key', value: 'key', align: 'end' },
+              { title: 'Value', value: 'value' },
+            ]"
+            :items="associationAsEntries"
+            hide-default-header
+            hide-default-footer
           >
-            <template v-slot:item.value="{ item }">
+            <template #item.value="{ item }">
               <span v-if="item.key.toLowerCase() === 'match'">
-                <MatchAutocompleteDropdown v-if="isEditable"
-                                           v-model="associatedMatchKey"
+                <MatchAutocompleteDropdown
+                  v-if="isEditable"
+                  v-model="associatedMatchKey"
                 />
                 <!-- TODO: Extract non-editable state into component -->
                 <template v-else>
-                  {{ association.matchName ?? "None" }}<br />
+                  {{ association.matchName ?? "None" }}<br>
                   <span style="color: gray">{{ association.matchKey ?? "" }}</span>
                 </template>
               </span>
@@ -153,8 +171,9 @@
                 <template v-if="item.value === null">
                   Unknown
                 </template>
-                <VChip v-else
-                       :color="startTimeDiffColor"
+                <VChip
+                  v-else
+                  :color="startTimeDiffColor"
                 >
                   {{ renderDuration(item.value) }}
                 </VChip>
@@ -163,8 +182,9 @@
                 <template v-if="item.value === null">
                   Unknown
                 </template>
-                <VChip v-else
-                       :color="videoDurationColor"
+                <VChip
+                  v-else
+                  :color="videoDurationColor"
                 >
                   {{ renderDuration(item.value) }}
                 </VChip>
@@ -172,11 +192,12 @@
               <span v-else>{{ item.value }}</span>
             </template>
           </VDataTable>
-          <VAlert v-if="noMatchSelected"
-                  variant="tonal"
-                  density="compact"
-                  color="error"
-                  icon="mdi-alert-circle"
+          <VAlert
+            v-if="noMatchSelected"
+            variant="tonal"
+            density="compact"
+            color="error"
+            icon="mdi-alert-circle"
           >
             To accept this association, select a match above.
           </VAlert>
@@ -185,19 +206,21 @@
     </VCardText>
     <VCardActions v-if="isEditable">
       <VSpacer />
-      <VBtn color="error"
-            :disabled="autoRenameStore.confirmWeakAssociationLoading || autoRenameStore.ignoreAssociationLoading"
-            :loading="autoRenameStore.ignoreAssociationLoading"
-            @click="onIgnore"
+      <VBtn
+        color="error"
+        :disabled="autoRenameStore.confirmWeakAssociationLoading || autoRenameStore.ignoreAssociationLoading"
+        :loading="autoRenameStore.ignoreAssociationLoading"
+        @click="onIgnore"
       >
         Ignore
       </VBtn>
-      <VBtn color="success"
-            variant="tonal"
-            :loading="autoRenameStore.confirmWeakAssociationLoading"
-            :disabled="autoRenameStore.confirmWeakAssociationLoading || autoRenameStore.ignoreAssociationLoading
-              || noMatchSelected"
-            @click="onConfirm"
+      <VBtn
+        color="success"
+        variant="tonal"
+        :loading="autoRenameStore.confirmWeakAssociationLoading"
+        :disabled="autoRenameStore.confirmWeakAssociationLoading || autoRenameStore.ignoreAssociationLoading
+          || noMatchSelected"
+        @click="onConfirm"
       >
         Accept
       </VBtn>
@@ -205,7 +228,7 @@
   </VCard>
 </template>
 <script lang="ts" setup>
-import { computed, reactive, ref, toRef } from "vue";
+import { computed, ref, toRef } from "vue";
 import { capitalizeFirstLetter } from "@/util/capitalize";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import MatchAutocompleteDropdown from "@/components/matches/MatchAutocompleteDropdown.vue";

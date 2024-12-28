@@ -1,50 +1,89 @@
 <template>
   <!-- TODO: Autosaving textarea should be either a separate component or this should be more flexible somehow -->
-  <VTextarea v-if="inputType === 'textarea'"
-             v-model="inputValue"
-             :label="label"
-             :disabled="state === State.LOADING || !!disabled"
-             persistent-hint
-             :hint="!!error ? error: (helpText || '')"
-             :error="!!error"
-             auto-grow
-             @blur="submit()"
+  <VTextarea
+    v-if="inputType === 'textarea'"
+    v-model="inputValue"
+    :label="label"
+    :disabled="state === State.LOADING || !!disabled"
+    persistent-hint
+    :hint="!!error ? error: (helpText || '')"
+    :error="!!error"
+    auto-grow
+    @blur="submit()"
   >
-    <template v-if="state !== State.READY" v-slot:append>
-      <VIcon v-if="state === State.ERROR"
-             color="error"
-             class="mr-1"
+    <template
+      v-if="state !== State.READY"
+      #append
+    >
+      <VIcon
+        v-if="state === State.ERROR"
+        color="error"
+        class="mr-1"
       >
         mdi-alert-circle-outline
       </VIcon>
-      <VIcon v-if="state === State.SUCCESS" color="success">mdi-check</VIcon>
-      <VProgressCircular v-if="state===State.LOADING" indeterminate />
+      <VIcon
+        v-if="state === State.SUCCESS"
+        color="success"
+      >
+        mdi-check
+      </VIcon>
+      <VProgressCircular
+        v-if="state===State.LOADING"
+        indeterminate
+      />
     </template>
   </VTextarea>
-  <VTextField v-else
-              v-model="inputValue"
-              variant="underlined"
-              :disabled="state === State.LOADING || !!disabled"
-              :label="label"
-              persistent-hint
-              :hint="!!error ? error: (helpText || '')"
-              :error="!!error"
-              :type="calculatedInputType"
-              @blur="submit()"
+  <VTextField
+    v-else
+    v-model="inputValue"
+    variant="underlined"
+    :disabled="state === State.LOADING || !!disabled"
+    :label="label"
+    persistent-hint
+    :hint="!!error ? error: (helpText || '')"
+    :error="!!error"
+    :type="calculatedInputType"
+    @blur="submit()"
   >
-    <template v-if="inputType === 'password'" v-slot:append-inner>
-      <VIcon v-if="showPlainText" @click="togglePlaintext">mdi-eye-off</VIcon>
-      <VIcon v-else @click="togglePlaintext">mdi-eye</VIcon>
+    <template
+      v-if="inputType === 'password'"
+      #append-inner
+    >
+      <VIcon
+        v-if="showPlainText"
+        @click="togglePlaintext"
+      >
+        mdi-eye-off
+      </VIcon>
+      <VIcon
+        v-else
+        @click="togglePlaintext"
+      >
+        mdi-eye
+      </VIcon>
     </template>
-    <template v-if="state !== State.READY" v-slot:append>
-      <VIcon v-if="state === State.ERROR"
-             color="error"
-             class="mr-1"
+    <template
+      v-if="state !== State.READY"
+      #append
+    >
+      <VIcon
+        v-if="state === State.ERROR"
+        color="error"
+        class="mr-1"
       >
         mdi-alert-circle-outline
       </VIcon>
-      <VIcon v-if="state === State.SUCCESS" color="success">mdi-check</VIcon>
-      <VProgressCircular v-if="state===State.LOADING" indeterminate />
+      <VIcon
+        v-if="state === State.SUCCESS"
+        color="success"
+      >
+        mdi-check
+      </VIcon>
+      <VProgressCircular
+        v-if="state===State.LOADING"
+        indeterminate
+      />
     </template>
   </VTextField>
 </template>
@@ -54,14 +93,14 @@
 import {computed, ref} from "vue";
 import {SettingType} from "@/types/ISettings";
 
-/* eslint-disable */
+ 
 enum State {
   LOADING,
   READY,
   SUCCESS,
   ERROR,
 }
-/* eslint-enable */
+ 
 
 interface IProps {
   onSubmit: Function;
@@ -80,12 +119,12 @@ const emit = defineEmits(["savedValueUpdated"]);
 const state = ref<State>(State.READY);
 
 // TODO: These no-setup-props-destructure rules are valid but not breaking the component
-// eslint-disable-next-line vue/no-setup-props-destructure
+ 
 const inputValue = ref(props.initialValue);
-// eslint-disable-next-line vue/no-setup-props-destructure
+ 
 const lastSubmittedValue = ref(props.initialValue);
 const error = ref("");
-// eslint-disable-next-line vue/no-setup-props-destructure
+ 
 const showPlainText = ref(props.inputType === "text");
 
 async function submit() {

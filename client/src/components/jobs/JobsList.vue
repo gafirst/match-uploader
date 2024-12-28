@@ -1,12 +1,16 @@
 <template>
-  <VAlert v-if="workerStore.jobCancellationError"
-          class="mt-2"
-          color="error"
+  <VAlert
+    v-if="workerStore.jobCancellationError"
+    class="mt-2"
+    color="error"
   >
     {{ workerStore.jobCancellationError }}
   </VAlert>
   <VList>
-    <div v-for="job in filteredJobsList" :key="job.jobId">
+    <div
+      v-for="job in filteredJobsList"
+      :key="job.jobId"
+    >
       <JobListItem :job="job" />
     </div>
   </VList>

@@ -2,8 +2,6 @@
  * Environments variables declared here.
  */
 
-/* eslint-disable node/no-process-env */
-
 const requiredEnvVars = [
     "HOST",
     "DB_CONNECTION_STRING",

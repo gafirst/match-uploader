@@ -1,26 +1,32 @@
 <template>
-  <VNavigationDrawer permanent
-                     expand-on-hover
-                     rail
-                     app
-                     location="left"
+  <VNavigationDrawer
+    permanent
+    expand-on-hover
+    rail
+    app
+    location="left"
   >
     <VList>
-      <VListItem v-for="item in navItems"
-                 :key="item.title"
-                 :title="item.title"
-                 :to="item.to"
-                 :prepend-icon="item.icon"
+      <VListItem
+        v-for="item in navItems"
+        :key="item.title"
+        :title="item.title"
+        :to="item.to"
+        :prepend-icon="item.icon"
       >
-        <template v-slot:prepend>
-          <VBadge v-if="item.badge?.show"
-                  :color="item.badge.color"
-                  :content="item.badge.content"
-                  :dot="item.badge.dot"
+        <template #prepend>
+          <VBadge
+            v-if="item.badge?.show"
+            :color="item.badge.color"
+            :content="item.badge.content"
+            :dot="item.badge.dot"
           >
             <VIcon :icon="item.icon" />
           </VBadge>
-          <VIcon v-else :icon="item.icon" />
+          <VIcon
+            v-else
+            :icon="item.icon"
+          />
         </template>
       </VListItem>
     </VList>
@@ -28,10 +34,8 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref} from "vue";
-import {INavItem} from "@/types/INavItem";
+import {computed} from "vue";
 import {useWorkerStore} from "@/stores/worker";
-import {WorkerJobStatus} from "@/types/WorkerJob";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssociationStatus";
 import { useLiveModeStore } from "@/stores/liveMode";
@@ -77,7 +81,7 @@ const autoRenameBadge = computed(() => {
     };
   }
 
-  if (!settingsStore.isFirstLoad && settingsStore.settings.autoRenameEnabled) {
+  if (!settingsStore.isFirstLoad && settingsStore.settings?.autoRenameEnabled) {
     return {
       show: true,
       color: "success",
@@ -117,6 +121,11 @@ const navItems = computed(() => {
         color: "error",
         content: workerStore.numFailedJobs,
       },
+    },
+    {
+      title: "Reports",
+      to: "/reports",
+      icon: "mdi-chart-box-multiple-outline",
     },
     {
       title: "Settings",

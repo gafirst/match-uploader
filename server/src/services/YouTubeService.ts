@@ -25,6 +25,7 @@ export async function getGoogleOAuth2Client(requestProtocol: string): Promise<OA
     const settings = await getSettings();
     const secrets = await getSecrets();
 
+    // @ts-ignore
     return new auth.OAuth2(
         settings.googleClientId,
         secrets.googleClientSecret,

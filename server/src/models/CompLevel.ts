@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 import { type FrcApiTournamentLevel } from "@src/models/frcEvents/frcTournamentLevel";
 
 /**

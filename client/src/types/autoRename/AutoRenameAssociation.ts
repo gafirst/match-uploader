@@ -44,7 +44,8 @@ export function isAutoRenameAssociationApiResponse(x: unknown): x is AutoRenameA
 }
 
 export function isAutoRenameAssociation(x: unknown): x is AutoRenameAssociation {
-  return typeof x === "object" &&
+  return x !== null &&
+    typeof x === "object" &&
     "filePath" in x &&
     "status" in x &&
     isAutoRenameAssociationStatus(x.status) &&
