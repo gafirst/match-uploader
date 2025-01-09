@@ -126,7 +126,8 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                 },
             });
         } catch (e: unknown) {
-            logger.error(`Unable to save UploadedVideo ${payload.videoPath} with YouTube ID ${uploadResult.videoId}: ${JSON.stringify(e)}`)
+            logger.error(`Unable to save UploadedVideo ${payload.videoPath} with YouTube ID ` +
+              `${uploadResult.videoId}: ${JSON.stringify(e)}`)
         }
 
         try {
@@ -148,7 +149,17 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                     linkedOnTheBlueAlliance: postUploadStepsResult.linkOnTheBlueAlliance,
                 },
             });
-            // FIXME: Move to own try-catch
+        } catch (e: unknown) {
+            if (isPrismaClientKnownRequestError(e, "P2025")) {
+                logger.warn(`Unable to record post-upload step results for job with ID ${job.id}: Job does ` +
+                  "not exist in match-uploader WorkerJob table");
+            } else {
+                logger.warn(`Unable to record post-upload step results for job with ID ${job.id}: ` +
+                  `${JSON.stringify(e)}`);
+            }
+        }
+
+        try {
             await prisma.uploadedVideo.update({
                 where: {
                     youTubeVideoId: uploadResult.videoId,
@@ -158,14 +169,9 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                     addToYouTubePlaylistSucceeded: postUploadStepsResult.addToYouTubePlaylist,
                 },
             });
-        } catch (e: unknown) { // Catch the prisma update error
-            if (isPrismaClientKnownRequestError(e, "P2025")) {
-                logger.warn(`Unable to record post-upload step results for job with ID ${job.id}: Job does ` +
-                  "not exist in match-uploader WorkerJob table");
-            } else {
-                logger.warn(`Unable to record post-upload step results for job with ID ${job.id}: ` +
-                  `${JSON.stringify(e)}`);
-            }
+        } catch (e: unknown) {
+            logger.error(`Unable to update UploadedVideo ${payload.videoPath} with YouTube ID ` +
+              `${uploadResult.videoId}: ${JSON.stringify(e)}`)
         }
     } else if (isYouTubeVideoUploadError(uploadResult)) {
         logger.error(`Failed to upload video ${payload.title}: ${uploadResult.error}`);
