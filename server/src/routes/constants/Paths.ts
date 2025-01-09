@@ -21,6 +21,7 @@ const Paths = {
     RecommendVideoFiles: "/:matchKey/videos/recommend",
     GenerateDescription: "/:matchKey/description",
     PossibleNextMatches: "/:matchKey/nextMatch",
+    UploadStatuses: "/uploaded",
   },
   YouTube: {
     Base: "/youtube",

@@ -1,7 +1,8 @@
 <template>
-  <VListItem :prepend-icon="complete ? 'mdi-check' : 'mdi-close'"
-             :class="{ 'text-success': complete, 'text-error': !complete }"
-             :density="density ?? 'compact'"
+  <VListItem
+    :prepend-icon="complete ? 'mdi-check' : 'mdi-close'"
+    :class="{ 'text-success': complete, 'text-error': !complete }"
+    :density="density ?? 'compact'"
   >
     <slot />
   </VListItem>

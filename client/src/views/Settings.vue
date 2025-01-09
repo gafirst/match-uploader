@@ -2,68 +2,87 @@
   <h1>Settings</h1>
   <VRow>
     <VCol md="6">
-      <VProgressCircular v-if="loading" indeterminate />
-      <VAlert v-else-if="!!error"
-              color="error"
+      <VProgressCircular
+        v-if="loading"
+        indeterminate
+      />
+      <VAlert
+        v-else-if="!!error"
+        color="error"
       >
         {{ error }}
       </VAlert>
       <div v-else>
         <h2>General</h2>
-        <AutosavingTextInput :key="`eventName-${dataRefreshKey}`"
-                             :on-submit="submitEventName"
-                             :initial-value="settingsStore.settings?.eventName"
-                             name="eventName"
-                             label="Event name"
-                             input-type="text"
-                             setting-type="setting"
-                             class="mt-4"
+        <AutosavingTextInput
+          :key="`eventName-${dataRefreshKey}`"
+          :on-submit="submitEventName"
+          :initial-value="settingsStore.settings?.eventName"
+          name="eventName"
+          label="Event name"
+          input-type="text"
+          setting-type="setting"
+          class="mt-4"
         />
 
-        <VAlert v-if="matchStore.selectedMatchKey"
-                class="mb-4"
-                color="warning"
+        <VAlert
+          v-if="matchStore.selectedMatchKey"
+          class="mb-4"
+          color="warning"
         >
           Changing the event code will clear the current selected match.
         </VAlert>
-        <AutosavingTextInput :key="`eventTbaCode-${dataRefreshKey}`"
-                             :on-submit="submitEventCode"
-                             :initial-value="settingsStore.settings?.eventTbaCode"
-                             name="eventTbaCode"
-                             label="Event TBA code"
-                             input-type="text"
-                             setting-type="setting"
+        <AutosavingTextInput
+          :key="`eventTbaCode-${dataRefreshKey}`"
+          :on-submit="submitEventCode"
+          :initial-value="settingsStore.settings?.eventTbaCode"
+          name="eventTbaCode"
+          label="Event TBA code"
+          input-type="text"
+          setting-type="setting"
         />
 
-        <p class="mb-1">Playoffs type</p>
-        <VAlert v-if="settingsStore.settings?.playoffsType === PLAYOFF_BEST_OF_3"
-                color="warning"
-                variant="tonal"
-                class="mb-2"
+        <p class="mb-1">
+          Playoffs type
+        </p>
+        <VAlert
+          v-if="settingsStore.settings?.playoffsType === PLAYOFF_BEST_OF_3"
+          color="warning"
+          variant="tonal"
+          class="mb-2"
         >
           Best of 3 playoff support is limited and functionality may be broken or limited in this playoff mode.
         </VAlert>
-        <AutosavingBtnSelectGroup :choices="PLAYOFF_MATCH_TYPES"
-                                  :default-value="settingsStore.settings?.playoffsType"
-                                  :loading="savingPlayoffMatchType"
-                                  @on-choice-selected="savePlayoffMatchType"
+        <AutosavingBtnSelectGroup
+          :choices="PLAYOFF_MATCH_TYPES"
+          :default-value="settingsStore.settings?.playoffsType"
+          :loading="savingPlayoffMatchType"
+          @on-choice-selected="savePlayoffMatchType"
         />
 
-        <p class="mb-1">Sandbox mode</p>
-        <AutosavingBtnSelectGroup :choices="['On', 'Off']"
-                                  :default-value="settingsStore.settings?.sandboxModeEnabled ? 'On' : 'Off'"
-                                  :loading="savingSandboxMode"
-                                  @on-choice-selected="saveSandboxMode"
+        <p class="mb-1">
+          Sandbox mode
+        </p>
+        <AutosavingBtnSelectGroup
+          :choices="['On', 'Off']"
+          :default-value="settingsStore.settings?.sandboxModeEnabled ? 'On' : 'Off'"
+          :loading="savingSandboxMode"
+          @on-choice-selected="saveSandboxMode"
         />
 
-        <p class="mb-1">Video upload privacy</p>
-        <AutosavingBtnSelectGroup :choices="['Public', 'Unlisted', 'Private']"
-                                  :default-value="capitalize(settingsStore.settings?.youTubeVideoPrivacy ?? 'public')"
-                                  :loading="savingUploadPrivacy"
-                                  @on-choice-selected="saveUploadPrivacy"
+        <p class="mb-1">
+          Video upload privacy
+        </p>
+        <AutosavingBtnSelectGroup
+          :choices="['Public', 'Unlisted', 'Private']"
+          :default-value="capitalize(settingsStore.settings?.youTubeVideoPrivacy ?? 'public')"
+          :loading="savingUploadPrivacy"
+          @on-choice-selected="saveUploadPrivacy"
         />
 
-        <h2 class="mb-1">Video description template</h2>
+        <h2 class="mb-1">
+          Video description template
+        </h2>
         <VExpansionPanels class="mb-4">
           <VExpansionPanel>
             <VExpansionPanelTitle>Description template syntax/variables</VExpansionPanelTitle>
@@ -83,7 +102,7 @@
                   comment that will not be rendered in the final description.
                 </li>
               </ul>
-              <br />
+              <br>
               <p>Available variables:</p>
               <ul class="ml-4">
                 <li>
@@ -123,9 +142,10 @@
             </VExpansionPanelText>
           </VExpansionPanel>
         </VExpansionPanels>
-        <VAlert v-if="matchStore.selectedMatchKey"
-                class="mb-4"
-                color="warning"
+        <VAlert
+          v-if="matchStore.selectedMatchKey"
+          class="mb-4"
+          color="warning"
         >
           <p>
             If you change the
@@ -133,29 +153,35 @@
             Upload page to update the description for the current match with the latest changes.
           </p>
         </VAlert>
-        <AutosavingTextInput :key="`descriptionTemplate-${dataRefreshKey}`"
-                             :on-submit="saveDescriptionTemplate"
-                             :initial-value="settingsStore.descriptionTemplate ?? undefined"
-                             name="descriptionTemplate"
-                             label="Template for YouTube video descriptions"
-                             input-type="textarea"
-                             setting-type="descriptionTemplate"
-                             help-text="Updating this value will *not* affect any currently queued videos."
+        <AutosavingTextInput
+          :key="`descriptionTemplate-${dataRefreshKey}`"
+          :on-submit="saveDescriptionTemplate"
+          :initial-value="settingsStore.descriptionTemplate ?? undefined"
+          name="descriptionTemplate"
+          label="Template for YouTube video descriptions"
+          input-type="textarea"
+          setting-type="descriptionTemplate"
+          help-text="Updating this value will *not* affect any currently queued videos."
         />
 
-        <h2 class="mt-4">The Blue Alliance (TBA)</h2>
+        <h2 class="mt-4">
+          The Blue Alliance (TBA)
+        </h2>
         <h3>Read API</h3>
-        <AutosavingTextInput :key="`theBlueAllianceReadApiKey-${dataRefreshKey}`"
-                             :on-submit="submit"
-                             initial-value=""
-                             name="theBlueAllianceReadApiKey"
-                             label="TBA read API key"
-                             input-type="password"
-                             setting-type="secret"
-                             :help-text="tbaReadApiKeyHelpText"
+        <AutosavingTextInput
+          :key="`theBlueAllianceReadApiKey-${dataRefreshKey}`"
+          :on-submit="submit"
+          initial-value=""
+          name="theBlueAllianceReadApiKey"
+          label="TBA read API key"
+          input-type="password"
+          setting-type="secret"
+          :help-text="tbaReadApiKeyHelpText"
         />
 
-        <h3 class="mt-2">Trusted (write) API</h3>
+        <h3 class="mt-2">
+          Trusted (write) API
+        </h3>
         <p>
           You can use TBA's trusted API to associate uploaded videos with matches on TBA. To use this feature,
           you must request write tokens for your event on
@@ -164,46 +190,52 @@
           </a>
         </p>
 
-        <p class="mt-4">Link match videos on TBA</p>
-        <AutosavingBtnSelectGroup :choices="['On', 'Off']"
-                                  :default-value="settingsStore.settings?.linkVideosOnTheBlueAlliance ? 'On' : 'Off'"
-                                  :loading="savingTbaLinkVideos"
-                                  @on-choice-selected="saveTbaLinkVideos"
+        <p class="mt-4">
+          Link match videos on TBA
+        </p>
+        <AutosavingBtnSelectGroup
+          :choices="['On', 'Off']"
+          :default-value="settingsStore.settings?.linkVideosOnTheBlueAlliance ? 'On' : 'Off'"
+          :loading="savingTbaLinkVideos"
+          @on-choice-selected="saveTbaLinkVideos"
         />
 
-        <VAlert v-if="!settingsStore.settings?.linkVideosOnTheBlueAlliance"
-                color="info"
-                variant="tonal"
-                class="mt-4 mb-4"
+        <VAlert
+          v-if="!settingsStore.settings?.linkVideosOnTheBlueAlliance"
+          color="info"
+          variant="tonal"
+          class="mt-4 mb-4"
         >
           Some settings are hidden because linking match videos on TBA is disabled. Enable the feature to see them.
         </VAlert>
 
-        <AutosavingTextInput v-if="
-                               settingsStore.settings?.linkVideosOnTheBlueAlliance"
-                             :key="`theBlueAllianceTrustedApiAuthId-${dataRefreshKey}`"
-                             :on-submit="submit"
-                             initial-value=""
-                             name="theBlueAllianceTrustedApiAuthId"
-                             label="TBA trusted API auth ID"
-                             input-type="password"
-                             setting-type="secret"
-                             :help-text="settingsStore.obfuscatedSecrets?.theBlueAllianceTrustedApiAuthId ?
-                               'Current value hidden' :
-                               ''"
+        <AutosavingTextInput
+          v-if="
+            settingsStore.settings?.linkVideosOnTheBlueAlliance"
+          :key="`theBlueAllianceTrustedApiAuthId-${dataRefreshKey}`"
+          :on-submit="submit"
+          initial-value=""
+          name="theBlueAllianceTrustedApiAuthId"
+          label="TBA trusted API auth ID"
+          input-type="password"
+          setting-type="secret"
+          :help-text="settingsStore.obfuscatedSecrets?.theBlueAllianceTrustedApiAuthId ?
+            'Current value hidden' :
+            ''"
         />
 
-        <AutosavingTextInput v-if="settingsStore.settings?.linkVideosOnTheBlueAlliance"
-                             :key="`theBlueAllianceTrustedApiAuthSecret-${dataRefreshKey}`"
-                             :on-submit="submit"
-                             initial-value=""
-                             name="theBlueAllianceTrustedApiAuthSecret"
-                             label="TBA trusted API auth secret"
-                             input-type="password"
-                             setting-type="secret"
-                             :help-text="settingsStore.obfuscatedSecrets?.theBlueAllianceTrustedApiAuthId ?
-                               'Current value hidden' :
-                               ''"
+        <AutosavingTextInput
+          v-if="settingsStore.settings?.linkVideosOnTheBlueAlliance"
+          :key="`theBlueAllianceTrustedApiAuthSecret-${dataRefreshKey}`"
+          :on-submit="submit"
+          initial-value=""
+          name="theBlueAllianceTrustedApiAuthSecret"
+          label="TBA trusted API auth secret"
+          input-type="password"
+          setting-type="secret"
+          :help-text="settingsStore.obfuscatedSecrets?.theBlueAllianceTrustedApiAuthId ?
+            'Current value hidden' :
+            ''"
         />
 
         <h2 class="mt-4">
@@ -223,31 +255,36 @@
           paste it below.
         </p>
 
-        <p class="mt-4">Retrieve match data from FRC Events</p>
-        <AutosavingBtnSelectGroup :choices="['On', 'Off']"
-                                  :default-value="settingsStore.settings?.useFrcEventsApi ? 'On' : 'Off'"
-                                  :loading="savingFrcEventsEnabled"
-                                  @on-choice-selected="saveFrcEventsEnabled"
+        <p class="mt-4">
+          Retrieve match data from FRC Events
+        </p>
+        <AutosavingBtnSelectGroup
+          :choices="['On', 'Off']"
+          :default-value="settingsStore.settings?.useFrcEventsApi ? 'On' : 'Off'"
+          :loading="savingFrcEventsEnabled"
+          @on-choice-selected="saveFrcEventsEnabled"
         />
 
-        <VAlert v-if="!settingsStore.settings?.useFrcEventsApi"
-                color="info"
-                variant="tonal"
-                class="mt-4 mb-4"
+        <VAlert
+          v-if="!settingsStore.settings?.useFrcEventsApi"
+          color="info"
+          variant="tonal"
+          class="mt-4 mb-4"
         >
           Some settings are hidden because FRC Events integration is disabled. Enable the feature to see them.
         </VAlert>
-        <AutosavingTextInput v-else
-                             :key="`frcEventsApiKey-${dataRefreshKey}`"
-                             :on-submit="submit"
-                             initial-value=""
-                             name="frcEventsApiKey"
-                             label="Base64-encoded FRC Events API key"
-                             input-type="password"
-                             setting-type="secret"
-                             :help-text="settingsStore.obfuscatedSecrets?.frcEventsApiKey ?
-                               'Current value hidden' :
-                               ''"
+        <AutosavingTextInput
+          v-else
+          :key="`frcEventsApiKey-${dataRefreshKey}`"
+          :on-submit="submit"
+          initial-value=""
+          name="frcEventsApiKey"
+          label="Base64-encoded FRC Events API key"
+          input-type="password"
+          setting-type="secret"
+          :help-text="settingsStore.obfuscatedSecrets?.frcEventsApiKey ?
+            'Current value hidden' :
+            ''"
         />
 
         <h2 class="mt-4">
@@ -259,22 +296,27 @@
           YouTube
         </h2>
 
-        <h3 class="mb-2">OAuth2 client details</h3>
-        <VAlert v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
-                class="mb-3"
+        <h3 class="mb-2">
+          OAuth2 client details
+        </h3>
+        <VAlert
+          v-if="!settingsStore.youTubeAuthState?.accessTokenStored"
+          class="mb-3"
         >
-          In your Google Cloud project, create an OAuth2 web client.<br />
-          <br />
+          In your Google Cloud project, create an OAuth2 web client.<br>
+          <br>
           <div v-if="settingsStore.youTubeOAuth2RedirectUri">
             Make sure to add the following as an authorized redirect URI:
-            <VTextField :value="settingsStore.youTubeOAuth2RedirectUri"
-                        readonly
-                        variant="underlined"
-                        @focus="$event.target.select()"
+            <VTextField
+              :value="settingsStore.youTubeOAuth2RedirectUri"
+              readonly
+              variant="underlined"
+              @focus="$event.target.select()"
             >
-              <template v-slot:append>
-                <VBtn :color="youTubeOAuth2RedirectCopyBtnColor"
-                      @click="copyYouTubeOAuth2RedirectUri"
+              <template #append>
+                <VBtn
+                  :color="youTubeOAuth2RedirectCopyBtnColor"
+                  @click="copyYouTubeOAuth2RedirectUri"
                 >
                   {{ youTubeOAuth2RedirectCopyBtnText }}
                 </VBtn>
@@ -282,115 +324,134 @@
             </VTextField>
           </div>
         </VAlert>
-        <VAlert v-if="settingsStore.youTubeAuthState?.accessTokenStored"
-                class="mb-3"
-                color="info"
-                variant="tonal"
+        <VAlert
+          v-if="settingsStore.youTubeAuthState?.accessTokenStored"
+          class="mb-3"
+          color="info"
+          variant="tonal"
         >
           You currently have an active YouTube connection. Use the <strong>Reset YouTube Connection</strong> button
           below to adjust your YouTube OAuth2 client details.
         </VAlert>
-        <AutosavingTextInput :on-submit="submit"
-                             :initial-value="settingsStore.settings?.googleClientId"
-                             name="googleClientId"
-                             label="OAuth2 client ID"
-                             :disabled="settingsStore.youTubeAuthState?.accessTokenStored"
-                             input-type="text"
-                             setting-type="setting"
-                             @saved-value-updated="() => refreshData(false)"
+        <AutosavingTextInput
+          :on-submit="submit"
+          :initial-value="settingsStore.settings?.googleClientId"
+          name="googleClientId"
+          label="OAuth2 client ID"
+          :disabled="settingsStore.youTubeAuthState?.accessTokenStored"
+          input-type="text"
+          setting-type="setting"
+          @saved-value-updated="() => refreshData(false)"
         />
 
-        <AutosavingTextInput :on-submit="submit"
-                             initial-value=""
-                             name="googleClientSecret"
-                             label="OAuth2 client secret"
-                             :help-text="settingsStore.youTubeAuthState?.clientSecretProvided ?
-                               'Current value hidden' :
-                               ''"
-                             input-type="password"
-                             setting-type="secret"
-                             :disabled="settingsStore.youTubeAuthState?.accessTokenStored"
-                             class="mb-3"
-                             @saved-value-updated="() => refreshData(false)"
+        <AutosavingTextInput
+          :on-submit="submit"
+          initial-value=""
+          name="googleClientSecret"
+          label="OAuth2 client secret"
+          :help-text="settingsStore.youTubeAuthState?.clientSecretProvided ?
+            'Current value hidden' :
+            ''"
+          input-type="password"
+          setting-type="secret"
+          :disabled="settingsStore.youTubeAuthState?.accessTokenStored"
+          class="mb-3"
+          @saved-value-updated="() => refreshData(false)"
         />
-        <YouTubeConnectionInfo :google-auth-status="settingsStore.settings?.googleAuthStatus"
-                               :you-tube-auth-state="settingsStore.youTubeAuthState"
-                               @trigger-refresh="refreshData"
+        <YouTubeConnectionInfo
+          :google-auth-status="settingsStore.settings?.googleAuthStatus"
+          :you-tube-auth-state="settingsStore.youTubeAuthState"
+          @trigger-refresh="refreshData"
         />
         <h2 class="mt-4 mb-2">
-          Auto rename <VChip color="purple">Beta</VChip>
+          Auto rename <VChip color="purple">
+            Beta
+          </VChip>
         </h2>
-        <VAlert color="purple"
-                variant="tonal"
-                density="compact"
-                icon="mdi-bug-outline"
+        <VAlert
+          color="purple"
+          variant="tonal"
+          density="compact"
+          icon="mdi-bug-outline"
         >
           Report bugs and send feedback
-          <a target="_blank" href="https://github.com/gafirst/match-uploader/issues/new/choose">on GitHub</a>.
+          <a
+            target="_blank"
+            href="https://github.com/gafirst/match-uploader/issues/new/choose"
+          >on GitHub</a>.
         </VAlert>
-        <h3 class="mt-4 mb-2">Advanced auto rename settings</h3>
-        <VAlert class="mb-2"
-                variant="tonal"
-                color="warning"
+        <h3 class="mt-4 mb-2">
+          Advanced auto rename settings
+        </h3>
+        <VAlert
+          class="mb-2"
+          variant="tonal"
+          color="warning"
         >
           Changing these settings can affect the accuracy of automated associations made by Auto Rename. Proceed with
           caution.
         </VAlert>
-        <AutoRenameFileNamePatterns v-if="!settingsStore.isFirstLoad
-                                      && settingsStore.settings?.autoRenameFileNamePatterns"
-                                    :initial-patterns="settingsStore.settings
-                                      .autoRenameFileNamePatterns.split(',').map((value) => { return { value }; })"
+        <AutoRenameFileNamePatterns
+          v-if="!settingsStore.isFirstLoad
+            && settingsStore.settings?.autoRenameFileNamePatterns"
+          :initial-patterns="settingsStore.settings
+            .autoRenameFileNamePatterns.split(',').map((value) => { return { value }; })"
         />
-        <AutosavingTextInput :on-submit="submit"
-                             class="mb-2"
-                             :initial-value="settingsStore.settings?.autoRenameMinExpectedVideoDurationSecs"
-                             name="autoRenameMinExpectedVideoDurationSecs"
-                             label="Minimum expected video duration (seconds)"
-                             input-type="text"
-                             help-text="Default: 180 | Associations will be marked weak if the video duration is
+        <AutosavingTextInput
+          :on-submit="submit"
+          class="mb-2"
+          :initial-value="settingsStore.settings?.autoRenameMinExpectedVideoDurationSecs"
+          name="autoRenameMinExpectedVideoDurationSecs"
+          label="Minimum expected video duration (seconds)"
+          input-type="text"
+          help-text="Default: 180 | Associations will be marked weak if the video duration is
                              shorter than this"
-                             setting-type="setting"
+          setting-type="setting"
         />
-        <AutosavingTextInput :on-submit="submit"
-                             class="mb-2"
-                             :initial-value="settingsStore.settings?.autoRenameMaxExpectedVideoDurationSecs"
-                             name="autoRenameMaxExpectedVideoDurationSecs"
-                             label="Maximum expected video duration (seconds)"
-                             input-type="text"
-                             help-text="Default: 420 | Associations will be marked weak if the video duration is
+        <AutosavingTextInput
+          :on-submit="submit"
+          class="mb-2"
+          :initial-value="settingsStore.settings?.autoRenameMaxExpectedVideoDurationSecs"
+          name="autoRenameMaxExpectedVideoDurationSecs"
+          label="Maximum expected video duration (seconds)"
+          input-type="text"
+          help-text="Default: 420 | Associations will be marked weak if the video duration is
                              longer than this"
-                             setting-type="setting"
+          setting-type="setting"
         />
-        <AutosavingTextInput :on-submit="submit"
-                             class="mb-2"
-                             :initial-value="settingsStore.settings?.autoRenameMaxStartTimeDiffSecStrong"
-                             name="autoRenameMaxStartTimeDiffSecStrong"
-                             label="Max start time difference (seconds) for a strong association"
-                             input-type="text"
-                             help-text="Default: 60 | Associations will be marked strong when the match start time and
+        <AutosavingTextInput
+          :on-submit="submit"
+          class="mb-2"
+          :initial-value="settingsStore.settings?.autoRenameMaxStartTimeDiffSecStrong"
+          name="autoRenameMaxStartTimeDiffSecStrong"
+          label="Max start time difference (seconds) for a strong association"
+          input-type="text"
+          help-text="Default: 60 | Associations will be marked strong when the match start time and
                              video filename timestamp are not more than this many seconds apart"
-                             setting-type="setting"
+          setting-type="setting"
         />
-        <AutosavingTextInput :on-submit="submit"
-                             class="mb-2"
-                             :initial-value="settingsStore.settings?.autoRenameMaxStartTimeDiffSecWeak"
-                             name="autoRenameMaxStartTimeDiffSecWeak"
-                             label="Max start time difference (seconds) for a weak association"
-                             input-type="text"
-                             help-text="Default: 300 | Associations will be marked weak when the match start time and
+        <AutosavingTextInput
+          :on-submit="submit"
+          class="mb-2"
+          :initial-value="settingsStore.settings?.autoRenameMaxStartTimeDiffSecWeak"
+          name="autoRenameMaxStartTimeDiffSecWeak"
+          label="Max start time difference (seconds) for a weak association"
+          input-type="text"
+          help-text="Default: 300 | Associations will be marked weak when the match start time and
                              video filename timestamp are not more than this many seconds apart"
-                             setting-type="setting"
+          setting-type="setting"
         />
-        <AutosavingTextInput :on-submit="submit"
-                             class="mb-2"
-                             :initial-value="settingsStore.settings?.autoRenameFileRenameJobDelaySecs"
-                             name="autoRenameFileRenameJobDelaySecs"
-                             label="Rename job delay for strong associations"
-                             input-type="text"
-                             help-text="Default: 300 | After a strong association is made, the job to rename the file
+        <AutosavingTextInput
+          :on-submit="submit"
+          class="mb-2"
+          :initial-value="settingsStore.settings?.autoRenameFileRenameJobDelaySecs"
+          name="autoRenameFileRenameJobDelaySecs"
+          label="Rename job delay for strong associations"
+          input-type="text"
+          help-text="Default: 300 | After a strong association is made, the job to rename the file
                              (and thus make it available to upload) will be delayed this many seconds to allow undoing
                              or modifying the association if needed"
-                             setting-type="setting"
+          setting-type="setting"
         />
       </div>
     </VCol>
@@ -409,24 +470,22 @@ import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.
 import { useMatchStore } from "@/stores/match";
 import { useMatchListStore } from "@/stores/matchList";
 import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNamePatterns.vue";
+import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 
-// const loading = ref(true);
 const loading = computed(() => {
   return settingsStore.loading;
 });
 
-// const error = ref("");
 const error = computed(() => {
   return settingsStore.error;
 });
 const matchStore = useMatchStore();
 const matchListStore = useMatchListStore();
 const settingsStore = useSettingsStore();
-// const settings = ref<ISettings | null>(null);
-// const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
+const uploadedVideosStore = useUploadedVideosStore();
+
 const dataRefreshKey = ref(1);
 const youTubeOAuth2RedirectUriCopied = ref(false);
-// const youTubeOAuth2RedirectUri = ref<string | null>(null);
 const savingPlayoffMatchType = ref(false);
 
 const youTubeOAuth2RedirectCopyBtnText = computed((): string => {
@@ -477,9 +536,11 @@ async function submitEventCode(settingName: string, value: string | boolean, set
   const submitResult = await submit(settingName, value, settingType);
   await matchListStore.getMatchList(true);
   matchStore.clearSelectedMatch();
+  await uploadedVideosStore.getMatchUploadStatuses();
   return submitResult;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function saveDescriptionTemplate(settingName: string, value: string, settingType: SettingType) {
   return await settingsStore.saveDescriptionTemplate(value);
 }

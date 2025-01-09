@@ -1,11 +1,12 @@
 <template>
   <div v-if="matchStore.selectedMatchKey">
-    <VSwitch v-model="matchStore.isReplay"
-             color="primary"
-             label="Replay"
-             :loading="matchStore.descriptionLoading || matchStore.matchVideosLoading"
-             :disabled="matchStore.descriptionLoading || matchStore.matchVideosLoading"
-             inset
+    <VSwitch
+      v-model="matchStore.isReplay"
+      color="primary"
+      label="Replay"
+      :loading="matchStore.descriptionLoading || matchStore.matchVideosLoading"
+      :disabled="matchStore.descriptionLoading || matchStore.matchVideosLoading"
+      inset
     />
   </div>
 </template>

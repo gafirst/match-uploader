@@ -25,6 +25,14 @@ const routes: RouteRecordRaw[] = [
     component: () => import(/* webpackChunkName: "home" */ "@/views/AutoRenameView.vue"),
   },
   {
+    path: "/reports",
+    name: "Reports",
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "reports" */ "@/views/Reports.vue"),
+  },
+  {
     path: "/settings",
     name: "Settings",
     // route level code-splitting

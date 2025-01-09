@@ -1,6 +1,6 @@
 import type MatchKey from "@src/models/MatchKey";
 import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
-import { getDescriptionTemplate, getSecrets, getSettings } from "@src/services/SettingsService";
+import { getDescriptionTemplate, getSecrets, getSettings, getYouTubePlaylists } from "@src/services/SettingsService";
 import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { MatchVideoInfo } from "@src/models/MatchVideoInfo";
@@ -12,6 +12,14 @@ import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getFrcApiMatchNumber } from "@src/models/frcEvents/frcScoredMatch";
 import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 import Mustache from "mustache";
+
+import {
+    getEventUploadStatusByMatch,
+} from "@src/repos/UploadedVideosRepo";
+
+import { EventUploadStatusByMatch } from "@src/models/UploadedVideo";
+import { type PrismaClient } from "@prisma/client";
+import { type WorkerPrismaClient } from "@src/worker";
 
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: boolean): Promise<MatchVideoInfo[]> {
     const { eventName, videoSearchDirectory } = await getSettings();
@@ -133,7 +141,7 @@ function matchIsScored(match: TbaMatchSimple): boolean {
  * @returns string A string of team numbers, joined by the joinWith string.
  */
 function getTeamsInMatch(teamKeys: TbaFrcTeam[], joinWith = ", "): string {
-    // turns "frc1234" into "1234"
+    // Remove "frc" from "frc1234" to get "1234"
     return teamKeys.map((teamKey) => teamKey.substring(3)).join(joinWith);
 }
 
@@ -209,4 +217,19 @@ export async function generateMatchVideoDescription(match: Match, eventName: str
     };
 
     return Mustache.render(templateString, view);
+}
+
+export async function getMatchUploadStatuses(
+  prisma: PrismaClient | WorkerPrismaClient,
+): Promise<EventUploadStatusByMatch> {
+    const { eventTbaCode, playoffsType } = await getSettings();
+    const playlists = await getYouTubePlaylists();
+
+    return await getEventUploadStatusByMatch(
+      prisma,
+      eventTbaCode,
+      new Set(Object.keys(playlists)),
+      playoffsType as PlayoffsType,
+      await getMatchList(),
+    );
 }

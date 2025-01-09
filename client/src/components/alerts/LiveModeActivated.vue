@@ -1,12 +1,13 @@
 <template>
-  <VAlert v-if="liveModeStore.isActive"
-          color="purple"
-          variant="tonal"
-          density="comfortable"
-          :rounded="props.rounded ?? 0"
-          icon="mdi-auto-fix"
+  <VAlert
+    v-if="liveModeStore.isActive"
+    color="purple"
+    variant="tonal"
+    density="comfortable"
+    :rounded="props.rounded ?? 0"
+    icon="mdi-auto-fix"
   >
-    <template v-slot:text>
+    <template #text>
       <strong>Live Mode is activated.</strong> Keep this tab open—Live Mode runs in your browser.
     </template>
   </VAlert>

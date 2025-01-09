@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-/* eslint-disable no-unused-vars */
+ 
 /**
  * This file was copied from here: https://gist.github.com/scokmen/f813c904ef79022e84ab2409574d1b45
  */

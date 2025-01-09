@@ -1,4 +1,4 @@
-import { abbreviatedCompLevel, CompLevel, compLevelFromString } from "@src/models/CompLevel";
+import { abbreviatedCompLevel, compareCompLevel, CompLevel, compLevelFromString } from "@src/models/CompLevel";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { getBestOf3RoundNumberFromSetNumber } from "@src/util/playoffs";
 
@@ -12,12 +12,13 @@ class MatchKey {
 
     static matchKeyRegex = /^(\d{4})([a-z0-9]+)_(q|qf|sf|f)(\d{1,2})?m(\d+)$/;
 
-    constructor(year: number,
-                eventCode: string,
-                compLevel: string,
-                setNumber: number | null,
-                matchNumber: number,
-                playoffsType: PlayoffsType,
+    constructor(
+        year: number,
+        eventCode: string,
+        compLevel: string,
+        setNumber: number | null,
+        matchNumber: number,
+        playoffsType: PlayoffsType,
     ) {
         this.year = year;
         this.eventCode = eventCode;
@@ -183,6 +184,22 @@ class MatchKey {
         }
 
         return null;
+    }
+
+    /**
+     * Compare two MatchKeys where `a` is this MatchKey and `b` is the other MatchKey to compare to.
+     *
+     * Returns a positive value if a > b (which means `a` is *later* in the competition compared to `b`), a negative
+     * value if a < b (which means `b` is *later* in the competition compared to `a`), and 0 if a === b (which means
+     * `a` and `b` are the same competition level).
+     *
+     * @param b The MatchKey to compare to
+     */
+    compare(b: MatchKey): number {
+        return this.eventKey.localeCompare(b.eventKey)
+            || compareCompLevel(this.compLevel, b.compLevel)
+            || (this.setNumber ?? 0) - (b.setNumber ?? 0)
+            || this.matchNumber - b.matchNumber;
     }
 }
 

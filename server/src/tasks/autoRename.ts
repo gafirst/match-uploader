@@ -124,7 +124,6 @@ function parseDateFromFileName(fileName: string, patterns: string[]): DateTime |
 
 export async function autoRename(payload: unknown, {
   logger,
-  job,
   addJob,
 }: JobHelpers): Promise<void> {
   logger.info(JSON.stringify(payload));
@@ -271,7 +270,9 @@ export async function autoRename(payload: unknown, {
 
     let {
       associationStatus,
+      // eslint-disable-next-line prefer-const
       startTimeDiffAbnormal,
+      // eslint-disable-next-line prefer-const
       videoDurationAbnormal,
     } = classifyAssociation(
       closestMatchDiff,

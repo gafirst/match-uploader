@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim as base
+FROM node:22-bookworm-slim as base
 # References:
 # - https://www.digitalocean.com/community/tutorials/how-to-build-a-node-js-application-with-docker
 # - https://snyk.io/blog/choosing-the-best-node-js-docker-image/

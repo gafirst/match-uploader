@@ -1,8 +1,9 @@
 <template>
   <div class="text-center">
-    <VProgressCircular indeterminate
-                       :color="color"
-                       :width="width"
+    <VProgressCircular
+      indeterminate
+      :color="color"
+      :width="width"
     />
   </div>
 </template>
@@ -12,7 +13,7 @@ interface IProps {
   width?: number;
 }
 
-const props = withDefaults(defineProps<IProps>(), {
+withDefaults(defineProps<IProps>(), {
   color: "primary",
   width: 3,
 });

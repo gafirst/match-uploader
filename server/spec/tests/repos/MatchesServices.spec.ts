@@ -25,6 +25,7 @@ describe("MatchesService", () => {
             MatchKey.fromString("2023gadal_qm16", PlayoffsType.DoubleElimination),
             false,
         );
+
         expect(files).toEqual([]);
         mockFs.restore();
     });

@@ -35,6 +35,7 @@ export interface ServerToClientEvents {
         data: CommonEvents[keyof CommonEvents];
     }
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ClientToServerEvents extends CommonEvents {}
 
 export function isWorkerJobStartEvent(x: unknown): x is CommonEvents[typeof WORKER_JOB_START] {

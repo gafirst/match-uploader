@@ -198,6 +198,8 @@ export const useMatchStore = defineStore("match", () => {
       matchVideos.value.some(video => videoIsUploaded(video));
   });
 
+  // TODO: Add types for this function
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function uploadVideo(video: MatchVideoInfo): Promise<any> {
     video.isRequestingJob = true;
     video.jobCreationError = null;
@@ -235,6 +237,7 @@ export const useMatchStore = defineStore("match", () => {
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result: any = await response.json();
 
     if (response.ok) {
@@ -247,6 +250,7 @@ export const useMatchStore = defineStore("match", () => {
       // Catches if the server returns parameter validation errors
       if (result.errors) {
         console.log("errors", result.errors);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         video.jobCreationError = result.errors.map((error: any) => error.msg).join(", ");
       } else {
         video.jobCreationError = result.error;
@@ -345,6 +349,7 @@ export const useMatchStore = defineStore("match", () => {
     return !!job.linkedOnTheBlueAlliance && !!job.addedToYouTubePlaylist;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   watch(isReplay, async (value, oldValue, onCleanup) => {
     await getMatchVideos();
     await getSuggestedDescription();

@@ -187,6 +187,7 @@ export async function addVideoToPlaylist(videoId: string, playlistId: string): P
         },
     }, {
         // Don't throw an exception because of the HTTP request's status code
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         validateStatus: (status) => true,
     });
 

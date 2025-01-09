@@ -32,4 +32,5 @@ export function isTbaMatchSimple(obj: object): obj is TbaMatchSimple {
         !!(obj as TbaMatchSimple).set_number &&
         !!(obj as TbaMatchSimple).event_key &&
         !!(obj as TbaMatchSimple).key;
+        // TODO: (breaking change) Require actual_time field to be in response (don't require non-null)
 }

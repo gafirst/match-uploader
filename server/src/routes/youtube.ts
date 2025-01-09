@@ -107,7 +107,6 @@ async function handleYouTubeOAuth2Callback(req: IReq, res: IRes): Promise<void> 
                 logger.warn("OAuth2 code exchange: no expiry_date was received.");
             }
         } catch (codeExchangeError) {
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             await setSetting("googleAuthStatus", `YouTube connection failed: ${codeExchangeError}`);
         }
     } else if (error) {
@@ -200,34 +199,6 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
         ok: true,
         workerJob,
     });
-
-    // const uploadResult = await uploadYouTubeVideo(videoTitle as string,
-    //     description as string,
-    //     videoPath as string,
-    //     videoPrivacy as YouTubeVideoPrivacy,
-    // );
-    //
-    // if (isYouTubeVideoUploadSuccess(uploadResult)) {
-    //     const postUploadStepsResult =
-    //         await handleMatchVideoPostUploadSteps(uploadResult.videoId, label as string, matchKeyObject);
-    //
-    //     res.json({
-    //         ok: true,
-    //         videoId: uploadResult.videoId,
-    //         postUploadSteps: postUploadStepsResult,
-    //     });
-    // } else if (isYouTubeVideoUploadError(uploadResult)) {
-    //     res.status(500)
-    //         .json({
-    //             ok: false,
-    //             error: uploadResult.error,
-    //         });
-    // } else {
-    //     res.status(500).json({
-    //         ok: false,
-    //         error: "An unknown error occurred while processing the YouTube video upload result",
-    //     });
-    // }
 }
 
 youTubeRouter.get(

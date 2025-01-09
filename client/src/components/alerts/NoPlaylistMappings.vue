@@ -1,15 +1,18 @@
 <template>
-  <VAlert v-if="!playlistsStore.isFirstLoad && !playlistsStore.playlists?.length"
-          color="info"
-          variant="tonal"
-          density="comfortable"
-          :rounded="props.rounded ?? 0"
-          icon="mdi-upload-off"
+  <VAlert
+    v-if="!playlistsStore.playlistMappingsExist"
+    color="info"
+    variant="tonal"
+    density="comfortable"
+    :rounded="props.rounded ?? 0"
+    icon="mdi-upload-off"
   >
-    <template v-slot:text>
+    <template #text>
       <strong>No playlist mappings defined.</strong> Define playlist mappings in
-      <RouterLink to="/settings">Settings</RouterLink> if you want your videos added to YouTube playlists after being
-      uploaded.
+      <RouterLink to="/settings">
+        Settings
+      </RouterLink> if you want your videos added to YouTube playlists after being
+      uploaded and to use the Match Upload Status report.
     </template>
   </VAlert>
 </template>

@@ -11,13 +11,13 @@ import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
 export const prisma = new PrismaClient().$extends({
     query: {
         autoRenameAssociation: {
-            async update({ model, operation, args, query }) {
+            async update({ args, query }) {
                 const association = await query(args);
                 workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
                     filePath: association.filePath,
                 });
             },
-            async upsert({ model, operation, args, query }) {
+            async upsert({ args, query }) {
                 const association = await query(args);
                 workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
                     filePath: association.filePath,

@@ -13,6 +13,8 @@ import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { getSettings } from "@src/services/SettingsService";
 import { PlayoffsType } from "@src/models/PlayoffsType";
+import { getMatchUploadStatuses as getMatchUploadStatusesImpl } from "@src/services/MatchesService";
+import { prisma } from "@src/server";
 
 export const matchesRouter = Router();
 
@@ -24,14 +26,20 @@ matchesRouter.get(
 async function getEventMatchList(req: IReq, res: IRes): Promise<void> {
   const { playoffsType: playoffsTypeRaw } = await getSettings();
   const playoffsType = playoffsTypeRaw as PlayoffsType;
-  const matchList = (await getMatchList()).map((match) => {
+  const matches = await getMatchList();
+  matches.sort((a, b) => {
+    const matchKeyA = MatchKey.fromString(a.key, playoffsType);
+    const matchKeyB = MatchKey.fromString(b.key, playoffsType);
+    return matchKeyA.compare(matchKeyB);
+  });
+  const matchList = matches.map((match) => {
     return {
       key: match.key,
       actualTime: match.actual_time,
       verboseName: capitalizeFirstLetter(
         new Match(
           MatchKey.fromString(match.key, playoffsType),
-        ).verboseMatchName,
+        ).matchName,
       ),
     };
   });
@@ -155,5 +163,17 @@ async function getPossibleNextMatches(req: IReq, res: IRes): Promise<IRes> {
     ok: true,
     sameLevel: nextMatchSameLevel,
     nextLevel: firstMatchNextLevel,
+  });
+}
+
+matchesRouter.get(
+  Paths.Matches.UploadStatuses,
+  getMatchUploadStatuses,
+);
+
+async function getMatchUploadStatuses(req: IReq, res: IRes): Promise<void> {
+  res.json({
+    ok: true,
+    ...(await getMatchUploadStatusesImpl(prisma)),
   });
 }
