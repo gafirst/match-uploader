@@ -25,7 +25,8 @@ export async function getGoogleOAuth2Client(requestProtocol: string): Promise<OA
     const settings = await getSettings();
     const secrets = await getSecrets();
 
-    // @ts-ignore
+    // @ts-expect-error This OAuth2 client is correct, but the types don't match for unclear reasons that aren't worth
+    // investigating right now
     return new auth.OAuth2(
         settings.googleClientId,
         secrets.googleClientSecret,

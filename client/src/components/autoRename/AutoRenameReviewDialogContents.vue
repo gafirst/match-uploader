@@ -152,6 +152,7 @@
             hide-default-header
             hide-default-footer
           >
+            <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template #item.value="{ item }">
               <span v-if="item.key.toLowerCase() === 'match'">
                 <MatchAutocompleteDropdown

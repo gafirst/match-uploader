@@ -540,6 +540,7 @@ async function submitEventCode(settingName: string, value: string | boolean, set
   return submitResult;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function saveDescriptionTemplate(settingName: string, value: string, settingType: SettingType) {
   return await settingsStore.saveDescriptionTemplate(value);
 }

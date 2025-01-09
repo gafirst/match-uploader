@@ -127,7 +127,7 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
             });
         } catch (e: unknown) {
             logger.error(`Unable to save UploadedVideo ${payload.videoPath} with YouTube ID ` +
-              `${uploadResult.videoId}: ${JSON.stringify(e)}`)
+              `${uploadResult.videoId}: ${JSON.stringify(e)}`);
         }
 
         try {
@@ -171,7 +171,7 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
             });
         } catch (e: unknown) {
             logger.error(`Unable to update UploadedVideo ${payload.videoPath} with YouTube ID ` +
-              `${uploadResult.videoId}: ${JSON.stringify(e)}`)
+              `${uploadResult.videoId}: ${JSON.stringify(e)}`);
         }
     } else if (isYouTubeVideoUploadError(uploadResult)) {
         logger.error(`Failed to upload video ${payload.title}: ${uploadResult.error}`);

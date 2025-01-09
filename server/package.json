@@ -5,7 +5,7 @@
     "build": "npx ts-node build.ts",
     "lint": "npx eslint src/ spec/",
     "lint:fix": "npx eslint --fix  src/ spec/",
-    "lint:ci": "npx eslint --max-warnings=0 --output-file eslint_report.json --format json --ext .ts src/ spec/",
+    "lint:ci": "npx eslint --max-warnings=0 --output-file eslint_report.json --format json src/ spec/",
     "start": "npx prisma migrate deploy && node -r module-alias/register ./dist --env=production",
     "start:worker": "node -r module-alias/register ./dist/worker.js --env=production",
     "dev": "nodemon",

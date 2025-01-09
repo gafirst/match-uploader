@@ -1,6 +1,5 @@
 import { acceptHMRUpdate, defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { isUploadedVideo, UploadedVideo } from "@/types/UploadedVideo";
 import { isEventUploadStatusByMatch, UploadStatusSummary, UploadTotalsSummary } from "@/types/EventUploadStatusByMatch";
 
 export const useUploadedVideosStore = defineStore("uploadedVideos", () => {

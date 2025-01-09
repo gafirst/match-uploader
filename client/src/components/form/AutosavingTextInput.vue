@@ -93,16 +93,17 @@
 import {computed, ref} from "vue";
 import {SettingType} from "@/types/ISettings";
 
- 
+
 enum State {
   LOADING,
   READY,
   SUCCESS,
   ERROR,
 }
- 
+
 
 interface IProps {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   onSubmit: Function;
   name: string;
   label: string;
@@ -119,12 +120,12 @@ const emit = defineEmits(["savedValueUpdated"]);
 const state = ref<State>(State.READY);
 
 // TODO: These no-setup-props-destructure rules are valid but not breaking the component
- 
+
 const inputValue = ref(props.initialValue);
- 
+
 const lastSubmittedValue = ref(props.initialValue);
 const error = ref("");
- 
+
 const showPlainText = ref(props.inputType === "text");
 
 async function submit() {

@@ -7,7 +7,7 @@ export const usePlaylistsStore = defineStore("playlists", () => {
   const loading = ref(false);
   const isFirstLoad = ref(true);
   const error = ref<string>("");
-  const playlistMappingsExist = computed(() => !isFirstLoad.value && (playlists.value?.length ?? 0) > 0)
+  const playlistMappingsExist = computed(() => !isFirstLoad.value && (playlists.value?.length ?? 0) > 0);
 
   const playlistMappings = computed(() => {
     if (!playlists.value) {
@@ -64,6 +64,8 @@ export const usePlaylistsStore = defineStore("playlists", () => {
     isFirstLoad.value = false;
   }
 
+  // TODO: Remove any types from this file
+
   /**
    * Save a playlist mapping
    *
@@ -91,6 +93,7 @@ export const usePlaylistsStore = defineStore("playlists", () => {
 
     if (resultJson.errors) {
       apiError = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       error.value = resultJson.errors.map((error: any) => error.msg).join(", ");
     }
 
@@ -118,6 +121,7 @@ export const usePlaylistsStore = defineStore("playlists", () => {
 
     if (resultJson.errors) {
       apiError = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       error.value = resultJson.errors.map((error: any) => error.msg).join(", ");
     }
 

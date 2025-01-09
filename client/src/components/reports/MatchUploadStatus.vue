@@ -37,7 +37,10 @@
       </VAlert>
     </VCol>
   </VRow>
-  <VRow class="ml-1 mb-2" v-if="playlistsStore.playlistMappingsExist">
+  <VRow
+    v-if="playlistsStore.playlistMappingsExist"
+    class="ml-1 mb-2"
+  >
     <VCol
       md="3"
     >
@@ -72,14 +75,18 @@
     </VCol>
   </VRow>
 
-  <VAlert v-if="!playlistsStore.playlistMappingsExist"
-            color="warning"
-            variant="tonal"
-            icon="mdi-alert-circle-outline"
-          >
-    To use this report, define at least one playlist mapping in <RouterLink to="/settings">Settings</RouterLink>.
+  <VAlert
+    v-if="!playlistsStore.playlistMappingsExist"
+    color="warning"
+    variant="tonal"
+    icon="mdi-alert-circle-outline"
+  >
+    To use this report, define at least one playlist mapping in <RouterLink to="/settings">
+      Settings
+    </RouterLink>.
   </VAlert>
-  <VDataTable v-else
+  <VDataTable
+    v-else
     :items="items"
     items-per-page="-1"
     density="compact"

@@ -32,6 +32,7 @@ const matchListStore = useMatchListStore();
 
 matchListStore.getMatchList();
 
+// eslint-disable-next-line vue/require-prop-types
 const model = defineModel();
 
 function matchSelected(value: string) {

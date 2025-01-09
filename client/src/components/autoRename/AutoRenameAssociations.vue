@@ -15,12 +15,14 @@
     multi-sort
     :sort-by="[{ key: 'videoLabel', order: 'asc' }, { key: 'videoTimestamp', order: 'asc' }]"
   >
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.status="{ item }">
       <VChip :color="statusToColor(item.status)">
         {{ statusIncludingRenames(item) }}
       </VChip>
     </template>
 
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.actions="{ item }">
       <VAlert
         v-if="item.renameJobId &&
@@ -33,6 +35,7 @@
       >
         File rename failed. Click Review for details.
       </VAlert>
+
       <div class="d-flex mt-2 mb-2">
         <VBtn
           class="mr-2"
@@ -67,10 +70,12 @@
       </div>
     </template>
 
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.videoTimestamp="{ item }">
       {{ dayjs(item.videoTimestamp).format("llll z") }}
     </template>
 
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.matchKey="{ item }">
       {{ item.matchName ?? "None" }}<br>
       <span style="color: gray">{{ item.matchKey ?? "" }}</span>
@@ -113,10 +118,9 @@ dayjs.extend(localizedFormat);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-const props = defineProps<{
+defineProps<{
   includedAssociationStatuses: AutoRenameAssociationStatus[];
 }>();
-
 
 const autoRenameStore = useAutoRenameStore();
 autoRenameStore.getAssociations();
