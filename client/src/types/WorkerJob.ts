@@ -8,7 +8,7 @@ export const UPLOAD_VIDEO_TASK = "uploadVideo";
 export const RENAME_VIDEO_TASK = "renameVideo";
 export const AUTO_RENAME_TASK = "autoRename";
 
-export const WorkerTask = typeof UPLOAD_VIDEO_TASK | typeof RENAME_VIDEO_TASK | typeof AUTO_RENAME_TASK;
+export type WorkerTask = typeof UPLOAD_VIDEO_TASK | typeof RENAME_VIDEO_TASK | typeof AUTO_RENAME_TASK;
 
 export enum WorkerJobStatus {
   PENDING = "PENDING",

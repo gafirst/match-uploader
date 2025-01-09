@@ -1,61 +1,147 @@
 <template>
-  <h1>Match upload status</h1>
-  <VDataTable
+  <h1>
+    Match upload status <VBtn
+      prepend-icon="mdi-refresh"
+      @click="refreshData"
+    >
+      Refresh
+    </VBtn>
+  </h1>
+  <p
+    v-if="uploadedVideosStore.eventKey"
+    class="mb-2"
+  >
+    <strong>Event code:</strong> {{ uploadedVideosStore.eventKey }}
+  </p>
+  <VRow
+    v-if="!!playlistsStore.error || !!uploadedVideosStore.error"
+    class="mt-1"
+  >
+    <VCol>
+      <VAlert
+        v-if="!!playlistsStore.error"
+        variant="tonal"
+        color="error"
+        class="mb-2"
+      >
+        {{ playlistsStore.error }}
+      </VAlert>
+
+      <VAlert
+        v-if="!!uploadedVideosStore.error"
+        variant="tonal"
+        color="error"
+        class="mb-2"
+      >
+        {{ uploadedVideosStore.error }}
+      </VAlert>
+    </VCol>
+  </VRow>
+  <VRow class="ml-1 mb-2" v-if="playlistsStore.playlistMappingsExist">
+    <VCol
+      md="3"
+    >
+      <p>
+        <VIcon color="success">
+          mdi-cloud-check-variant
+        </VIcon> Video uploaded
+      </p>
+      <p>
+        <VIcon
+          color="error"
+        >
+          mdi-cloud-outline
+        </VIcon> No video uploaded
+      </p>
+    </VCol>
+    <VCol
+      v-if="uploadedVideosStore.matchUploadStatusTotals"
+      md="3"
+    >
+      <VProgressLinear
+        :model-value="uploadedVideosStore.completedPercent * 100"
+        rounded
+        height="10"
+        :color="progressBarColor"
+        style="max-width: 150px"
+        class="mb-2"
+      />
+      {{ uploadedVideosStore.matchUploadStatusTotals.completed }} of
+      {{ uploadedVideosStore.matchUploadStatusTotals.total }}
+      match{{ uploadedVideosStore.matchUploadStatusTotals.total != 1 ? "es" : "" }} uploaded
+    </VCol>
+  </VRow>
+
+  <VAlert v-if="!playlistsStore.playlistMappingsExist"
+            color="warning"
+            variant="tonal"
+            icon="mdi-alert-circle-outline"
+          >
+    To use this report, define at least one playlist mapping in <RouterLink to="/settings">Settings</RouterLink>.
+  </VAlert>
+  <VDataTable v-else
     :items="items"
     items-per-page="-1"
     density="compact"
     :headers="headers"
+    :loading="playlistsStore.loading || uploadedVideosStore.loading"
     hide-default-footer
   >
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.status="{ item }">
       <VChip
         :color="statusColor(item.status)"
         density="compact"
       >
-        {{ item.status }}
+        {{ capitalizeFirstLetter(matchUploadStatusToUiString(item.status)) }}
       </VChip>
     </template>
 
     <template
-      v-for="playlist in (playlistStore.playlists ?? []).map(playlist => playlist.label)"
+      v-for="playlist in (playlistsStore.playlists ?? []).map(p => p.label)"
       #[`item.${playlist}`]="{ item }"
       :key="playlist"
     >
       <VIcon
-        v-if="item.statusByLabel[playlist].success"
+        v-if="item.statusByLabel[playlist] && item.statusByLabel[playlist].success"
         icon="mdi-cloud-check-variant"
         color="success"
       />
       <VIcon
         v-else
-        icon="mdi-alert-circle"
+        icon="mdi-cloud-outline"
         color="error"
       />
     </template>
   </VDataTable>
 </template>
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { capitalizeFirstLetter } from "@/util/capitalize";
 import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 import { usePlaylistsStore } from "@/stores/playlists";
+import { MatchUploadStatus, matchUploadStatusToUiString } from "@/types/EventUploadStatusByMatch";
 
-const playlistStore = usePlaylistsStore();
+const playlistsStore = usePlaylistsStore();
 
 const uploadedVideosStore = useUploadedVideosStore();
-playlistStore.getPlaylists();
-uploadedVideosStore.getMatchUploadStatuses();
+refreshData();
+
+async function refreshData() {
+  await playlistsStore.getPlaylists();
+  await uploadedVideosStore.getMatchUploadStatuses();
+}
 
 function statusColor(status: string) {
-  if (status === "Not started") {
+  if (status === MatchUploadStatus.NOT_STARTED) {
     return "error";
   }
-  if (status === "Partial") {
+
+  if (status === MatchUploadStatus.PARTIAL) {
     return "warning";
   }
-  if (status === "Complete") {
-    return "success";
-  }
+
+  return "success";
 }
 
 const headers = computed(() => [
@@ -64,7 +150,7 @@ const headers = computed(() => [
   {
     title: "By label",
     align: "center",
-    children: (playlistStore.playlists ?? []).map(playlist => ({
+    children: (playlistsStore.playlists ?? []).map(playlist => ({
         key: playlist.label,
         title: capitalizeFirstLetter(playlist.label),
       }),
@@ -76,12 +162,11 @@ const headers = computed(() => [
 // when the store's state changes.
 const items = computed(() => uploadedVideosStore.matchUploadStatuses);
 
-// const items = ref([
-//   { match: "Qualification 1", status: "Partial", statusByLabel: { "unlabeled": false, "overhead": true } },
-//   { match: "Qualification 2", status: "Complete", statusByLabel: { "unlabeled": true, "overhead": true } },
-//   { match: "Qualification 3", status: "Not started", statusByLabel: { "unlabeled": false, "overhead": false } },
-//   { match: "Playoff 1", status: "Complete", statusByLabel: { "unlabeled": true, "overhead": true } },
-//   { match: "Playoff 2", status: "Partial", statusByLabel: { "unlabeled": true, "overhead": false } },
-//   { match: "Playoff 3", status: "Not started", statusByLabel: { "unlabeled": false, "overhead": false } },
-// ]);
+const progressBarColor = computed(() => {
+  if (uploadedVideosStore.completedPercent === 1) {
+    return "success";
+  }
+
+  return "primary";
+});
 </script>

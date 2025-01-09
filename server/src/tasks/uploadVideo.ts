@@ -104,17 +104,7 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                     youTubeVideoId: uploadResult.videoId,
                 },
             });
-            await prisma.uploadedVideo.create({
-                data: {
-                    matchKey: matchKeyObject.matchKey,
-                    eventKey: matchKeyObject.eventKey,
-                    filePath: payload.videoPath,
-                    label: payload.label,
-                    youTubeVideoId: uploadResult.videoId,
-                    // FIXME: Handle replays
-                },
-            });
-        } catch (e) { // Catch the prisma update error
+        } catch (e: unknown) { // Catch the prisma update error
             if (isPrismaClientKnownRequestError(e, "P2025")) {
                 logger.warn(`Unable to attach YouTube video with ID ${uploadResult.videoId} to job with ID ` +
                   `${job.id}: Job does not exist in match-uploader WorkerJob table`);
@@ -122,6 +112,21 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                 logger.warn(`Unable to attach YouTube video with ID ${uploadResult.videoId} to job with ID ` +
                   `${job.id}: ${JSON.stringify(e)}`);
             }
+        }
+
+        try {
+            await prisma.uploadedVideo.create({
+                data: {
+                    matchKey: matchKeyObject.matchKey,
+                    eventKey: matchKeyObject.eventKey,
+                    filePath: payload.videoPath,
+                    label: payload.label,
+                    youTubeVideoId: uploadResult.videoId,
+                    workerJobId: job.id,
+                },
+            });
+        } catch (e: unknown) {
+            logger.error(`Unable to save UploadedVideo ${payload.videoPath} with YouTube ID ${uploadResult.videoId}: ${JSON.stringify(e)}`)
         }
 
         try {
@@ -143,6 +148,7 @@ export async function uploadVideo(payload: unknown, { logger, job }: JobHelpers)
                     linkedOnTheBlueAlliance: postUploadStepsResult.linkOnTheBlueAlliance,
                 },
             });
+            // FIXME: Move to own try-catch
             await prisma.uploadedVideo.update({
                 where: {
                     youTubeVideoId: uploadResult.videoId,

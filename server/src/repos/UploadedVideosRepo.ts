@@ -1,40 +1,14 @@
-import { JobStatus, type Prisma, type PrismaClient, type UploadedVideo } from "@prisma/client";
+import { JobStatus, type Prisma, type PrismaClient } from "@prisma/client";
 import { type WorkerPrismaClient } from "@src/worker";
 import MatchKey from "@src/models/MatchKey";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { Match } from "@src/models/Match";
-
-export async function getUploadedVideos(
-  prisma: PrismaClient | WorkerPrismaClient,
-): Promise<UploadedVideo[]> {
-  return await prisma.uploadedVideo.findMany();
-}
-
-type MatchUploadStatus = "COMPLETED" | "PARTIAL" | "NOT_STARTED";
+import { TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
+import { EventUploadStatusByMatch, MatchUploadStatus, UploadStatusSummary } from "@src/models/UploadedVideo";
 
 type UploadedVideoWithWorkerJob = Prisma.UploadedVideoGetPayload<{
   include: { workerJob: true }
 }>
-
-interface UploadStatusSummary {
-  matchKey: string;
-  matchName: string;
-  status: MatchUploadStatus;
-  statusByLabel: {
-    [label: string]: {
-      success: boolean;
-      count: number;
-      postUploadStepsSucceeded: boolean;
-    };
-  };
-}
-
-
-// FIXME: extract types from this file
-export interface EventUploadStatusByMatch {
-  eventKey: string,
-  matches: UploadStatusSummary[],
-}
 
 function summarizeUploadsForMatch(
   matchKey: string,
@@ -45,7 +19,7 @@ function summarizeUploadsForMatch(
   const summary: UploadStatusSummary = {
     matchKey,
     matchName: new Match(MatchKey.fromString(matchKey, playoffsType), false).matchName,
-    status: "NOT_STARTED",
+    status: MatchUploadStatus.NOT_STARTED,
     statusByLabel: {},
   };
 
@@ -70,31 +44,38 @@ function summarizeUploadsForMatch(
     }
   }
 
-  const actualLabels = new Set(Object.keys(summary.statusByLabel).map(label => label.toLowerCase()));
+  const actualLabels = new Set(
+    Object.keys(summary.statusByLabel)
+      .filter(label => summary.statusByLabel[label].success)
+      .map(label => label.toLowerCase())
+  );
   const missingLabels = expectedLabels.difference(actualLabels);
 
   if (missingLabels.size === 0) {
-    summary.status = "COMPLETED";
+    summary.status = MatchUploadStatus.COMPLETED;
   } else if (missingLabels.size < expectedLabels.size) {
-    summary.status = "PARTIAL";
+    summary.status = MatchUploadStatus.PARTIAL;
   }
 
   missingLabels.forEach(label => {
-    summary.statusByLabel[label] = {
-      success: false,
-      count: 0,
-      postUploadStepsSucceeded: false,
-    };
+    if (!Object.hasOwnProperty.call(summary.statusByLabel, label)) {
+      summary.statusByLabel[label] = {
+        success: false,
+        count: 0,
+        postUploadStepsSucceeded: false,
+      };
+    }
   });
 
   return summary;
 }
 
-export async function getUploadedVideosByPlaylist(
+export async function getEventUploadStatusByMatch(
   prisma: PrismaClient | WorkerPrismaClient,
   eventKey: string,
   expectedLabels: Set<string>,
   playoffsType: PlayoffsType,
+  allMatches: TbaMatchSimple[],
 ): Promise<EventUploadStatusByMatch> {
   const videos: UploadedVideoWithWorkerJob[] = await prisma.uploadedVideo.findMany({
     where: {
@@ -108,6 +89,12 @@ export async function getUploadedVideosByPlaylist(
   const result: EventUploadStatusByMatch = {
     eventKey,
     matches: [],
+    totals: {
+      total: 0,
+      completed: 0,
+      partial: 0,
+      notStarted: 0,
+    },
   };
 
   const videosByMatchKey: {
@@ -122,10 +109,45 @@ export async function getUploadedVideosByPlaylist(
     }
   });
 
+  allMatches.forEach(match => {
+    if (!Object.hasOwnProperty.call(videosByMatchKey, match.key)) {
+      videosByMatchKey[match.key] = [];
+    }
+  });
+
   for (const matchKey of Object.keys(videosByMatchKey)) {
     const videosForMatch = videosByMatchKey[matchKey];
     result.matches.push(summarizeUploadsForMatch(matchKey, videosForMatch, expectedLabels, playoffsType));
   }
+
+  result.matches.sort((a, b): number => {
+    const matchKeyA = MatchKey.fromString(a.matchKey, playoffsType);
+    const matchKeyB = MatchKey.fromString(b.matchKey, playoffsType);
+    return matchKeyA.compare(matchKeyB);
+  });
+
+  result.totals = result.matches.reduce((previousValue, currentValue, currentIndex, array) => {
+    if (currentValue.status === MatchUploadStatus.COMPLETED) {
+      previousValue.completed++;
+    } else if (currentValue.status === MatchUploadStatus.PARTIAL) {
+      previousValue.partial++;
+    } else {
+      previousValue.notStarted++;
+    }
+
+    previousValue.total++;
+
+    if (currentIndex === array.length - 1) {
+      return previousValue;
+    }
+
+    return previousValue;
+  }, {
+    total: 0,
+    completed: 0,
+    partial: 0,
+    notStarted: 0,
+  });
 
   return result;
 }

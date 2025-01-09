@@ -1,4 +1,3 @@
- 
 import { type FrcApiTournamentLevel } from "@src/models/frcEvents/frcTournamentLevel";
 
 /**

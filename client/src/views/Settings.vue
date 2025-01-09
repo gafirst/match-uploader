@@ -470,24 +470,22 @@ import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.
 import { useMatchStore } from "@/stores/match";
 import { useMatchListStore } from "@/stores/matchList";
 import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNamePatterns.vue";
+import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 
-// const loading = ref(true);
 const loading = computed(() => {
   return settingsStore.loading;
 });
 
-// const error = ref("");
 const error = computed(() => {
   return settingsStore.error;
 });
 const matchStore = useMatchStore();
 const matchListStore = useMatchListStore();
 const settingsStore = useSettingsStore();
-// const settings = ref<ISettings | null>(null);
-// const youTubeAuthState = ref<IYouTubeAuthState | null>(null);
+const uploadedVideosStore = useUploadedVideosStore();
+
 const dataRefreshKey = ref(1);
 const youTubeOAuth2RedirectUriCopied = ref(false);
-// const youTubeOAuth2RedirectUri = ref<string | null>(null);
 const savingPlayoffMatchType = ref(false);
 
 const youTubeOAuth2RedirectCopyBtnText = computed((): string => {
@@ -538,6 +536,7 @@ async function submitEventCode(settingName: string, value: string | boolean, set
   const submitResult = await submit(settingName, value, settingType);
   await matchListStore.getMatchList(true);
   matchStore.clearSelectedMatch();
+  await uploadedVideosStore.getMatchUploadStatuses();
   return submitResult;
 }
 

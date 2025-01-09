@@ -114,8 +114,7 @@ model UploadedVideo {
   matchKey String
   eventKey String
 
-  label    String
-  isReplay Boolean @default(false)
+  label String
 
   addToYouTubePlaylistSucceeded  Boolean?
   linkOnTheBlueAllianceSucceeded Boolean?
