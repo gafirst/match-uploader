@@ -35,6 +35,5 @@ export interface ISecretSettings {
 export type SecretSettingsKey = keyof ISecretSettings;
 
 export type ISecretSettingsHidden = {
-     
     [key in keyof ISecretSettings]: boolean;
 }
