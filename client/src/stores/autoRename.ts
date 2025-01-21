@@ -23,9 +23,13 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     return false;
   }
 
-  async function getAssociations() {
+  async function getAssociations(forceRefresh: boolean = false) {
     loadingAssociations.value = true;
     associationsError.value = "";
+
+    if (forceRefresh) {
+      associations.value.clear();
+    }
 
     const url = "/api/v1/autoRename/associations";
     const result = await fetch(url);

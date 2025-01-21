@@ -15,12 +15,14 @@ export const prisma = new PrismaClient().$extends({
                 const association = await query(args);
                 workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
                     filePath: association.filePath,
+                    eventKey: association.eventKey,
                 });
             },
             async upsert({ args, query }) {
                 const association = await query(args);
                 workerIo.emit(AUTO_RENAME_ASSOCIATION_UPDATE, {
                     filePath: association.filePath,
+                    eventKey: association.eventKey,
                 });
             },
         },

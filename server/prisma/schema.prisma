@@ -51,8 +51,10 @@ enum JobStatus {
   COMPLETED
 }
 
+// FIXME: Generate migration for changes
 model AutoRenameAssociation {
-  filePath               String                      @id @unique
+  eventKey               String // FIXME: Add a legacy default value for this for backwards-compatibility in migration script
+  filePath               String
   videoFile              String
   status                 AutoRenameAssociationStatus @default(UNMATCHED)
   statusReason           String?
@@ -77,6 +79,9 @@ model AutoRenameAssociation {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@id([eventKey, filePath], name: "id")
+  @@unique([eventKey, filePath], name: "associationIdentifier")
 }
 
 enum AutoRenameAssociationStatus {

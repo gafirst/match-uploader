@@ -6,7 +6,10 @@ import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
 export interface RenameFilePayload {
   directory: string;
   oldFileName: string;
-  associationId: string;
+  associationId: {
+    eventKey: string;
+    filePath: string;
+  };
 }
 
 function assertIsRenameFilePayload(payload: unknown): asserts payload is RenameFilePayload {
@@ -14,11 +17,13 @@ function assertIsRenameFilePayload(payload: unknown): asserts payload is RenameF
     throw new Error(`Invalid payload (null): ${JSON.stringify(payload)}`);
   } else if (typeof payload === "undefined") {
     throw new Error(`Invalid payload (undefined): ${JSON.stringify(payload)}`);
-  } else if (!(payload as unknown as RenameFilePayload).directory ||
-    !(payload as unknown as RenameFilePayload).oldFileName ||
-    !(payload as unknown as RenameFilePayload).associationId
+  } else if (typeof (payload as RenameFilePayload).directory !== "string" ||
+    typeof (payload as RenameFilePayload).oldFileName !== "string" ||
+    typeof (payload as RenameFilePayload).associationId !== "object" ||
+    typeof (payload as RenameFilePayload).associationId.eventKey !== "string" ||
+    typeof (payload as RenameFilePayload).associationId.filePath !== "string"
   ) {
-    throw new Error(`Invalid payload (missing required prop): ${JSON.stringify(payload)}`);
+    throw new Error(`Invalid payload (missing or invalid required prop): ${JSON.stringify(payload)}`);
   }
 }
 
@@ -30,7 +35,7 @@ export async function renameFile(payload: unknown, {
 
   const association = await prisma.autoRenameAssociation.findUniqueOrThrow({
     where: {
-      filePath: payload.associationId,
+      id: payload.associationId,
     },
   });
 
@@ -52,7 +57,7 @@ export async function renameFile(payload: unknown, {
 
   await prisma.autoRenameAssociation.update({
     where: {
-      filePath: payload.associationId,
+      id: payload.associationId,
     },
     data: {
       renameCompleted: true,
