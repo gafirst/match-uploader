@@ -471,6 +471,7 @@ import { useMatchStore } from "@/stores/match";
 import { useMatchListStore } from "@/stores/matchList";
 import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNamePatterns.vue";
 import { useUploadedVideosStore } from "@/stores/uploadedVideos";
+import { useAutoRenameStore } from "@/stores/autoRename";
 
 const loading = computed(() => {
   return settingsStore.loading;
@@ -483,6 +484,7 @@ const matchStore = useMatchStore();
 const matchListStore = useMatchListStore();
 const settingsStore = useSettingsStore();
 const uploadedVideosStore = useUploadedVideosStore();
+const autoRenameStore = useAutoRenameStore();
 
 const dataRefreshKey = ref(1);
 const youTubeOAuth2RedirectUriCopied = ref(false);
@@ -537,6 +539,7 @@ async function submitEventCode(settingName: string, value: string | boolean, set
   await matchListStore.getMatchList(true);
   matchStore.clearSelectedMatch();
   await uploadedVideosStore.getMatchUploadStatuses();
+  await autoRenameStore.getAssociations(true);
   return submitResult;
 }
 

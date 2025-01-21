@@ -21,6 +21,7 @@ export interface CommonEvents {
         success: boolean;
     };
     [AUTO_RENAME_ASSOCIATION_UPDATE]: {
+        eventKey: string;
         filePath: string;
     };
 }
@@ -65,5 +66,6 @@ export function isAutoRenameAssociationUpdateEvent(
 ): x is CommonEvents[typeof AUTO_RENAME_ASSOCIATION_UPDATE] {
     return typeof x === "object" &&
         x !== null &&
-        "filePath" in x;
+        "filePath" in x &&
+        "eventKey" in x;
 }
