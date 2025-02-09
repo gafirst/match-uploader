@@ -4,8 +4,7 @@
       cols="12"
       md="4"
     >
-      <h1>Upload match</h1>
-      <LiveMode />
+      <h1>Upload event media</h1>
       <VAlert
         v-if="!!error"
         color="error"
@@ -14,18 +13,18 @@
       </VAlert>
 
       <h2 class="mb-2">
-        Match info
+        File  info
       </h2>
-      <MatchSelector />
+<!--      <MatchSelector />-->
 
       <h2 class="mb-2">
-        Video metadata
+        File metadata
       </h2>
       <MatchMetadata />
       <h3 class="mb-2">
         Description
       </h3>
-      <MatchDescription />
+<!--      <MatchDescription />-->
     </VCol>
     <VCol
       cols="12"
@@ -34,33 +33,36 @@
       <h2 class="mb-2">
         Videos
       </h2>
+<!--      FIXME: This part of matchStore could be converted into a generic store holding infos about videos to be uploaded / being uploaded-->
+<!--      <VRow>-->
+<!--        <VSheet class="d-flex flex-wrap">-->
+<!--          <VSheet-->
+<!--            v-for="video in matchStore.matchVideos"-->
+<!--            :key="video.path"-->
+<!--            class="pa-3 video-preview"-->
+<!--          >-->
+<!--            <h3>{{ video.videoLabel ?? "Unlabeled" }}</h3>-->
+<!--            <VAlert-->
+<!--              v-if="isVideoMissingPlaylistMapping(video)"-->
+<!--              density="compact"-->
+<!--              class="mb-2"-->
+<!--              variant="tonal"-->
+<!--              color="warning"-->
+<!--            >-->
+<!--              Missing playlist mapping-->
+<!--            </VAlert>-->
+<!--            <video-->
+<!--              :src="`videos/${video.path}`"-->
+<!--              controls-->
+<!--              preload="metadata"-->
+<!--            />-->
+<!--          </VSheet>-->
+<!--        </VSheet>-->
+<!--      </VRow>-->
       <VRow>
-        <VSheet class="d-flex flex-wrap">
-          <VSheet
-            v-for="video in matchStore.matchVideos"
-            :key="video.path"
-            class="pa-3 video-preview"
-          >
-            <h3>{{ video.videoLabel ?? "Unlabeled" }}</h3>
-            <VAlert
-              v-if="isVideoMissingPlaylistMapping(video)"
-              density="compact"
-              class="mb-2"
-              variant="tonal"
-              color="warning"
-            >
-              Missing playlist mapping
-            </VAlert>
-            <video
-              :src="`videos/${video.path}`"
-              controls
-              preload="metadata"
-            />
-          </VSheet>
-        </VSheet>
-      </VRow>
-      <VRow>
-        <MatchVideosUploader />
+<!--       FIXME: MatchVideosUploader should maybe be converted to a generic video uploader -->
+        <p>TODO: Video uploader</p>
+<!--        <MatchVideosUploader />-->
       </VRow>
       <VRow>
         <VCol>
@@ -68,10 +70,11 @@
             Help
           </h2>
           <VExpansionPanels>
-            <NameMatchVideoFilesHelp />
-            <MissingMatchVideosHelp />
-            <MissingPlaylistMapping />
-            <UploadErrors />
+<!--            FIXME: Update help content for this -->
+<!--            <NameMatchVideoFilesHelp />-->
+<!--            <MissingMatchVideosHelp />-->
+<!--            <MissingPlaylistMapping />-->
+<!--            <UploadErrors />-->
           </VExpansionPanels>
         </VCol>
       </VRow>
