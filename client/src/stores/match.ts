@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { MatchVideoInfo } from "@/types/MatchVideoInfo";
+import { VideoInfo } from "@/types/VideoInfo";
 import { useSettingsStore } from "@/stores/settings";
 import { useWorkerStore } from "@/stores/worker";
 import { WorkerJobStatus } from "@/types/WorkerJob";
@@ -135,7 +135,7 @@ export const useMatchStore = defineStore("match", () => {
     }
   }
 
-  const matchVideos = ref<MatchVideoInfo[]>([]);
+  const matchVideos = ref<VideoInfo[]>([]);
   const matchVideosLoading = ref(false);
   const matchVideoError = ref("");
 
@@ -175,7 +175,7 @@ export const useMatchStore = defineStore("match", () => {
       return;
     }
 
-    matchVideos.value = data.recommendedVideoFiles as MatchVideoInfo[];
+    matchVideos.value = data.recommendedVideoFiles as VideoInfo[];
     matchVideosLoading.value = false;
   }
 
@@ -184,7 +184,7 @@ export const useMatchStore = defineStore("match", () => {
       matchVideos.value.every(video => video.isUploaded || !!video.workerJobId);
   });
 
-  function videoIsUploaded(video: MatchVideoInfo): boolean {
+  function videoIsUploaded(video: VideoInfo): boolean {
     return video.isUploaded || workerStore.jobHasStatus(video.workerJobId, [WorkerJobStatus.COMPLETED]);
   }
 
@@ -200,7 +200,7 @@ export const useMatchStore = defineStore("match", () => {
 
   // TODO: Add types for this function
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async function uploadVideo(video: MatchVideoInfo): Promise<any> {
+  async function uploadVideo(video: VideoInfo): Promise<any> {
     video.isRequestingJob = true;
     video.jobCreationError = null;
 
@@ -261,7 +261,7 @@ export const useMatchStore = defineStore("match", () => {
     return result;
   }
 
-  async function uploadSingleVideo(video: MatchVideoInfo): Promise<void> {
+  async function uploadSingleVideo(video: VideoInfo): Promise<void> {
     uploadInProgress.value = true;
     await uploadVideo(video);
     uploadInProgress.value = false;
@@ -336,7 +336,7 @@ export const useMatchStore = defineStore("match", () => {
       && !allMatchVideosUploaded.value;
   });
 
-  function postUploadStepsSucceeded(video: MatchVideoInfo): boolean {
+  function postUploadStepsSucceeded(video: VideoInfo): boolean {
     if (!video.workerJobId) {
       return false;
     }

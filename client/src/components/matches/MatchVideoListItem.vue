@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { MatchVideoInfo } from "@/types/MatchVideoInfo";
+import { VideoInfo } from "@/types/VideoInfo";
 import { computed } from "vue";
 import { useMatchStore } from "@/stores/match";
 import { useWorkerStore } from "@/stores/worker";
@@ -58,7 +58,7 @@ const matchStore = useMatchStore();
 const workerStore = useWorkerStore();
 
 interface IProps {
-  video: MatchVideoInfo;
+  video: VideoInfo;
 }
 
 const props = defineProps<IProps>();

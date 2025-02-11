@@ -5,6 +5,10 @@
       md="4"
     >
       <h1>Upload event media</h1>
+      <VAlert color="info" variant="tonal" icon="mdi-information-outline" class="mb-2">
+        Event Media includes all non-match videos for your event. If TBA writes are enabled in settings, anything uploaded
+        here will be added to the Event Media section for the current event.
+      </VAlert>
       <VAlert
         v-if="!!error"
         color="error"
@@ -13,14 +17,45 @@
       </VAlert>
 
       <h2 class="mb-2">
-        File  info
+        Video info
       </h2>
+      <VAlert
+        v-if='eventMediaStore.mediaTitle?.includes("#")'
+        variant="tonal"
+        color="warning"
+        class="mb-4"
+        icon="mdi-pound"
+      >
+        Psst! Make sure to replace all # signs in the media title with the actual number.
+      </VAlert>
+      <VCombobox label="Media title"
+                 :messages='["Enter a title for this media; click to see examples. The event name and other info will be included in the final title as well."]'
+                 :items="mediaTitleDefaults"
+                 persistent-hint
+                 rounded
+                 clearable
+                 variant="outlined"
+                 v-model="eventMediaStore.mediaTitle"
+                 class="mb-6"
+      />
+
+      <VAutocomplete
+        chips
+        variant="outlined"
+        rounded
+        label="Select video files..."
+        :items="eventMediaStore.videoCandidates.map((video => video.path))"
+        v-model="eventMediaStore.selectedVideoFilePaths"
+        multiple
+        clearable
+      ></VAutocomplete>
+
 <!--      <MatchSelector />-->
 
-      <h2 class="mb-2">
-        File metadata
-      </h2>
-      <MatchMetadata />
+<!--      <h2 class="mb-2">-->
+<!--        File metadata-->
+<!--      </h2>-->
+<!--      <MatchMetadata />-->
       <h3 class="mb-2">
         Description
       </h3>
@@ -95,28 +130,27 @@
 
 <script lang="ts" setup>
 import {computed, ref} from "vue";
-import MatchSelector from "@/components/matches/MatchSelector.vue";
-import MatchVideosUploader from "@/components/matches/MatchVideosUploader.vue";
-import {useMatchStore} from "@/stores/match";
-import MatchDescription from "@/components/matches/MatchDescription.vue";
-import NameMatchVideoFilesHelp from "@/components/help/NameMatchVideoFilesHelp.vue";
-import MissingMatchVideosHelp from "@/components/help/MissingMatchVideosHelp.vue";
 import {usePlaylistsStore} from "@/stores/playlists";
-import UploadErrors from "@/components/help/UploadErrors.vue";
-import MissingPlaylistMapping from "@/components/help/MissingPlaylistMapping.vue";
 import JobsList from "@/components/jobs/JobsList.vue";
 import {useWorkerStore} from "@/stores/worker";
-import MatchMetadata from "@/components/matches/MatchMetadata.vue";
-import LiveMode from "@/components/liveMode/LiveMode.vue";
 import { UPLOAD_VIDEO_TASK } from "@/types/WorkerJob";
-import { MatchVideoInfo } from "@/types/MatchVideoInfo";
+import { VideoInfo } from "@/types/VideoInfo";
+import { useEventMediaStore } from "@/stores/eventMedia";
 
 const error = ref("");
 
-const matchStore = useMatchStore();
+const eventMediaStore = useEventMediaStore();
+eventMediaStore.getVideoCandidates("Test title");
 const playlistStore = usePlaylistsStore();
 const workerStore = useWorkerStore();
 workerStore.loadJobs();
+
+const mediaTitleDefaults = ref([
+  "Day # Opening Ceremonies",
+  "Alliance Selection",
+  "Day # Awards Ceremony Part #",
+  "Day # Closing Ceremonies",
+])
 
 const videosMdColWidth = computed(() => {
   if (workerStore.jobsList.length) {
@@ -126,7 +160,7 @@ const videosMdColWidth = computed(() => {
   }
 });
 
-function isVideoMissingPlaylistMapping(video: MatchVideoInfo) {
+function isVideoMissingPlaylistMapping(video: VideoInfo) {
   if (!video.videoLabel) {
     return !playlistStore.playlistMappings["unlabeled"];
   }

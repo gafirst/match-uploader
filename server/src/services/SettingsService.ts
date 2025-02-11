@@ -8,6 +8,7 @@ import {
 import EnvVars from "@src/constants/EnvVars";
 import { type YouTubePlaylists } from "@src/models/YouTubePlaylists";
 import { readSettingsJson, readTextFile, writeSettingsJson, writeTextFile } from "@src/repos/FileStorageRepo";
+import { VideoType } from "@src/models/VideoType";
 
 export async function getSettings(): Promise<ISettings> {
   return await readSettingsJson<ISettings>(

@@ -87,6 +87,7 @@
           <VExpansionPanel>
             <VExpansionPanelTitle>Description template syntax/variables</VExpansionPanelTitle>
             <VExpansionPanelText>
+<!--              FIXME: Update with latest changes -->
               <ul class="ml-4">
                 <li>
                   This description template will be rendered using

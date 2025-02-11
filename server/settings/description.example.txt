@@ -1,10 +1,12 @@
-{{ eventName }} - {{ capitalizedVerboseMatchName }}
+{{ eventName }} - {{ mediaTitle }}
+{{#isMatch}}
 
 Red (teams {{ redTeams }}) - {{ redScore }}
 Blue (teams {{ blueTeams }}) - {{ blueScore }}
+{{/isMatch}}
 
-{{! Careful: any URLs such as `matchUrl` must be in a triple mustache (three curly braces) so that the variable contents is rendered without being escaped }}
-View this match on {{ matchDetailsSite }}: {{{ matchUrl }}}
+{{! Careful: any URLs such as `detailsUrl` must be in a triple mustache (three curly braces) so that the variable contents is rendered without being escaped }}
+View on {{ eventDetailsSite }}: {{{ detailsUrl }}}
 
 Footage of the {{ eventName }} is provided by the GeorgiaFIRST A/V Team.
 

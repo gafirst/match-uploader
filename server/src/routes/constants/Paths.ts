@@ -23,6 +23,11 @@ const Paths = {
     PossibleNextMatches: "/:matchKey/nextMatch",
     UploadStatuses: "/uploaded",
   },
+  EventMedia: {
+    Base: "/event-media",
+    RecommendVideoFiles: "/videos/recommend",
+    GenerateDescription: "/videos/description",
+  },
   YouTube: {
     Base: "/youtube",
     Auth: {
