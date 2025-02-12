@@ -1,4 +1,4 @@
-{{ eventName }} - {{ mediaTitle }}
+{{ eventName }} - {{{ mediaTitle }}}
 {{#isMatch}}
 
 Red (teams {{ redTeams }}) - {{ redScore }}

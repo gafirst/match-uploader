@@ -57,7 +57,7 @@ async function generateDescription(req: IReq, res: IRes): Promise<void> {
     eventName,
   } = await getSettings();
 
-  const { mediaTitle } = matchedData(req);
+  const { mediaTitle } = matchedData(req)
 
   res.json({
     ok: true,

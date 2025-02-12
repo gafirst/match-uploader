@@ -4,11 +4,7 @@
       cols="12"
       md="4"
     >
-      <h1>Upload event media</h1>
-      <VAlert color="info" variant="tonal" icon="mdi-information-outline" class="mb-2">
-        Event Media includes all non-match videos for your event. If TBA writes are enabled in settings, anything uploaded
-        here will be added to the Event Media section for the current event.
-      </VAlert>
+      <h1 class="mb-2">Upload event media</h1>
       <VAlert
         v-if="!!error"
         color="error"
@@ -16,9 +12,6 @@
         {{ error }}
       </VAlert>
 
-      <h2 class="mb-2">
-        Video info
-      </h2>
       <VAlert
         v-if='eventMediaStore.mediaTitle?.includes("#")'
         variant="tonal"
@@ -29,14 +22,15 @@
         Psst! Make sure to replace all # signs in the media title with the actual number.
       </VAlert>
       <VCombobox label="Media title"
-                 :messages='["Enter a title for this media; click to see examples. The event name and other info will be included in the final title as well."]'
+                 :messages='["Click to see examples. The event name and other info will be included in the final title as well."]'
                  :items="mediaTitleDefaults"
                  persistent-hint
                  rounded
                  clearable
                  variant="outlined"
                  v-model="eventMediaStore.mediaTitle"
-                 class="mb-6"
+                 class="mb-2"
+                 @click:clear="() => eventMediaStore.description = ''"
       />
 
       <VAutocomplete
@@ -59,7 +53,12 @@
       <h3 class="mb-2">
         Description
       </h3>
-<!--      <MatchDescription />-->
+      <VideoDescription :error="eventMediaStore.descriptionFetchError"
+                        :showInput="!!eventMediaStore.mediaTitle"
+                        :loading="eventMediaStore.descriptionLoading"
+                        v-model="eventMediaStore.description"
+                        @onRefreshDescription="eventMediaStore.getSuggestedDescription"
+      />
     </VCol>
     <VCol
       cols="12"
@@ -136,6 +135,7 @@ import {useWorkerStore} from "@/stores/worker";
 import { UPLOAD_VIDEO_TASK } from "@/types/WorkerJob";
 import { VideoInfo } from "@/types/VideoInfo";
 import { useEventMediaStore } from "@/stores/eventMedia";
+import VideoDescription from "@/components/form/VideoDescription.vue";
 
 const error = ref("");
 
