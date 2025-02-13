@@ -2,7 +2,7 @@
   <VRow>
     <VCol
       cols="12"
-      md="4"
+      md="5"
     >
       <h1 class="mb-2">Upload event media</h1>
       <VAlert
@@ -21,35 +21,27 @@
       >
         Psst! Make sure to replace all # signs in the media title with the actual number.
       </VAlert>
+<!--      TODO: Loading states -->
+<!--      TODO: Error states -->
+<!--      TODO: Refresh buttons -->
       <VCombobox label="Media title"
-                 :messages='["Click to see examples. The event name and other info will be included in the final title as well."]'
+                 :messages='["Click to see examples. The event name and video label will be included in the final title as well."]'
                  :items="mediaTitleDefaults"
                  persistent-hint
                  rounded
-                 clearable
                  variant="outlined"
                  v-model="eventMediaStore.mediaTitle"
-                 class="mb-2"
-                 @click:clear="() => eventMediaStore.description = ''"
+                 class="mb-4"
       />
 
       <VAutocomplete
-        chips
         variant="outlined"
         rounded
-        label="Select video files..."
-        :items="eventMediaStore.videoCandidates.map((video => video.path))"
-        v-model="eventMediaStore.selectedVideoFilePaths"
-        multiple
-        clearable
+        label="Video file"
+        :items="eventMediaStore.videoFilePaths"
+        v-model="eventMediaStore.selectedVideoFilePath"
       ></VAutocomplete>
 
-<!--      <MatchSelector />-->
-
-<!--      <h2 class="mb-2">-->
-<!--        File metadata-->
-<!--      </h2>-->
-<!--      <MatchMetadata />-->
       <h3 class="mb-2">
         Description
       </h3>
@@ -65,34 +57,33 @@
       :md="videosMdColWidth"
     >
       <h2 class="mb-2">
-        Videos
+        Video
       </h2>
-<!--      FIXME: This part of matchStore could be converted into a generic store holding infos about videos to be uploaded / being uploaded-->
-<!--      <VRow>-->
-<!--        <VSheet class="d-flex flex-wrap">-->
-<!--          <VSheet-->
-<!--            v-for="video in matchStore.matchVideos"-->
-<!--            :key="video.path"-->
-<!--            class="pa-3 video-preview"-->
-<!--          >-->
-<!--            <h3>{{ video.videoLabel ?? "Unlabeled" }}</h3>-->
-<!--            <VAlert-->
-<!--              v-if="isVideoMissingPlaylistMapping(video)"-->
-<!--              density="compact"-->
-<!--              class="mb-2"-->
-<!--              variant="tonal"-->
-<!--              color="warning"-->
-<!--            >-->
-<!--              Missing playlist mapping-->
-<!--            </VAlert>-->
-<!--            <video-->
-<!--              :src="`videos/${video.path}`"-->
-<!--              controls-->
-<!--              preload="metadata"-->
-<!--            />-->
-<!--          </VSheet>-->
-<!--        </VSheet>-->
-<!--      </VRow>-->
+      <VRow>
+        <VSheet class="d-flex flex-wrap">
+          <VSheet
+            v-for="video in eventMediaStore.videoCandidates"
+            :key="video.path"
+            class="pa-3 video-preview"
+          >
+            <h3>{{ video.videoLabel ?? "Unlabeled" }}</h3>
+            <VAlert
+              v-if="isVideoMissingPlaylistMapping(video)"
+              density="compact"
+              class="mb-2"
+              variant="tonal"
+              color="warning"
+            >
+              Missing playlist mapping
+            </VAlert>
+            <video
+              :src="`videos/${video.path}`"
+              controls
+              preload="metadata"
+            />
+          </VSheet>
+        </VSheet>
+      </VRow>
       <VRow>
 <!--       FIXME: MatchVideosUploader should maybe be converted to a generic video uploader -->
         <p>TODO: Video uploader</p>
@@ -135,12 +126,12 @@ import {useWorkerStore} from "@/stores/worker";
 import { UPLOAD_VIDEO_TASK } from "@/types/WorkerJob";
 import { VideoInfo } from "@/types/VideoInfo";
 import { useEventMediaStore } from "@/stores/eventMedia";
-import VideoDescription from "@/components/form/VideoDescription.vue";
+import VideoDescription from "@/components/videos/VideoDescription.vue";
 
 const error = ref("");
 
 const eventMediaStore = useEventMediaStore();
-eventMediaStore.getVideoCandidates("Test title");
+eventMediaStore.getVideoFiles();
 const playlistStore = usePlaylistsStore();
 const workerStore = useWorkerStore();
 workerStore.loadJobs();
@@ -172,7 +163,7 @@ function isVideoMissingPlaylistMapping(video: VideoInfo) {
 
 <style scoped>
 .video-preview {
-  max-width: 12.25rem;
+  max-width: 25rem;
 }
 
 /* https://css-tricks.com/fluid-width-video/ */

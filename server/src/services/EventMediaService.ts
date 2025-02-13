@@ -6,10 +6,19 @@ import { capitalizeFirstLetter } from "@src/util/string";
 import { matchUploaderAttribution } from "@src/util/videoDescription";
 import Mustache from "mustache";
 
-export async function getEventMediaVideos(mediaTitle: string, includeMatchVideos: boolean): Promise<VideoInfo[]> {
-  const { eventName, videoSearchDirectory } = await getSettings();
+export async function getEventMediaVideoFiles(): Promise<string[]> {
+  const { videoSearchDirectory } = await getSettings();
 
   const filePaths = await getFilesMatchingPattern(videoSearchDirectory, `**/*`, 2, false);
+
+  return filePaths.filter(path => {
+    const pathEnd: string = (path.split("/").at(-1)?.toLowerCase() ?? "");
+    return path.includes("/") && !pathEnd.includes("qualification") && !pathEnd.includes("playoff");
+  }).sort();
+}
+
+export async function getEventMediaVideos(filePaths: string[], mediaTitle: string): Promise<VideoInfo[]> {
+  const { eventName } = await getSettings();
 
   return filePaths.filter(file => file.includes("/"))
     .map(path => {
@@ -27,15 +36,7 @@ export async function getEventMediaVideos(mediaTitle: string, includeMatchVideos
         false,
         VideoType.EventMedia,
       );
-    })
-    .filter(video => {
-      if (includeMatchVideos) {
-        return true;
-      }
-
-      // FIXME: Make this more efficient
-      return !(video.path.split("/").at(-1)?.toLowerCase().includes("playoff") ?? false) && !(video.path.split("/").at(-1)?.toLowerCase().includes("qualification") ?? false)
-    })
+    });
 }
 
 async function generateEventMediaDetailsUrl(): Promise<{

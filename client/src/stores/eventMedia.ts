@@ -6,27 +6,16 @@ import { watchDebounced } from "@vueuse/core";
 
 export const useEventMediaStore = defineStore("eventMedia", () => {
   const mediaTitle = ref<string|null>(null);
+  const videoFilePaths = ref<string[]>([]);
   const videoCandidates = ref<VideoInfo[]>([]);
 
-  async function getVideoCandidates(videoTitle: string) {
-    const response = await fetch(`/api/v1/event-media/videos/recommend?mediaTitle=${encodeURIComponent(videoTitle)}`);
-    videoCandidates.value = (await response.json()).videoCandidates.map(
-      (video: any): VideoInfo => {
-        return {
-          path: video.path,
-          videoLabel: video.videoLabel,
-          videoTitle: video.videoTitle,
-          isRequestingJob: false,
-          isUploaded: false,
-          jobCreationError: null,
-          workerJobId: null,
-          skipUpload: false,
-          videoType: video.videoType,
-        };
-      });
+  async function getVideoFiles() {
+    // FIXME: Error handling
+    const response = await fetch(`/api/v1/event-media/videos/recommend`);
+    videoFilePaths.value = (await response.json()).videoFiles;
   }
 
-  const selectedVideoFilePaths = ref<string[]>([]);
+  const selectedVideoFilePath = ref<string|null>(null);
 
   const description = ref<string | null>(null);
   const descriptionLoading = ref(false);
@@ -75,11 +64,31 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     description.value = data.description;
   }
 
+  async function getVideoMetadata(): Promise<void> {
+    // FIXME: Error handling
+    const response = await fetch(`/api/v1/event-media/videos/metadata`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mediaTitle: mediaTitle.value,
+          paths: [selectedVideoFilePath.value],
+        }),
+      }
+    );
+    videoCandidates.value = (await response.json()).videoCandidates;
+
+  }
+
   watchDebounced(
     mediaTitle,
-    async () => { console.log("Debounce called"); await getSuggestedDescription() },
+    async () => await getSuggestedDescription(),
     { debounce: 250, maxWait: 1000 },
   )
+
+  watch(selectedVideoFilePath, async () => await getVideoMetadata());
 
   // FIXME: Disabling FRC events should regenerate video description
   return {
@@ -87,10 +96,12 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     descriptionFetchError,
     descriptionLoading,
     getSuggestedDescription,
-    getVideoCandidates,
+    getVideoFiles,
+    getVideoMetadata,
     mediaTitle,
-    selectedVideoFilePaths,
+    selectedVideoFilePath,
     videoCandidates,
+    videoFilePaths,
   };
 });
 
