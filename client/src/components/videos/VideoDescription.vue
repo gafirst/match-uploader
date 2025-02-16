@@ -1,5 +1,5 @@
-<!--TODO update match uploads to use this component-->
 <template>
+  <!--TODO update match uploads to use this component-->
   <VAlert
     v-if="!!error"
     color="error"
