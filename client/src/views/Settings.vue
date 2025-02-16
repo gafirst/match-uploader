@@ -111,9 +111,12 @@
                   <code>{{ settingsStore.settings?.eventName ?? "Loading..." }}</code>)
                 </li>
                 <li>
-                  <code>capitalizedVerboseMatchName</code> - the full form of the match name with the first letter of
-                  each word capitalized (example: <code>Qualification Match 1</code> or
-                  <code>Playoff Match 3 (R1)</code>)
+                  <code>isMatch</code> - true if this is a match video, false otherwise (i.e., this is an event media
+                  upload). Use in an <code>if</code> block like <code v-pre>{{#isMatch}} ... {{/isMatch}} </code>
+                </li>
+                <li>
+                  <code>mediaTitle</code> - properly capitalized title for the video. When using, enclose in triple curly braces: <code v-pre>{{{mediaTitle}}}</code> (example: <code>Qualification Match 1</code>,
+                  <code>Playoff Match 3 (R1)</code>, or <code>Alliance Selection</code>)
                 </li>
                 <li>
                   <code>redTeams</code> - red alliance team numbers separated by a comma and a space (example:
@@ -126,11 +129,11 @@
                 <li><code>redScore</code> - red alliance match score (if available) (example: <code>21</code>)</li>
                 <li><code>blueScore</code> - blue alliance match score (if available) (example: <code>21</code>)</li>
                 <li>
-                  <code>matchDetailsSite</code> - either <code>The Blue Alliance</code> or <code>FRC Events</code>
-                  depending on the currently selected match data source
+                  <code>eventDetailsSite </code> - either <code>The Blue Alliance</code> or <code>FRC Events</code>
+                  depending on the currently selected event/match data source
                 </li>
                 <li>
-                  <code>matchUrl</code> <strong>(contains URL)</strong> - URL where full match results can be viewed
+                  <code>details</code> <strong>(contains URL)</strong> - URL where full match results or event info can be viewed
                   (links to The Blue Alliance or FRC Events depending on the currently selected match data source)
                   (example: <code>https://www.thebluealliance.com/match/2023gaalb_sf1m1</code> or
                   <code>https://frc-events.firstinspires.org/2023/gaalb/playoffs/3</code>)
@@ -201,15 +204,6 @@
           @on-choice-selected="saveTbaLinkVideos"
         />
 
-        <VAlert
-          v-if="!settingsStore.settings?.linkVideosOnTheBlueAlliance"
-          color="info"
-          variant="tonal"
-          class="mt-4 mb-4"
-        >
-          Some settings are hidden because linking match videos on TBA is disabled. Enable the feature to see them.
-        </VAlert>
-
         <AutosavingTextInput
           v-if="
             settingsStore.settings?.linkVideosOnTheBlueAlliance"
@@ -256,6 +250,14 @@
           paste it below.
         </p>
 
+        <VAlert
+          v-if="matchStore.selectedMatchKey"
+          class="mb-4"
+          color="warning"
+        >
+            Toggling the FRC Events setting will regenerate the description for the current match.
+        </VAlert>
+
         <p class="mt-4">
           Retrieve match data from FRC Events
         </p>
@@ -266,16 +268,8 @@
           @on-choice-selected="saveFrcEventsEnabled"
         />
 
-        <VAlert
-          v-if="!settingsStore.settings?.useFrcEventsApi"
-          color="info"
-          variant="tonal"
-          class="mt-4 mb-4"
-        >
-          Some settings are hidden because FRC Events integration is disabled. Enable the feature to see them.
-        </VAlert>
         <AutosavingTextInput
-          v-else
+          v-if="settingsStore.settings?.useFrcEventsApi"
           :key="`frcEventsApiKey-${dataRefreshKey}`"
           :on-submit="submit"
           initial-value=""
@@ -605,7 +599,9 @@ async function saveFrcEventsEnabled(value: string): Promise<void> {
   await submit("useFrcEventsApi", value === "On", "setting");
   await refreshData(false);
   savingFrcEventsEnabled.value = false;
+  matchStore.descriptionLoading = true;
   await matchListStore.getMatchList(true);
+  await matchStore.getSuggestedDescription();
 }
 </script>
 

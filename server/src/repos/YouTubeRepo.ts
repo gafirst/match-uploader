@@ -13,6 +13,7 @@ import path from "path";
 import type MatchKey from "@src/models/MatchKey";
 import type { YouTubePostUploadSteps } from "@src/models/YouTubePostUploadSteps";
 import { TheBlueAllianceTrustedRepo } from "@src/repos/TheBlueAllianceTrustedRepo";
+import { VideoType } from "@src/models/VideoType";
 
 // Functions in this file should not depend on anything in YouTubeService.ts or
 // directly or indirectly depend on anything in server/src/index.ts (e.g., WorkerService.ts), as this
@@ -220,13 +221,23 @@ export async function getPlaylistIdForVideoLabel(label: string): Promise<string 
 }
 
 /**
- * Handles post-upload steps for a match video, such as adding it to a playlist.
+ * Handles post-upload steps for a video, such as adding it to a playlist.
+ * @param videoType The type of the video (e.g., match video or event media)
  * @param videoId The ID of the uploaded video on YouTube
  * @param videoLabel The label (NOT case-sensitive) of the match video
- * @param matchKey The match key of the match that the video is for
+ * @param matchKey The match key of the match that the video is for, only required when video type is match video
+ * @param eventKey Event key, only required when video type is event media
  */
-export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabel: string, matchKey: MatchKey):
+export async function handleMatchVideoPostUploadSteps(videoType: VideoType, videoId: string, videoLabel: string, matchKey: MatchKey | null, eventKey: string | null):
   Promise<YouTubePostUploadSteps> {
+    if (videoType === VideoType.EventMedia && !eventKey) {
+        throw new Error("Event key is required when video type is event media");
+    }
+
+    if (videoType === VideoType.MatchVideo && !matchKey) {
+        throw new Error("Match key is required when video type is match video");
+    }
+
     // Make video labels more flexible by not requiring them to match case
     const lowercasedVideoLabel = videoLabel.toLowerCase();
     const playlistId = await getPlaylistIdForVideoLabel(lowercasedVideoLabel);
@@ -254,19 +265,25 @@ export async function handleMatchVideoPostUploadSteps(videoId: string, videoLabe
         if (authId && authSecret) {
             const tbaTrustedRepo = new TheBlueAllianceTrustedRepo(authId, authSecret);
             try {
-                await tbaTrustedRepo.postMatchVideo(matchKey, videoId);
+                if (videoType === VideoType.EventMedia && eventKey) {
+                    await tbaTrustedRepo.postEventMedia(eventKey, videoId);
+                } else if (videoType === VideoType.MatchVideo && matchKey) {
+                    await tbaTrustedRepo.postMatchVideo(matchKey, videoId);
+                } else {
+                    throw new Error(`Unexpected video type ${videoType} missing event key (${eventKey}) and match key`);
+                }
                 linkOnTbaSuccess = true;
             } catch (e) {
                 logger.err(`Failed to post match video ${videoId} to The Blue Alliance: ${e}`);
             }
         } else {
-            logger.err("Failed to post match video to The Blue Alliance: missing auth ID or auth secret. If " +
-              "you don't want to associate match videos on The Blue Alliance. Go to Settings in the client and " +
+            logger.err("Failed to post video to The Blue Alliance: missing auth ID or auth secret. If " +
+              "you don't want to associate videos on The Blue Alliance. Go to Settings in the client and " +
               "disable the 'Link match videos on TBA' feature.");
         }
     } else {
         linkOnTbaSuccess = true;
-        logger.info(`Skipping linking video ${videoId} for match ${matchKey.matchKey}, setting is disabled`);
+        logger.info(`Skipping linking video ${videoId} for ${matchKey?.matchKey ?? eventKey ?? "unknown"}, setting is disabled`);
     }
 
     return {

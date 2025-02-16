@@ -14,7 +14,6 @@
       />
     </template>
     <template
-      v-if="!video.isUploaded"
       #append
     >
       <VBtn
@@ -34,7 +33,7 @@
         Retry
       </VBtn>
       <VBtn
-        v-else-if="!video.workerJobId"
+        v-else-if="!video.workerJobId && !hideUploadBtn"
         variant="text"
         prepend-icon="mdi-upload"
         :disabled="matchStore.uploadInProgress"
@@ -59,6 +58,7 @@ const workerStore = useWorkerStore();
 
 interface IProps {
   video: VideoInfo;
+  hideUploadBtn?: boolean;
 }
 
 const props = defineProps<IProps>();

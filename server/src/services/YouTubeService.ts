@@ -13,72 +13,74 @@ import { getYouTubeApiClient } from "@src/repos/YouTubeRepo";
 import { graphileWorkerUtils, prisma } from "@src/server";
 import { queueJob } from "@src/util/queueJob";
 import { io } from "@src/index";
+import { VideoType } from "@src/models/VideoType";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
-    const port = EnvVars.port;
-    const includePort = port !== 80 && port !== 443;
-    const portString = includePort ? `:${port}` : "";
-    return `${requestProtocol}://${EnvVars.host}${portString}${FullPaths.YouTube.Auth.Callback}`;
+  const port = EnvVars.port;
+  const includePort = port !== 80 && port !== 443;
+  const portString = includePort ? `:${port}` : "";
+  return `${requestProtocol}://${EnvVars.host}${portString}${FullPaths.YouTube.Auth.Callback}`;
 }
 
 export async function getGoogleOAuth2Client(requestProtocol: string): Promise<OAuth2Client> {
-    const settings = await getSettings();
-    const secrets = await getSecrets();
+  const settings = await getSettings();
+  const secrets = await getSecrets();
 
-    // @ts-expect-error This OAuth2 client is correct, but the types don't match for unclear reasons that aren't worth
-    // investigating right now
-    return new auth.OAuth2(
-        settings.googleClientId,
-        secrets.googleClientSecret,
-        getGoogleOAuth2RedirectUri(requestProtocol),
-    );
+  // @ts-expect-error This OAuth2 client is correct, but the types don't match for unclear reasons that aren't worth
+  // investigating right now
+  return new auth.OAuth2(
+    settings.googleClientId,
+    secrets.googleClientSecret,
+    getGoogleOAuth2RedirectUri(requestProtocol),
+  );
 }
 
 export async function getOAuth2AuthUrl(requestProtocol: string): Promise<string> {
-    const client = await getGoogleOAuth2Client(requestProtocol);
+  const client = await getGoogleOAuth2Client(requestProtocol);
 
-    const scope = [
-        "https://www.googleapis.com/auth/youtube",
-        "https://www.googleapis.com/auth/youtube.upload",
-    ];
+  const scope = [
+    "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/youtube.upload",
+  ];
 
-    const authUrl = client.generateAuthUrl({
-        access_type: "offline",
-        include_granted_scopes: true,
-        scope,
-    });
-    logger.info(authUrl);
-    return authUrl;
+  const authUrl = client.generateAuthUrl({
+    access_type: "offline",
+    include_granted_scopes: true,
+    scope,
+  });
+  logger.info(authUrl);
+  return authUrl;
 }
 
 export async function oauth2AuthCodeExchange(code: string, requestProtocol: string): Promise<Credentials> {
-    const client = await getGoogleOAuth2Client(requestProtocol);
+  const client = await getGoogleOAuth2Client(requestProtocol);
 
-    const { tokens } = await client.getToken(code);
+  const { tokens } = await client.getToken(code);
 
-    return tokens;
+  return tokens;
 }
 
 export async function getAuthenticatedYouTubeChannels(): Promise<YouTubeChannelList[] | undefined> {
-    const youtubeClient = await getYouTubeApiClient();
+  const youtubeClient = await getYouTubeApiClient();
 
-    const resp = await youtubeClient.channels.list({
-        mine: true,
-        part: ["snippet"],
-    });
+  const resp = await youtubeClient.channels.list({
+    mine: true,
+    part: ["snippet"],
+  });
 
-    return resp.data.items?.map((item) => {
-        return {
-            id: item.id,
-            title: item.snippet?.title,
-            thumbnailUrl: item.snippet?.thumbnails?.default?.url,
-        };
-    });
+  return resp.data.items?.map((item) => {
+    return {
+      id: item.id,
+      title: item.snippet?.title,
+      thumbnailUrl: item.snippet?.thumbnails?.default?.url,
+    };
+  });
 }
 
 /**
  * Queues a job to upload a video to YouTube.
  *
+ * @param videoType
  * @param title
  * @param description
  * @param videoPath
@@ -86,71 +88,76 @@ export async function getAuthenticatedYouTubeChannels(): Promise<YouTubeChannelL
  * @param matchKey
  * @param label
  */
-export async function queueYouTubeVideoUpload(title: string,
-                                              description: string,
-                                              videoPath: string,
-                                              privacy: YouTubeVideoPrivacy,
-                                              matchKey: MatchKey,
-                                              label: string,
+export async function queueYouTubeVideoUpload(
+  videoType: VideoType,
+  title: string,
+  description: string,
+  videoPath: string,
+  privacy: YouTubeVideoPrivacy,
+  matchKey: MatchKey | null,
+  eventKey: string | null,
+  label: string,
 ): Promise<WorkerJob> {
-    return await queueJob(prisma, graphileWorkerUtils.addJob, io, title, UPLOAD_VIDEO, {
-        title,
-        description,
-        videoPath,
-        privacy,
-        label,
-        matchKey: matchKey.matchKey,
-        playoffsType: matchKey.playoffsType,
-    }, {
-        queueName: UPLOAD_VIDEO,
-        maxAttempts: 2,
-    });
+  return await queueJob(prisma, graphileWorkerUtils.addJob, io, title, UPLOAD_VIDEO, {
+    videoType,
+    title,
+    description,
+    videoPath,
+    privacy,
+    label,
+    matchKey: matchKey?.matchKey,
+    playoffsType: matchKey?.playoffsType,
+    eventKey,
+  }, {
+    queueName: UPLOAD_VIDEO,
+    maxAttempts: 2,
+  });
 }
 
 export async function cachePlaylistNames(forceUpdate = false): Promise<boolean> {
-    const playlists = await getYouTubePlaylists();
+  const playlists = await getYouTubePlaylists();
 
-    if (!playlists) {
-        return false;
-    }
+  if (!playlists) {
+    return false;
+  }
 
-    // map playlist IDs to labels
-    const playlistIdsToLabels: Record<string, string> = {};
-    Object.keys(playlists).forEach((label) => {
-        playlistIdsToLabels[playlists[label].id] = label;
-    });
+  // map playlist IDs to labels
+  const playlistIdsToLabels: Record<string, string> = {};
+  Object.keys(playlists).forEach((label) => {
+    playlistIdsToLabels[playlists[label].id] = label;
+  });
 
-    const playlistsWithoutNames = Object.values(playlists).filter((playlist) => !playlist.name);
+  const playlistsWithoutNames = Object.values(playlists).filter((playlist) => !playlist.name);
 
-    if (!forceUpdate && playlistsWithoutNames.length === 0) {
-        return true;
-    }
-
-    const youtubeClient = await getYouTubeApiClient();
-
-    const playlistIds = playlistsWithoutNames.map((playlist) => playlist.id);
-
-    const result = await youtubeClient.playlists.list({
-        part: ["snippet"],
-        id: playlistIds,
-    });
-
-    if (result.data.items && result.data.items.length !== playlistIds.length) {
-        logger.warn(`Expecting data for playlist IDs ${playlistIds.join(", ")}, but did not receive data ` +
-            `back for all of them (see below). This might mean that some of the playlist IDs are invalid or not ` +
-            `accessible by this channel.`);
-        logger.info(`YouTube API response for playlist IDs: ${JSON.stringify(result.data.items)}`);
-    }
-
-    if (!result.data.items) {
-        return false;
-    }
-
-    for (const playlist of result.data.items) {
-        if (playlist.id && playlist.snippet?.title && playlistIdsToLabels[playlist.id]) {
-            await setYouTubePlaylist(playlistIdsToLabels[playlist.id], playlist.id, playlist.snippet?.title);
-        }
-    }
-
+  if (!forceUpdate && playlistsWithoutNames.length === 0) {
     return true;
+  }
+
+  const youtubeClient = await getYouTubeApiClient();
+
+  const playlistIds = playlistsWithoutNames.map((playlist) => playlist.id);
+
+  const result = await youtubeClient.playlists.list({
+    part: ["snippet"],
+    id: playlistIds,
+  });
+
+  if (result.data.items && result.data.items.length !== playlistIds.length) {
+    logger.warn(`Expecting data for playlist IDs ${playlistIds.join(", ")}, but did not receive data ` +
+      `back for all of them (see below). This might mean that some of the playlist IDs are invalid or not ` +
+      `accessible by this channel.`);
+    logger.info(`YouTube API response for playlist IDs: ${JSON.stringify(result.data.items)}`);
+  }
+
+  if (!result.data.items) {
+    return false;
+  }
+
+  for (const playlist of result.data.items) {
+    if (playlist.id && playlist.snippet?.title && playlistIdsToLabels[playlist.id]) {
+      await setYouTubePlaylist(playlistIdsToLabels[playlist.id], playlist.id, playlist.snippet?.title);
+    }
+  }
+
+  return true;
 }

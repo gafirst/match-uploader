@@ -70,4 +70,15 @@ export class TheBlueAllianceTrustedRepo {
                 `${matchKey.matchKey} (video ID: ${videoId}: ${error}`);
         }
     }
+
+    async postEventMedia(eventKey: string, videoId: string): Promise<void> {
+        try {
+            await this.post(
+              `/event/${eventKey}/media/add`,
+              [videoId]);
+        } catch (error) {
+            throw new Error("Error posting event media to The Blue Alliance for " +
+              `${eventKey} (video ID: ${videoId}: ${error}`);
+        }
+    }
 }
