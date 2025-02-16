@@ -198,12 +198,12 @@ import { useWorkerStore } from "@/stores/worker";
 import { UPLOAD_VIDEO_TASK, WorkerJobStatus } from "@/types/WorkerJob";
 import { VideoInfo } from "@/types/VideoInfo";
 import { useEventMediaStore } from "@/stores/eventMedia";
-import VideoDescription from "@/components/videos/VideoDescription.vue";
 import MatchVideoListItem from "@/components/matches/MatchVideoListItem.vue";
 import { useSettingsStore } from "@/stores/settings";
 import LoadingSpinner from "@/components/util/LoadingSpinner.vue";
 import PrivateUploads from "@/components/alerts/PrivateUploads.vue";
 import SandboxModeAlert from "@/components/alerts/SandboxModeAlert.vue";
+import VideoDescription from "@/components/video/VideoDescription.vue";
 
 const eventMediaStore = useEventMediaStore();
 eventMediaStore.getVideoFiles();
