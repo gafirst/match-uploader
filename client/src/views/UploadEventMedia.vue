@@ -4,7 +4,11 @@
       cols="12"
       md="5"
     >
-      <h1 class="mb-2">Upload event media <VChip color="purple">Beta</VChip></h1>
+      <h1 class="mb-2">
+        Upload event media <VChip color="purple">
+          Beta
+        </VChip>
+      </h1>
       <VAlert
         color="purple"
         variant="tonal"
@@ -32,7 +36,7 @@
       </p>
 
       <VAlert
-        v-if='eventMediaStore.mediaTitle?.includes("#")'
+        v-if="eventMediaStore.mediaTitle?.includes('#')"
         variant="tonal"
         color="warning"
         class="mb-4"
@@ -40,23 +44,26 @@
       >
         Psst! Make sure to replace all # signs in the media title with the actual number.
       </VAlert>
-      <VCombobox label="Media title"
-                 :messages='["Click to see examples. The event name and video label will be included in the final title as well."]'
-                 :items="mediaTitleDefaults"
-                 persistent-hint
-                 rounded
-                 variant="outlined"
-                 v-model="eventMediaStore.mediaTitle"
-                 class="mb-4"
-                 :disabled="jobQueueInProgress"
+      <VCombobox
+        v-model="eventMediaStore.mediaTitle"
+        label="Media title"
+        :messages="[
+          'Click to see examples. The event name and video label will be included in the final title as well.'
+        ]"
+        :items="mediaTitleDefaults"
+        persistent-hint
+        rounded
+        variant="outlined"
+        class="mb-4"
+        :disabled="jobQueueInProgress"
       />
 
       <VAutocomplete
+        v-model="eventMediaStore.selectedVideoFilePath"
         variant="outlined"
         rounded
         label="Video file"
         :items="eventMediaStore.videoFilePaths"
-        v-model="eventMediaStore.selectedVideoFilePath"
         :disabled="!eventMediaStore.mediaTitle || jobQueueInProgress"
         :loading="eventMediaStore.videoFilesLoading"
       />
@@ -75,12 +82,13 @@
       <h3 class="mb-2">
         Description
       </h3>
-      <VideoDescription :error="eventMediaStore.descriptionFetchError"
-                        :showInput="!!eventMediaStore.mediaTitle"
-                        :loading="eventMediaStore.descriptionLoading"
-                        :input-disabled="jobQueueInProgress"
-                        v-model="eventMediaStore.description"
-                        @onRefreshDescription="eventMediaStore.getSuggestedDescription"
+      <VideoDescription
+        v-model="eventMediaStore.description"
+        :error="eventMediaStore.descriptionFetchError"
+        :show-input="!!eventMediaStore.mediaTitle"
+        :loading="eventMediaStore.descriptionLoading"
+        :input-disabled="jobQueueInProgress"
+        @on-refresh-description="eventMediaStore.getSuggestedDescription"
       />
     </VCol>
     <VCol
@@ -123,7 +131,15 @@
               v-if="eventMediaStore.videoToUploadLoading"
               class="mt-2 mb-4"
             />
-            <VAlert class="mb-2" density="compact" variant="tonal" color="info" v-else-if="!eventMediaStore.selectedVideoFile">Nothing to upload</VAlert>
+            <VAlert
+              v-else-if="!eventMediaStore.selectedVideoFile"
+              class="mb-2"
+              density="compact"
+              variant="tonal"
+              color="info"
+            >
+              Nothing to upload
+            </VAlert>
             <MatchVideoListItem
               v-else
               :video="eventMediaStore.selectedVideoFile"
@@ -143,8 +159,8 @@
             </div>
             <VBtn
               size="large"
-              @click="eventMediaStore.triggerUpload"
               :disabled="uploadInProgress || disableUploadButton"
+              @click="eventMediaStore.triggerUpload"
             >
               Queue upload
             </VBtn>
@@ -201,7 +217,7 @@ const mediaTitleDefaults = ref([
   "Alliance Selection",
   "Day # Awards Ceremony Part #",
   "Day # Closing Ceremonies",
-])
+]);
 
 const videosMdColWidth = computed(() => {
   if (workerStore.jobsList.length) {
@@ -242,7 +258,10 @@ const jobQueueInProgress = computed(() => {
 
 const uploadInProgress = computed(() => {
   if (eventMediaStore.selectedVideoFile?.workerJobId) {
-    return !workerStore.jobHasStatus(eventMediaStore.selectedVideoFile.workerJobId, [WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED]);
+    return !workerStore.jobHasStatus(
+      eventMediaStore.selectedVideoFile.workerJobId,
+      [WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED],
+    );
   }
 
   return false;

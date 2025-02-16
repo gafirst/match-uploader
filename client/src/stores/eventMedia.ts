@@ -1,7 +1,6 @@
 import { acceptHMRUpdate, defineStore } from "pinia";
 import { ref, watch } from "vue";
 import { VideoInfo } from "@/types/VideoInfo";
-import * as path from "node:path";
 import { watchDebounced } from "@vueuse/core";
 import { uploadVideo } from "@/util/videos";
 import { useSettingsStore } from "@/stores/settings";
@@ -24,7 +23,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     error.value = "";
     videoFilesLoading.value = true;
 
-    const result = await fetch(`/api/v1/event-media/videos/recommend`)
+    const result = await fetch("/api/v1/event-media/videos/recommend")
       .catch((e) => {
         error.value = `Unable to retrieve video files: ${e}`;
         videoFilesLoading.value = false;
@@ -36,7 +35,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     }
 
     if (!result.ok) {
-      const message = `Unable to retrieve video files`;
+      const message = "Unable to retrieve video files";
       error.value = `API error (${result.status} ${result.statusText}): ${message}`;
       videoFilesLoading.value = false;
       return;
@@ -57,7 +56,8 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     videoFilesLoading.value = false;
 
     if (!videoFilePaths.value.length) {
-      error.value = "There are no event media files to upload right now. File names including the word \"qualification\" or \"playoff\" (case-insensitive) are not shown here.";
+      error.value = "There are no event media files to upload right now. File names including the word" +
+        "\"qualification\" or \"playoff\" (case-insensitive) are not shown here.";
     }
   }
 
@@ -75,8 +75,9 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     descriptionLoading.value = true;
     descriptionFetchError.value = "";
 
-    const result = await fetch(`/api/v1/event-media/videos/description?mediaTitle=${encodeURIComponent(mediaTitle.value)}`)
-      .catch((e) => {
+    const result = await fetch(
+      `/api/v1/event-media/videos/description?mediaTitle=${encodeURIComponent(mediaTitle.value)}`,
+    ).catch((e) => {
         description.value = "";
         descriptionFetchError.value = `Unable to retrieve description: ${e}`;
         descriptionLoading.value = false;
@@ -88,7 +89,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     }
 
     if (!result.ok) {
-      const message = `Unable to retrieve description`;
+      const message = "Unable to retrieve description";
       description.value = "";
       descriptionFetchError.value = `API error (${result.status} ${result.statusText}): ${message}`;
       descriptionLoading.value = false;
@@ -116,7 +117,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     }
 
     videoToUploadLoading.value = true;
-    const response = await fetch(`/api/v1/event-media/videos/metadata`,
+    const response = await fetch("/api/v1/event-media/videos/metadata",
       {
         method: "POST",
         headers: {
@@ -126,7 +127,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
           mediaTitle: mediaTitle.value,
           paths: [selectedVideoFilePath.value],
         }),
-      }
+      },
     ).catch((e) => {
       error.value = `Unable to retrieve video metadata: ${e}`;
       console.log(e);
@@ -139,7 +140,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     }
 
     if (!response.ok) {
-      const message = `Unable to retrieve video metadata`;
+      const message = "Unable to retrieve video metadata";
       videoToUploadLoading.value = false;
       error.value = `API error (${response.status} ${response.statusText}): ${message}`;
       return;
@@ -171,7 +172,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
       await getVideoMetadata();
     },
     { debounce: 250, maxWait: 1000 },
-  )
+  );
 
   const selectedVideoFile = ref<VideoInfo | null>(null);
 
@@ -193,11 +194,14 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     }
 
     selectedVideoFile.value.isRequestingJob = true;
-    await uploadVideo(selectedVideoFile.value, description.value, settingsStore.settings.youTubeVideoPrivacy as YouTubeVideoPrivacy);
+    await uploadVideo(
+      selectedVideoFile.value,
+      description.value,
+      settingsStore.settings.youTubeVideoPrivacy as YouTubeVideoPrivacy,
+    );
     selectedVideoFile.value.isRequestingJob = false;
   }
 
-  // FIXME: Disabling FRC events should regenerate video description
   return {
     description,
     descriptionFetchError,

@@ -14,7 +14,7 @@ export const eventMediaRouter = Router();
 eventMediaRouter.get(
   Paths.EventMedia.RecommendVideoFiles,
   recommendVideoFiles,
-)
+);
 
 async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
   const errors = validationResult(req);
@@ -29,7 +29,7 @@ async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
 
   res.json({
     ok: true,
-    videoFiles: await getEventMediaVideoFiles()
+    videoFiles: await getEventMediaVideoFiles(),
   });
 }
 
@@ -38,7 +38,7 @@ eventMediaRouter.post(
   body("paths").isArray({ min: 1 }),
   body("mediaTitle").isString(),
   getVideoMetadata,
-)
+);
 
 async function getVideoMetadata(req: IReq, res: IRes): Promise<void> {
   const errors = validationResult(req);
@@ -55,7 +55,7 @@ async function getVideoMetadata(req: IReq, res: IRes): Promise<void> {
 
   res.json({
     ok: true,
-    videoCandidates: await getEventMediaVideos(paths, mediaTitle),
+    videoCandidates: await getEventMediaVideos(paths as string[], mediaTitle as string),
   });
 }
 
@@ -80,7 +80,7 @@ async function generateDescription(req: IReq, res: IRes): Promise<void> {
     eventName,
   } = await getSettings();
 
-  const { mediaTitle } = matchedData(req)
+  const { mediaTitle } = matchedData(req);
 
   res.json({
     ok: true,

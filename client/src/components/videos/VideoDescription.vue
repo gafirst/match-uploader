@@ -20,8 +20,8 @@
       Regenerate description
     </VBtn>
     <VAlert class="mb-4">
-      Changes you make to the description here will only apply to the current set of videos. To revert your changes, press
-      <strong>Regenerate description</strong> above.
+      Changes you make to the description here will only apply to the current set of videos. To revert your changes,
+      press <strong>Regenerate description</strong> above.
     </VAlert>
     <VTextarea
       v-model="description"
@@ -40,7 +40,9 @@
   >
     <p>
       Descriptions are generated using the template defined in
-      <RouterLink to="/settings">Settings</RouterLink>. After the description is generated for the current set of
+      <RouterLink to="/settings">
+        Settings
+      </RouterLink>. After the description is generated for the current set of
       videos, you'll see a preview here.
     </p>
   </VAlert>

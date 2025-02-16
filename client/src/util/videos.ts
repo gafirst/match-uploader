@@ -1,7 +1,10 @@
 import { VideoInfo } from "@/types/VideoInfo";
 import { YouTubeVideoPrivacy } from "@/types/youtube/YouTubeVideoPrivacy";
 
-export async function uploadVideo(video: VideoInfo, description: string, videoPrivacy: YouTubeVideoPrivacy, matchKey: string | null = null): Promise<any> {
+export async function uploadVideo(video: VideoInfo,
+  description: string,
+  videoPrivacy: YouTubeVideoPrivacy,
+  matchKey: string | null = null): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
   video.isRequestingJob = true;
   video.jobCreationError = null;
 

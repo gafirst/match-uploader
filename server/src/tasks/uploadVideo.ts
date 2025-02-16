@@ -155,7 +155,13 @@ export async function uploadVideo(payload: unknown, {
     }
 
     const postUploadStepsResult =
-      await handleMatchVideoPostUploadSteps(payload.videoType, uploadResult.videoId, payload.label, matchKeyObject, payload.eventKey);
+      await handleMatchVideoPostUploadSteps(
+        payload.videoType,
+        uploadResult.videoId,
+        payload.label,
+        matchKeyObject,
+        payload.eventKey
+      );
 
     try {
       await prisma.workerJob.update({

@@ -98,14 +98,15 @@ async function checkMatchOrdering(eventKey: string,
   };
 }
 
-async function getVideoDuration(logger: Logger, filePath: string): Promise<{ seconds: number } | { fileTooLarge: boolean }> {
+async function getVideoDuration(logger: Logger,
+  filePath: string): Promise<{ seconds: number } | { fileTooLarge: boolean }> {
   const videoFileSizeBytes = (await fs.stat(filePath)).size;
 
   if (videoFileSizeBytes > MAX_VIDEO_SIZE_BYTES_FOR_DURATION) {
     logger.warn(`Video file ${filePath} size (${videoFileSizeBytes}B) is too large to calculate duration`);
     return {
       fileTooLarge: true,
-    }
+    };
   }
 
   // eslint-disable-next-line
@@ -205,7 +206,7 @@ export async function autoRename(payload: unknown, {
           id: {
             filePath: file,
             eventKey: eventTbaCode,
-          }
+          },
         },
         create: {
           eventKey: eventTbaCode,
@@ -225,7 +226,7 @@ export async function autoRename(payload: unknown, {
           id: {
             filePath: file,
             eventKey: eventTbaCode,
-          }
+          },
         },
         create: {
           eventKey: eventTbaCode,
@@ -415,7 +416,7 @@ export async function autoRename(payload: unknown, {
             id: {
               eventKey: eventTbaCode,
               filePath: association.filePath,
-            }
+            },
           },
           data: {
             status: AutoRenameAssociationStatus.FAILED,
@@ -433,7 +434,7 @@ export async function autoRename(payload: unknown, {
             id: {
               eventKey: eventTbaCode,
               filePath: association.filePath,
-            }
+            },
           },
           data: {
             status: AutoRenameAssociationStatus.UNMATCHED,

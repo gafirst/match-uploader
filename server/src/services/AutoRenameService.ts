@@ -96,7 +96,7 @@ export async function updateAssociationData(
       id: {
         filePath,
         eventKey: eventTbaCode,
-      }
+      },
     },
     data: {
       status: AutoRenameAssociationStatus.STRONG,

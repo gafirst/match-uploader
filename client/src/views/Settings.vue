@@ -87,7 +87,6 @@
           <VExpansionPanel>
             <VExpansionPanelTitle>Description template syntax/variables</VExpansionPanelTitle>
             <VExpansionPanelText>
-<!--              FIXME: Update with latest changes -->
               <ul class="ml-4">
                 <li>
                   This description template will be rendered using
@@ -115,7 +114,8 @@
                   upload). Use in an <code>if</code> block like <code v-pre>{{#isMatch}} ... {{/isMatch}} </code>
                 </li>
                 <li>
-                  <code>mediaTitle</code> - properly capitalized title for the video. When using, enclose in triple curly braces: <code v-pre>{{{mediaTitle}}}</code> (example: <code>Qualification Match 1</code>,
+                  <code>mediaTitle</code> - properly capitalized title for the video. When using, enclose in triple
+                  curly braces: <code v-pre>{{{mediaTitle}}}</code> (example: <code>Qualification Match 1</code>,
                   <code>Playoff Match 3 (R1)</code>, or <code>Alliance Selection</code>)
                 </li>
                 <li>
@@ -133,9 +133,9 @@
                   depending on the currently selected event/match data source
                 </li>
                 <li>
-                  <code>details</code> <strong>(contains URL)</strong> - URL where full match results or event info can be viewed
-                  (links to The Blue Alliance or FRC Events depending on the currently selected match data source)
-                  (example: <code>https://www.thebluealliance.com/match/2023gaalb_sf1m1</code> or
+                  <code>details</code> <strong>(contains URL)</strong> - URL where full match results or event info can
+                  be viewed (links to The Blue Alliance or FRC Events depending on the currently selected match data
+                  source) (example: <code>https://www.thebluealliance.com/match/2023gaalb_sf1m1</code> or
                   <code>https://frc-events.firstinspires.org/2023/gaalb/playoffs/3</code>)
                 </li>
                 <li>
@@ -205,8 +205,7 @@
         />
 
         <AutosavingTextInput
-          v-if="
-            settingsStore.settings?.linkVideosOnTheBlueAlliance"
+          v-if="settingsStore.settings?.linkVideosOnTheBlueAlliance"
           :key="`theBlueAllianceTrustedApiAuthId-${dataRefreshKey}`"
           :on-submit="submit"
           initial-value=""
@@ -255,7 +254,7 @@
           class="mb-4"
           color="warning"
         >
-            Toggling the FRC Events setting will regenerate the description for the current match.
+          Toggling the FRC Events setting will regenerate the description for the current match.
         </VAlert>
 
         <p class="mt-4">
@@ -467,6 +466,7 @@ import { useMatchListStore } from "@/stores/matchList";
 import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNamePatterns.vue";
 import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 import { useAutoRenameStore } from "@/stores/autoRename";
+import { useEventMediaStore } from "@/stores/eventMedia";
 
 const loading = computed(() => {
   return settingsStore.loading;
@@ -480,6 +480,7 @@ const matchListStore = useMatchListStore();
 const settingsStore = useSettingsStore();
 const uploadedVideosStore = useUploadedVideosStore();
 const autoRenameStore = useAutoRenameStore();
+const eventMediaStore = useEventMediaStore();
 
 const dataRefreshKey = ref(1);
 const youTubeOAuth2RedirectUriCopied = ref(false);
@@ -600,6 +601,8 @@ async function saveFrcEventsEnabled(value: string): Promise<void> {
   await refreshData(false);
   savingFrcEventsEnabled.value = false;
   matchStore.descriptionLoading = true;
+  eventMediaStore.descriptionLoading = true;
+  await eventMediaStore.getSuggestedDescription();
   await matchListStore.getMatchList(true);
   await matchStore.getSuggestedDescription();
 }

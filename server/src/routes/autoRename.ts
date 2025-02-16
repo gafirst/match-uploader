@@ -153,7 +153,7 @@ async function undoRenameAssociation(req: IReq, res: IRes): Promise<void> {
   const association = await prisma.autoRenameAssociation.findUniqueOrThrow({
     where: {
       id: {
-        eventKey: eventTbaCode as string,
+        eventKey: eventTbaCode,
         filePath: filePath as string,
       },
     },

@@ -228,7 +228,11 @@ export async function getPlaylistIdForVideoLabel(label: string): Promise<string 
  * @param matchKey The match key of the match that the video is for, only required when video type is match video
  * @param eventKey Event key, only required when video type is event media
  */
-export async function handleMatchVideoPostUploadSteps(videoType: VideoType, videoId: string, videoLabel: string, matchKey: MatchKey | null, eventKey: string | null):
+export async function handleMatchVideoPostUploadSteps(videoType: VideoType,
+  videoId: string,
+  videoLabel: string,
+  matchKey: MatchKey | null,
+  eventKey: string | null):
   Promise<YouTubePostUploadSteps> {
     if (videoType === VideoType.EventMedia && !eventKey) {
         throw new Error("Event key is required when video type is event media");
@@ -283,7 +287,8 @@ export async function handleMatchVideoPostUploadSteps(videoType: VideoType, vide
         }
     } else {
         linkOnTbaSuccess = true;
-        logger.info(`Skipping linking video ${videoId} for ${matchKey?.matchKey ?? eventKey ?? "unknown"}, setting is disabled`);
+        logger.info(`Skipping linking video ${videoId} for ${matchKey?.matchKey ?? eventKey ?? "unknown"}, setting` +
+          "is disabled");
     }
 
     return {
