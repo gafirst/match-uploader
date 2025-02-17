@@ -40,11 +40,14 @@ export async function queueRenameJob(
     {
       directory: `${videoSearchDirectory}/${association.videoLabel}`,
       oldFileName: association.videoFile,
-      associationId: association.filePath,
+      associationId: {
+        eventKey: association.eventKey,
+        filePath: association.filePath,
+      },
     },
     {
       maxAttempts: 1,
-      jobKey: `autoRename-${association.filePath}`,
+      jobKey: `autoRename-${association.eventKey}-${association.filePath}`,
       jobKeyMode: "replace",
       runAt: renameAfter.toJSDate(),
       priority,

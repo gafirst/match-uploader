@@ -33,7 +33,7 @@ body:
   - type: dropdown
     attributes:
       label: Association status
-      description: The full match key (e.g., 2024gadal_qm1) of the match that Auto Rename associated with the video file.
+      description: The association status for the incorrect association
       options:
         - N/A (No association created)
         - Unmatched

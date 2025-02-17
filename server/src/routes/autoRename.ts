@@ -5,6 +5,7 @@ import { prisma } from "@src/server";
 import { body, matchedData, query, validationResult } from "express-validator";
 import { type AutoRenameAssociationStatus } from "@prisma/client";
 import { markAssociationIgnored, undoRename, updateAssociationData } from "@src/services/AutoRenameService";
+import { getSettings } from "@src/services/SettingsService";
 
 export const autoRenameRouter = Router();
 
@@ -36,11 +37,16 @@ async function getAutoRenameAssociations(req: IReq, res: IRes): Promise<void> {
     status,
   } = matchedData(req);
 
+  const { eventTbaCode } = await getSettings();
+
   const where = status
     ? {
       status: status as AutoRenameAssociationStatus,
+      eventKey: eventTbaCode,
     }
-    : undefined;
+    : {
+      eventKey: eventTbaCode,
+    };
 
   const associations = await prisma.autoRenameAssociation.findMany(
     {
@@ -142,9 +148,14 @@ async function undoRenameAssociation(req: IReq, res: IRes): Promise<void> {
     filePath,
   } = matchedData(req);
 
+  const { eventTbaCode } = await getSettings();
+
   const association = await prisma.autoRenameAssociation.findUniqueOrThrow({
     where: {
-      filePath: filePath as string,
+      id: {
+        eventKey: eventTbaCode,
+        filePath: filePath as string,
+      },
     },
   });
 

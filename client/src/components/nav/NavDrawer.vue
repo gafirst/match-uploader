@@ -97,14 +97,19 @@ const autoRenameBadge = computed(() => {
 const navItems = computed(() => {
   return [
     {
-      title: "Upload",
-      to: "/upload",
+      title: "Match video upload",
+      to: "/upload-match",
       icon: "mdi-cloud-upload-outline",
       badge: {
         show: liveModeStore.isActive,
         color: liveModeDotColor.value,
         dot: true,
       },
+    },
+    {
+      title: "Event media upload",
+      to: "/upload-event-media",
+      icon: "mdi-file-upload-outline",
     },
     {
       title: "Auto rename",

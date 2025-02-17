@@ -1,4 +1,6 @@
-export interface MatchVideoInfo {
+import { VideoType } from "@/types/VideoType";
+
+export interface VideoInfo {
     path: string;
     videoLabel: string | null;
     videoTitle: string;
@@ -7,4 +9,5 @@ export interface MatchVideoInfo {
     jobCreationError: string | null;
     isRequestingJob: boolean;
     isUploaded: boolean;
+    videoType?: VideoType;
 }

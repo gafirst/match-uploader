@@ -26,6 +26,7 @@ export async function updateAssociationData(
 ): Promise<string | undefined> {
   const {
     autoRenameFileRenameJobDelaySecs,
+    eventTbaCode,
     playoffsType,
     videoSearchDirectory,
   } = await getSettings();
@@ -33,6 +34,7 @@ export async function updateAssociationData(
     where: {
       videoLabel,
       filePath,
+      eventKey: eventTbaCode,
     },
   });
 
@@ -91,7 +93,10 @@ export async function updateAssociationData(
   const association = await prisma.autoRenameAssociation.update({
     where: {
       videoLabel,
-      filePath,
+      id: {
+        filePath,
+        eventKey: eventTbaCode,
+      },
     },
     data: {
       status: AutoRenameAssociationStatus.STRONG,
@@ -150,10 +155,12 @@ export async function updateAssociationData(
 }
 
 export async function markAssociationIgnored(videoLabel: string, filePath: string): Promise<string | undefined> {
+  const { eventTbaCode } = await getSettings();
   const existingAssociation = await prisma.autoRenameAssociation.findFirst({
     where: {
       videoLabel,
       filePath,
+      eventKey: eventTbaCode,
     },
   });
 
@@ -169,7 +176,10 @@ export async function markAssociationIgnored(videoLabel: string, filePath: strin
   const association = await prisma.autoRenameAssociation.update({
     where: {
       videoLabel,
-      filePath,
+      id: {
+        filePath,
+        eventKey: eventTbaCode,
+      },
     },
     data: {
       status: AutoRenameAssociationStatus.IGNORED,
@@ -228,7 +238,10 @@ export async function undoRename(association: AutoRenameAssociation): Promise<st
 
   const updatedAssociation = await prisma.autoRenameAssociation.update({
     where: {
-      filePath: association.filePath,
+      id: {
+        filePath: association.filePath,
+        eventKey: association.eventKey,
+      },
     },
     data: {
       renameCompleted: false,
@@ -258,7 +271,10 @@ export async function processAutoRenameEvent(
 
     const association: AutoRenameAssociation = await prisma.autoRenameAssociation.findUniqueOrThrow({
       where: {
-        filePath: data.filePath,
+        id: {
+          filePath: data.filePath,
+          eventKey: data.eventKey,
+        },
       },
     });
 

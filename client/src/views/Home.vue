@@ -4,8 +4,8 @@
       cols="12"
       md="4"
     >
-      <LiveMode />
       <h1>Upload match</h1>
+      <LiveMode />
       <VAlert
         v-if="!!error"
         color="error"
@@ -106,7 +106,7 @@ import {useWorkerStore} from "@/stores/worker";
 import MatchMetadata from "@/components/matches/MatchMetadata.vue";
 import LiveMode from "@/components/liveMode/LiveMode.vue";
 import { UPLOAD_VIDEO_TASK } from "@/types/WorkerJob";
-import { MatchVideoInfo } from "@/types/MatchVideoInfo";
+import { VideoInfo } from "@/types/VideoInfo";
 
 const error = ref("");
 
@@ -123,7 +123,7 @@ const videosMdColWidth = computed(() => {
   }
 });
 
-function isVideoMissingPlaylistMapping(video: MatchVideoInfo) {
+function isVideoMissingPlaylistMapping(video: VideoInfo) {
   if (!video.videoLabel) {
     return !playlistStore.playlistMappings["unlabeled"];
   }

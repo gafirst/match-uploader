@@ -3,7 +3,7 @@ import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
 import { getDescriptionTemplate, getSecrets, getSettings, getYouTubePlaylists } from "@src/services/SettingsService";
 import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
-import { MatchVideoInfo } from "@src/models/MatchVideoInfo";
+import { VideoInfo } from "@src/models/VideoInfo";
 import { type TbaMatchSimple } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
 import { TheBlueAllianceReadRepo } from "@src/repos/TheBlueAllianceReadRepo";
 import { type TbaFrcTeam } from "@src/models/theBlueAlliance/tbaFrcTeam";
@@ -20,8 +20,9 @@ import {
 import { EventUploadStatusByMatch } from "@src/models/UploadedVideo";
 import { type PrismaClient } from "@prisma/client";
 import { type WorkerPrismaClient } from "@src/worker";
+import { matchUploaderAttribution } from "@src/util/videoDescription";
 
-export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: boolean): Promise<MatchVideoInfo[]> {
+export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: boolean): Promise<VideoInfo[]> {
     const { eventName, videoSearchDirectory } = await getSettings();
     const match = new Match(matchKey, isReplay);
     const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);
@@ -41,6 +42,7 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: b
     );
 
     files.push(...uploadedFiles);
+    // TODO: Use VideoInfo.getVideoLabelFromPath(path) here
     return files
       .filter(filePath => filePath.includes("/")) // Files must be within a subdirectory
       .map(filePath => {
@@ -62,7 +64,7 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: b
 
         const isUploaded = filePath.includes("uploaded");
 
-        return new MatchVideoInfo(filePath, videoLabel, videoTitle, isUploaded);
+        return new VideoInfo(filePath, videoLabel, videoTitle, isUploaded);
     });
 }
 
@@ -182,9 +184,7 @@ export async function generateMatchVideoDescription(match: Match, eventName: str
         throw new Error(`Match ${matchKey.matchKey} has not been scored yet.`);
     }
 
-    const { site: matchDetailsSite, url: matchUrl } = await generateMatchDetailsUrl(matchKey);
-
-    const matchUploaderAttribution = "Uploaded using https://github.com/gafirst/match-uploader";
+    const { site: eventDetailsSite, url: detailsUrl } = await generateMatchDetailsUrl(matchKey);
 
     const redScore = matchInfo.alliances.red.score;
     const blueScore = matchInfo.alliances.blue.score;
@@ -205,14 +205,15 @@ export async function generateMatchVideoDescription(match: Match, eventName: str
     const blueTeams = getTeamsInMatch(matchInfo.alliances.blue.team_keys);
 
     const view = {
+        isMatch: true,
         eventName,
-        capitalizedVerboseMatchName: capitalizeFirstLetter(match.verboseMatchName),
+        mediaTitle: capitalizeFirstLetter(match.verboseMatchName),
         redTeams,
         blueTeams,
         redScore,
         blueScore,
-        matchDetailsSite,
-        matchUrl,
+        eventDetailsSite,
+        detailsUrl,
         matchUploaderAttribution,
     };
 

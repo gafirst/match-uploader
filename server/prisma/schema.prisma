@@ -52,7 +52,8 @@ enum JobStatus {
 }
 
 model AutoRenameAssociation {
-  filePath               String                      @id @unique
+  eventKey               String
+  filePath               String
   videoFile              String
   status                 AutoRenameAssociationStatus @default(UNMATCHED)
   statusReason           String?
@@ -77,6 +78,9 @@ model AutoRenameAssociation {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@id([eventKey, filePath], name: "id")
+  @@unique([eventKey, filePath], name: "associationIdentifier")
 }
 
 enum AutoRenameAssociationStatus {

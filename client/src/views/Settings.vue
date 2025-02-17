@@ -110,9 +110,13 @@
                   <code>{{ settingsStore.settings?.eventName ?? "Loading..." }}</code>)
                 </li>
                 <li>
-                  <code>capitalizedVerboseMatchName</code> - the full form of the match name with the first letter of
-                  each word capitalized (example: <code>Qualification Match 1</code> or
-                  <code>Playoff Match 3 (R1)</code>)
+                  <code>isMatch</code> - true if this is a match video, false otherwise (i.e., this is an event media
+                  upload). Use in an <code>if</code> block like <code v-pre>{{#isMatch}} ... {{/isMatch}} </code>
+                </li>
+                <li>
+                  <code>mediaTitle</code> - properly capitalized title for the video. When using, enclose in triple
+                  curly braces: <code v-pre>{{{mediaTitle}}}</code> (example: <code>Qualification Match 1</code>,
+                  <code>Playoff Match 3 (R1)</code>, or <code>Alliance Selection</code>)
                 </li>
                 <li>
                   <code>redTeams</code> - red alliance team numbers separated by a comma and a space (example:
@@ -125,13 +129,13 @@
                 <li><code>redScore</code> - red alliance match score (if available) (example: <code>21</code>)</li>
                 <li><code>blueScore</code> - blue alliance match score (if available) (example: <code>21</code>)</li>
                 <li>
-                  <code>matchDetailsSite</code> - either <code>The Blue Alliance</code> or <code>FRC Events</code>
-                  depending on the currently selected match data source
+                  <code>eventDetailsSite </code> - either <code>The Blue Alliance</code> or <code>FRC Events</code>
+                  depending on the currently selected event/match data source
                 </li>
                 <li>
-                  <code>matchUrl</code> <strong>(contains URL)</strong> - URL where full match results can be viewed
-                  (links to The Blue Alliance or FRC Events depending on the currently selected match data source)
-                  (example: <code>https://www.thebluealliance.com/match/2023gaalb_sf1m1</code> or
+                  <code>details</code> <strong>(contains URL)</strong> - URL where full match results or event info can
+                  be viewed (links to The Blue Alliance or FRC Events depending on the currently selected match data
+                  source) (example: <code>https://www.thebluealliance.com/match/2023gaalb_sf1m1</code> or
                   <code>https://frc-events.firstinspires.org/2023/gaalb/playoffs/3</code>)
                 </li>
                 <li>
@@ -200,18 +204,8 @@
           @on-choice-selected="saveTbaLinkVideos"
         />
 
-        <VAlert
-          v-if="!settingsStore.settings?.linkVideosOnTheBlueAlliance"
-          color="info"
-          variant="tonal"
-          class="mt-4 mb-4"
-        >
-          Some settings are hidden because linking match videos on TBA is disabled. Enable the feature to see them.
-        </VAlert>
-
         <AutosavingTextInput
-          v-if="
-            settingsStore.settings?.linkVideosOnTheBlueAlliance"
+          v-if="settingsStore.settings?.linkVideosOnTheBlueAlliance"
           :key="`theBlueAllianceTrustedApiAuthId-${dataRefreshKey}`"
           :on-submit="submit"
           initial-value=""
@@ -255,6 +249,14 @@
           paste it below.
         </p>
 
+        <VAlert
+          v-if="matchStore.selectedMatchKey"
+          class="mb-4"
+          color="warning"
+        >
+          Toggling the FRC Events setting will regenerate the description for the current match.
+        </VAlert>
+
         <p class="mt-4">
           Retrieve match data from FRC Events
         </p>
@@ -265,16 +267,8 @@
           @on-choice-selected="saveFrcEventsEnabled"
         />
 
-        <VAlert
-          v-if="!settingsStore.settings?.useFrcEventsApi"
-          color="info"
-          variant="tonal"
-          class="mt-4 mb-4"
-        >
-          Some settings are hidden because FRC Events integration is disabled. Enable the feature to see them.
-        </VAlert>
         <AutosavingTextInput
-          v-else
+          v-if="settingsStore.settings?.useFrcEventsApi"
           :key="`frcEventsApiKey-${dataRefreshKey}`"
           :on-submit="submit"
           initial-value=""
@@ -471,6 +465,8 @@ import { useMatchStore } from "@/stores/match";
 import { useMatchListStore } from "@/stores/matchList";
 import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNamePatterns.vue";
 import { useUploadedVideosStore } from "@/stores/uploadedVideos";
+import { useAutoRenameStore } from "@/stores/autoRename";
+import { useEventMediaStore } from "@/stores/eventMedia";
 
 const loading = computed(() => {
   return settingsStore.loading;
@@ -483,6 +479,8 @@ const matchStore = useMatchStore();
 const matchListStore = useMatchListStore();
 const settingsStore = useSettingsStore();
 const uploadedVideosStore = useUploadedVideosStore();
+const autoRenameStore = useAutoRenameStore();
+const eventMediaStore = useEventMediaStore();
 
 const dataRefreshKey = ref(1);
 const youTubeOAuth2RedirectUriCopied = ref(false);
@@ -537,6 +535,7 @@ async function submitEventCode(settingName: string, value: string | boolean, set
   await matchListStore.getMatchList(true);
   matchStore.clearSelectedMatch();
   await uploadedVideosStore.getMatchUploadStatuses();
+  await autoRenameStore.getAssociations(true);
   return submitResult;
 }
 
@@ -601,7 +600,11 @@ async function saveFrcEventsEnabled(value: string): Promise<void> {
   await submit("useFrcEventsApi", value === "On", "setting");
   await refreshData(false);
   savingFrcEventsEnabled.value = false;
+  matchStore.descriptionLoading = true;
+  eventMediaStore.descriptionLoading = true;
+  await eventMediaStore.getSuggestedDescription();
   await matchListStore.getMatchList(true);
+  await matchStore.getSuggestedDescription();
 }
 </script>
 

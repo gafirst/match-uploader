@@ -14,7 +14,6 @@
       />
     </template>
     <template
-      v-if="!video.isUploaded"
       #append
     >
       <VBtn
@@ -34,7 +33,7 @@
         Retry
       </VBtn>
       <VBtn
-        v-else-if="!video.workerJobId"
+        v-else-if="!video.workerJobId && !hideUploadBtn"
         variant="text"
         prepend-icon="mdi-upload"
         :disabled="matchStore.uploadInProgress"
@@ -47,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { MatchVideoInfo } from "@/types/MatchVideoInfo";
+import { VideoInfo } from "@/types/VideoInfo";
 import { computed } from "vue";
 import { useMatchStore } from "@/stores/match";
 import { useWorkerStore } from "@/stores/worker";
@@ -58,7 +57,8 @@ const matchStore = useMatchStore();
 const workerStore = useWorkerStore();
 
 interface IProps {
-  video: MatchVideoInfo;
+  video: VideoInfo;
+  hideUploadBtn?: boolean;
 }
 
 const props = defineProps<IProps>();

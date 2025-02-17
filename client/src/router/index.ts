@@ -4,16 +4,27 @@ import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    redirect: "/upload",
+    redirect: "/upload-match",
   },
   {
     path: "/upload",
-    name: "Upload",
-    // redirect: "/upload",
+    redirect: "/upload-match",
+  },
+  {
+    path: "/upload-match",
+    name: "Upload match",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "home" */ "@/views/Home.vue"),
+  },
+  {
+    path: "/upload-event-media",
+    name: "Upload event-media",
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "upload_event_media" */ "@/views/UploadEventMedia.vue"),
   },
   {
     path: "/autoRename",
@@ -22,7 +33,7 @@ const routes: RouteRecordRaw[] = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "home" */ "@/views/AutoRenameView.vue"),
+    component: () => import(/* webpackChunkName: "auto_rename_view */ "@/views/AutoRenameView.vue"),
   },
   {
     path: "/reports",

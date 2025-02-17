@@ -1,4 +1,4 @@
-import type { JobHelpers } from "graphile-worker";
+import type { JobHelpers, Logger } from "graphile-worker";
 import { assertIsCronPayload, type CronPayload } from "@src/tasks/types/cronPayload";
 import { getSettings } from "@src/services/SettingsService";
 import { getFilesMatchingPattern } from "@src/repos/FileStorageRepo";
@@ -22,6 +22,8 @@ export interface AutoRenameCronPayload {
   _cron: CronPayload;
   manualTrigger?: boolean;
 }
+
+const MAX_VIDEO_SIZE_BYTES_FOR_DURATION = Math.pow(2, 31) - 1;
 
 function classifyAssociation(startTimeDiffSecs: number,
   videoDuration: number,
@@ -96,7 +98,17 @@ async function checkMatchOrdering(eventKey: string,
   };
 }
 
-async function getVideoDuration(filePath: string): Promise<{ seconds: number }> {
+async function getVideoDuration(logger: Logger,
+  filePath: string): Promise<{ seconds: number } | { fileTooLarge: boolean }> {
+  const videoFileSizeBytes = (await fs.stat(filePath)).size;
+
+  if (videoFileSizeBytes > MAX_VIDEO_SIZE_BYTES_FOR_DURATION) {
+    logger.warn(`Video file ${filePath} size (${videoFileSizeBytes}B) is too large to calculate duration`);
+    return {
+      fileTooLarge: true,
+    };
+  }
+
   // eslint-disable-next-line
   return await videoDuration(filePath);
 }
@@ -161,7 +173,10 @@ export async function autoRename(payload: unknown, {
 
     const existingAssoc = await prisma.autoRenameAssociation.findUnique({
       where: {
-        filePath: file,
+        id: {
+          filePath: file,
+          eventKey: eventTbaCode,
+        },
       },
     });
 
@@ -188,9 +203,13 @@ export async function autoRename(payload: unknown, {
       logger.info(`File: ${file} / Parsed date: ${parsedDate.toISO()}`);
       await prisma.autoRenameAssociation.upsert({
         where: {
-          filePath: file,
+          id: {
+            filePath: file,
+            eventKey: eventTbaCode,
+          },
         },
         create: {
+          eventKey: eventTbaCode,
           filePath: file,
           videoFile,
           videoLabel,
@@ -204,9 +223,13 @@ export async function autoRename(payload: unknown, {
     } else {
       await prisma.autoRenameAssociation.upsert({
         where: {
-          filePath: file,
+          id: {
+            filePath: file,
+            eventKey: eventTbaCode,
+          },
         },
         create: {
+          eventKey: eventTbaCode,
           filePath: file,
           videoFile,
           videoLabel,
@@ -238,7 +261,10 @@ export async function autoRename(payload: unknown, {
     if (!(await fs.exists(`${videoSearchDirectory}/${association.filePath}`))) {
       await prisma.autoRenameAssociation.update({
         where: {
-          filePath: association.filePath,
+          id: {
+            eventKey: eventTbaCode,
+            filePath: association.filePath,
+          },
         },
         data: {
           status: AutoRenameAssociationStatus.FAILED,
@@ -265,9 +291,19 @@ export async function autoRename(payload: unknown, {
       }
     }
 
-    // TODO: Would be good to catch errors here
-    const videoDurationSecs = (await getVideoDuration(`${videoSearchDirectory}/${association.filePath}`)).seconds;
+    let videoDurationSecs = Number.MAX_SAFE_INTEGER;
 
+    try {
+      const videoDuration = await getVideoDuration(logger, `${videoSearchDirectory}/${association.filePath}`);
+      if ("fileTooLarge" in videoDuration) {
+        videoDurationSecs = Infinity;
+      } else {
+        videoDurationSecs = videoDuration.seconds;
+      }
+    } catch (e: unknown) {
+      videoDurationSecs = Infinity;
+      logger.error(`Error getting video duration for ${association.filePath}: ${e}`);
+    }
     let {
       associationStatus,
       // eslint-disable-next-line prefer-const
@@ -349,7 +385,10 @@ export async function autoRename(payload: unknown, {
 
       await prisma.autoRenameAssociation.update({
         where: {
-          filePath: association.filePath,
+          id: {
+            eventKey: eventTbaCode,
+            filePath: association.filePath,
+          },
         },
         data: {
           status: associationStatus,
@@ -374,7 +413,10 @@ export async function autoRename(payload: unknown, {
       if (association.associationAttempts + 1 >= association.maxAssociationAttempts) {
         await prisma.autoRenameAssociation.update({
           where: {
-            filePath: association.filePath,
+            id: {
+              eventKey: eventTbaCode,
+              filePath: association.filePath,
+            },
           },
           data: {
             status: AutoRenameAssociationStatus.FAILED,
@@ -389,7 +431,10 @@ export async function autoRename(payload: unknown, {
       } else {
         await prisma.autoRenameAssociation.update({
           where: {
-            filePath: association.filePath,
+            id: {
+              eventKey: eventTbaCode,
+              filePath: association.filePath,
+            },
           },
           data: {
             status: AutoRenameAssociationStatus.UNMATCHED,

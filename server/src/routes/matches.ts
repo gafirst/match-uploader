@@ -8,7 +8,7 @@ import {
 } from "@src/services/MatchesService";
 import { matchedData, param, query, validationResult } from "express-validator";
 import MatchKey from "@src/models/MatchKey";
-import { type MatchVideoInfo } from "@src/models/MatchVideoInfo";
+import { type VideoInfo } from "@src/models/VideoInfo";
 import { Match } from "@src/models/Match";
 import { capitalizeFirstLetter } from "@src/util/string";
 import { getSettings } from "@src/services/SettingsService";
@@ -84,7 +84,7 @@ async function recommendVideoFiles(req: IReq, res: IRes): Promise<void> {
   const recommendedVideoFiles = await getLocalVideoFilesForMatch(matchKeyObject, isReplay as boolean);
   res.json({
     ok: true,
-    recommendedVideoFiles: recommendedVideoFiles.map((recommendation: MatchVideoInfo) => recommendation.toJson()),
+    recommendedVideoFiles: recommendedVideoFiles.map((recommendation: VideoInfo) => recommendation.toJson()),
   });
 }
 
