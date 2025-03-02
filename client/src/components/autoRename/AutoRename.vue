@@ -20,14 +20,24 @@
         >on GitHub</a>.
       </VAlert>
 
-      <VAlert density="compact" color="success" icon="mdi-check-circle"
-              variant="tonal" v-if="autoRenameStore.triggerNowSuccess"
-              class="mb-4">
+      <VAlert
+        v-if="autoRenameStore.triggerNowSuccess"
+        density="compact"
+        color="success"
+        icon="mdi-check-circle"
+        variant="tonal"
+        class="mb-4"
+      >
         Auto rename run scheduled and should begin shortly
       </VAlert>
-      <VAlert density="compact" color="error" icon="mdi-alert-circle"
-              variant="tonal" v-if="!!autoRenameStore.triggerNowError"
-              class="mb-4">
+      <VAlert
+        v-if="!!autoRenameStore.triggerNowError"
+        density="compact"
+        color="error"
+        icon="mdi-alert-circle"
+        variant="tonal"
+        class="mb-4"
+      >
         {{ autoRenameStore.triggerNowError }}
       </VAlert>
 
@@ -42,11 +52,16 @@
         @on-choice-selected="saveAutoRenameEnabled"
       />
 
-      <VBtn class="mb-2" variant="outlined" prepend-icon="mdi-refresh"
-            v-if="settingsStore.settings?.autoRenameEnabled"
-            @click="autoRenameStore.triggerNow"
-            :loading="autoRenameStore.triggerNowLoading"
-      >Trigger now</VBtn>
+      <VBtn
+        v-if="settingsStore.settings?.autoRenameEnabled"
+        class="mb-2"
+        variant="outlined"
+        prepend-icon="mdi-refresh"
+        :loading="autoRenameStore.triggerNowLoading"
+        @click="autoRenameStore.triggerNow"
+      >
+        Trigger now
+      </VBtn>
 
       <VAlert
         v-if="autoRenameStore.confirmWeakAssociationError"
