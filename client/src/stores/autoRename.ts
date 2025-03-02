@@ -184,8 +184,7 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     }
 
     if (!response.ok) {
-      const errorResponse = await response.json();
-      triggerNowError.value = errorResponse.message || "Unable to trigger auto rename";
+      triggerNowError.value = "Unable to trigger auto rename";
     }
 
     const data = await response.json();
@@ -193,6 +192,8 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     if (!data.success) {
       console.error("Failed to trigger auto rename", data);
       triggerNowError.value = "Unable to trigger auto rename";
+      triggerNowLoading.value = false;
+      return;
     }
 
     triggerNowLoading.value = false;
