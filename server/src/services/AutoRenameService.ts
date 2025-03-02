@@ -20,6 +20,7 @@ import { type PlayoffsType } from "@src/models/PlayoffsType";
 import { Match } from "@src/models/Match";
 import fs from "fs-extra";
 import { cancelJob } from "@src/services/WorkerService";
+import { queueJob } from "@src/util/queueJob";
 
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
@@ -285,4 +286,30 @@ export async function processAutoRenameEvent(
   } catch (e) {
     logger.err(`Error handling ${event} event: ${e}`);
   }
+}
+
+/**
+ * Queue an autoRename job to run immediately.
+ *
+ * Note: Only one manually-triggered autorename job can be triggered at a time
+ */
+export async function triggerAutoRenameJob() {
+  return await queueJob(
+    prisma,
+    graphileWorkerUtils.addJob,
+    io,
+    "Manual trigger",
+    "autoRename",
+    {
+      _cron: {
+        ts: new Date().toISOString(),
+        backfill: false,
+      },
+      manualTrigger: true,
+    },
+    {
+      maxAttempts: 1,
+      jobKey: "autoRename-manual-trigger",
+    },
+  );
 }

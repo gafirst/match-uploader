@@ -164,6 +164,44 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     undoRenameLoading.value = false;
   }
 
+  const triggerNowError = ref("");
+  const triggerNowLoading = ref(false);
+  const triggerNowSuccess = ref(false);
+
+  async function triggerNow() {
+    triggerNowError.value = "";
+    triggerNowSuccess.value = false;
+    triggerNowLoading.value = true;
+    const response = await fetch("/api/v1/worker/debug/autoRename")
+      .catch((error) => {
+        triggerNowError.value = `Unable to trigger auto rename: ${error}`;
+        triggerNowLoading.value = false;
+        return null;
+      });
+
+    if (!response) {
+      return;
+    }
+
+    if (!response.ok) {
+      triggerNowError.value = "Unable to trigger auto rename";
+      triggerNowLoading.value = false;
+      return;
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error("Failed to trigger auto rename", data);
+      triggerNowError.value = "Unable to trigger auto rename";
+      triggerNowLoading.value = false;
+      return;
+    }
+
+    triggerNowLoading.value = false;
+    triggerNowSuccess.value = true;
+  }
+
   function isEditable(association: AutoRenameAssociation) {
     if (association.status === AutoRenameAssociationStatus.STRONG) {
       const editable = !association.renameCompleted;
@@ -222,6 +260,10 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
     ignoreAssociationLoading,
     isEditable,
     loadingAssociations,
+    triggerNow,
+    triggerNowError,
+    triggerNowLoading,
+    triggerNowSuccess,
     undoRename,
     undoRenameError,
     undoRenameLoading,

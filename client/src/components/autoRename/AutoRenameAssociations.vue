@@ -13,7 +13,11 @@
       { title: 'Actions', key: 'actions'}
     ]"
     multi-sort
-    :sort-by="[{ key: 'videoLabel', order: 'asc' }, { key: 'videoTimestamp', order: 'asc' }]"
+    :sort-by="[
+      { key: 'status', order: 'desc' },
+      { key: 'videoLabel', order: 'asc' },
+      { key: 'videoTimestamp', order: 'asc' },
+    ]"
   >
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.status="{ item }">
@@ -112,6 +116,7 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { useWorkerStore } from "@/stores/worker";
 import { WorkerJobStatus } from "@/types/WorkerJob";
+
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 dayjs.extend(localizedFormat);

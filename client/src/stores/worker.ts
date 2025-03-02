@@ -1,6 +1,6 @@
-import {socket} from "@/socket";
-import {acceptHMRUpdate, defineStore} from "pinia";
-import {computed, ref, watch} from "vue";
+import { socket } from "@/socket";
+import { acceptHMRUpdate, defineStore } from "pinia";
+import { computed, ref, watch } from "vue";
 import {
   isWorkerEvent,
   isWorkerJobCompleteEvent, isWorkerJobCreatedEvent,
@@ -38,7 +38,7 @@ export const useWorkerStore = defineStore("worker", () => {
   function jobUpdatedAtSortDirection(job1Status: WorkerJobStatus, job2Status: WorkerJobStatus): number {
     if (job1Status === job2Status) {
       // Statuses to show the oldest jobs first
-      const sortAscending = [WorkerJobStatus.PENDING, WorkerJobStatus.STARTED,  WorkerJobStatus.FAILED_RETRYABLE];
+      const sortAscending = [WorkerJobStatus.PENDING, WorkerJobStatus.STARTED, WorkerJobStatus.FAILED_RETRYABLE];
       if (sortAscending.includes(job1Status)) {
         return 1;
       }
@@ -151,7 +151,8 @@ export const useWorkerStore = defineStore("worker", () => {
     // Don't update if the job status transition would be invalid (e.g., completed -> started, failed -> started)
     if (storedJob && storedJob.status === WorkerJobStatus.COMPLETED && workerJob.status === WorkerJobStatus.STARTED) {
       console.warn(`Ignoring ${event} event because of invalid status transition: completed -> started`, {
-        storedJob, workerJob,
+        storedJob,
+        workerJob,
       });
       return;
     }
@@ -159,21 +160,24 @@ export const useWorkerStore = defineStore("worker", () => {
     console.log("Stored job.status", storedJob?.status, "workerJob.status", workerJob.status, "event", event);
     if (storedJob && storedJob.status === WorkerJobStatus.STARTED && workerJob.status === WorkerJobStatus.PENDING) {
       console.warn(`Ignoring ${event} event because of invalid status transition: started -> pending`, {
-        storedJob, workerJob,
+        storedJob,
+        workerJob,
       });
       return;
     }
 
     if (storedJob && storedJob.status === WorkerJobStatus.FAILED && workerJob.status === WorkerJobStatus.STARTED) {
       console.warn(`Ignoring ${event} event because of invalid status transition: failed -> started`, {
-        storedJob, workerJob,
+        storedJob,
+        workerJob,
       });
       return;
     }
 
     if (storedJob && storedJob.status === WorkerJobStatus.COMPLETED && workerJob.status === WorkerJobStatus.FAILED) {
       console.warn(`Ignoring ${event} event because of invalid status transition: completed -> failed`, {
-        storedJob, workerJob,
+        storedJob,
+        workerJob,
       });
       return;
     }
@@ -218,6 +222,7 @@ export const useWorkerStore = defineStore("worker", () => {
   }
 
   const jobCancellationError = ref("");
+
   async function cancelJob(jobId: string) {
     jobCancellationError.value = "";
 
