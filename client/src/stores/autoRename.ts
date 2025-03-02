@@ -185,6 +185,8 @@ export const useAutoRenameStore = defineStore("autoRename", () => {
 
     if (!response.ok) {
       triggerNowError.value = "Unable to trigger auto rename";
+      triggerNowLoading.value = false;
+      return;
     }
 
     const data = await response.json();
