@@ -233,7 +233,7 @@ export async function autoRename(payload: unknown, {
           filePath: file,
           videoFile,
           videoLabel,
-          status: AutoRenameAssociationStatus.FAILED,
+          status: AutoRenameAssociationStatus.IGNORED,
           statusReason: "Unable to parse date from file name",
         },
         update: {},

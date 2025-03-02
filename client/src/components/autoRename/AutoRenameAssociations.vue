@@ -13,7 +13,7 @@
       { title: 'Actions', key: 'actions'}
     ]"
     multi-sort
-    :sort-by="[{ key: 'videoLabel', order: 'asc' }, { key: 'videoTimestamp', order: 'asc' }]"
+    :sort-by="[{key: 'status', order: 'desc' }, { key: 'videoLabel', order: 'asc' }, { key: 'videoTimestamp', order: 'asc' }]"
   >
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.status="{ item }">

@@ -9,6 +9,7 @@ body:
         - Strong association to the wrong match
         - Association status unexpectedly weak
         - Association was expected but not made
+        - Unexpected association (i.e., association shouldn't have been created)
         - Something else (describe in Additional Information)
     validations:
       required: true

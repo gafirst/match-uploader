@@ -20,6 +20,17 @@
         >on GitHub</a>.
       </VAlert>
 
+      <VAlert density="compact" color="success" icon="mdi-check-circle"
+              variant="tonal" v-if="autoRenameStore.triggerNowSuccess"
+              class="mb-4">
+        Auto rename run scheduled and should begin shortly
+      </VAlert>
+      <VAlert density="compact" color="error" icon="mdi-alert-circle"
+              variant="tonal" v-if="!!autoRenameStore.triggerNowError"
+              class="mb-4">
+        {{ autoRenameStore.triggerNowError }}
+      </VAlert>
+
       <p class="mb-1">
         Enable auto rename
       </p>
@@ -30,6 +41,12 @@
         :loading="savingAutoRenameEnabled"
         @on-choice-selected="saveAutoRenameEnabled"
       />
+
+      <VBtn class="mb-2" variant="outlined" prepend-icon="mdi-refresh"
+            v-if="settingsStore.settings?.autoRenameEnabled"
+            @click="autoRenameStore.triggerNow"
+            :loading="autoRenameStore.triggerNowLoading"
+      >Trigger now</VBtn>
 
       <VAlert
         v-if="autoRenameStore.confirmWeakAssociationError"
@@ -113,6 +130,12 @@ async function saveAutoRenameEnabled(value: string): Promise<void> {
   await settingsStore.saveSetting("autoRenameEnabled", value.toLowerCase() === "on", "setting");
   await settingsStore.getSettings(false);
   savingAutoRenameEnabled.value = false;
+  if (value.toLowerCase() === "on") {
+    await autoRenameStore.triggerNow();
+  } else if (!autoRenameStore.triggerNowLoading) {
+    autoRenameStore.triggerNowSuccess = false;
+    autoRenameStore.triggerNowError = "";
+  }
 }
 
 </script>
