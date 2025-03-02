@@ -127,10 +127,10 @@
             <template v-else>
               A video for the current match with the label above is still expected.
             </template>
-            If this is incorrect, go to <RouterLink to="/settings">
-              Settings
-            </RouterLink> and remove
-            any unnecessary playlist mappings.
+            If this is incorrect, go to
+            <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+            <RouterLink to="/settings">Settings</RouterLink>
+            and remove any unnecessary playlist mappings.
           </p>
         </VAlert>
 
