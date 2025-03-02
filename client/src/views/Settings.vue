@@ -25,6 +25,8 @@
           class="mt-4"
         />
 
+        <SettingsTextInput setting-name="tbaEventCode" label="test" />
+
         <VAlert
           v-if="matchStore.selectedMatchKey"
           class="mb-4"
@@ -467,6 +469,11 @@ import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNa
 import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import { useEventMediaStore } from "@/stores/eventMedia";
+import AutosavingTextInputV2 from "@/components/form/AutosavingTextInputV2.vue";
+import { useTestSettingsStore } from "@/stores/settingsTest";
+import { VTextarea, VTextField } from "vuetify/components";
+import BaseDynamicTextInput from "@/components/form/BaseDynamicTextInput.vue";
+import SettingsTextInput from "@/components/form/SettingsTextInput.vue";
 
 const loading = computed(() => {
   return settingsStore.loading;
@@ -481,6 +488,10 @@ const settingsStore = useSettingsStore();
 const uploadedVideosStore = useUploadedVideosStore();
 const autoRenameStore = useAutoRenameStore();
 const eventMediaStore = useEventMediaStore();
+
+
+const testSettingsStore = useTestSettingsStore();
+
 
 const dataRefreshKey = ref(1);
 const youTubeOAuth2RedirectUriCopied = ref(false);
