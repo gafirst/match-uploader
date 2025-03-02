@@ -33,7 +33,7 @@
         Retry
       </VBtn>
       <VBtn
-        v-else-if="!video.workerJobId && !hideUploadBtn"
+        v-else-if="!video.workerJobId && !isUploaded && !hideUploadBtn"
         variant="text"
         prepend-icon="mdi-upload"
         :disabled="matchStore.uploadInProgress"
@@ -131,6 +131,11 @@ const subtitle = computed(() => {
   }
 
   return `${uploadStatus.value} | ${postUploadStatus}${props.video.path}`;
+});
+
+const isUploaded = computed(() => {
+  return props.video.isUploaded ||
+    (props.video.workerJobId && workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.COMPLETED));
 });
 
 const icon = computed((): {
