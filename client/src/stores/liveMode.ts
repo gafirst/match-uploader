@@ -132,16 +132,16 @@ export const useLiveModeStore = defineStore("liveMode", () => {
             if (!matchStore.description) {
               if (!matchStore.descriptionLoading) {
                 // Description is not loading and we don't have one, try refreshing
-                console.log("Description is unavailable and not loading, trying to refresh")
+                console.log("Description is unavailable and not loading, trying to refresh");
                 await matchStore.getSuggestedDescription();
                 if (!matchStore.description) {
-                  console.log("Description still unavailable after refresh, switching to slow mode")
+                  console.log("Description still unavailable after refresh, switching to slow mode");
                   setFastTicks(false);
                   shouldCheckAgain = false;
                 }
               } else {
                 // Description is loading, just tick again
-                console.log("Description is unavailable but loading, will wait for next tick")
+                console.log("Description is unavailable but loading, will wait for next tick");
                 shouldCheckAgain = false;
               }
             } else {
