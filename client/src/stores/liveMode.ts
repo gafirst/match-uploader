@@ -109,6 +109,11 @@ export const useLiveModeStore = defineStore("liveMode", () => {
           return;
         }
 
+        if (matchStore.nextMatchError) {
+          setError("Unable to retrieve the next match. Check the upload form for errors.");
+          return;
+        }
+
         await matchStore.getMatchVideos();
 
         if (matchStore.matchVideoError) {
@@ -124,9 +129,26 @@ export const useLiveModeStore = defineStore("liveMode", () => {
             state.value = LiveModeStatus.ADVANCE_MATCH;
             await matchStore.advanceMatch();
           } else if (!matchStore.allowMatchUpload) {
-            shouldCheckAgain = false;
-            setError("Videos cannot be queued for upload right now. Check the upload form for errors.");
-            console.error("Cannot trigger upload right now, check matchStore");
+            if (!matchStore.description) {
+              if (!matchStore.descriptionLoading) {
+                // Description is not loading and we don't have one, try refreshing
+                console.log("Description is unavailable and not loading, trying to refresh");
+                await matchStore.getSuggestedDescription();
+                if (!matchStore.description) {
+                  console.log("Description still unavailable after refresh, switching to slow mode");
+                  setFastTicks(false);
+                  shouldCheckAgain = false;
+                }
+              } else {
+                // Description is loading, just tick again
+                console.log("Description is unavailable but loading, will wait for next tick");
+                shouldCheckAgain = false;
+              }
+            } else {
+              // Something else is preventing match uploads, raise an error
+              setError("Videos cannot be queued for upload right now. Check the upload form for errors.");
+              console.error("Cannot trigger upload right now, check matchStore");
+            }
           } else {
             await matchStore.uploadVideos();
             if (matchStore.allMatchVideosQueued) {
