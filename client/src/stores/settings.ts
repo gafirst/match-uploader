@@ -1,12 +1,24 @@
 import {acceptHMRUpdate, defineStore} from "pinia";
-import {ISettings, SettingType} from "@/types/ISettings";
-import {ref} from "vue";
+import { ISettings, ISettingsClient, SaveSettingResult, SettingType } from "@/types/ISettings";
+import { computed, ref } from "vue";
 import {IYouTubeRedirectUriResponse} from "@/types/youtube/IYouTubeRedirectUriResponse";
 import {IYouTubeAuthState} from "@/types/youtube/IYouTubeAuthState";
 import {IObfuscatedSecrets} from "@/types/IObfuscatedSecrets";
 
 export const useSettingsStore = defineStore("settings", () => {
-    const settings = ref<ISettings | null>(null);
+    const rawSettings = ref<ISettingsClient | null>(null);
+
+    const settings = computed(() => {
+      if (rawSettings.value) {
+        return Object.entries(rawSettings.value).reduce((acc, [key, value]) => {
+          acc[key] = value.currentValue;
+          return acc;
+        }, {} as ISettings);
+      } else {
+        return null;
+      }
+    });
+
     // Whether secret values exist - not the actual secret values
     const obfuscatedSecrets = ref<IObfuscatedSecrets | null>(null);
     const descriptionTemplate = ref<string | null>(null);
@@ -31,13 +43,19 @@ export const useSettingsStore = defineStore("settings", () => {
         loading.value = showLoading;
         const settingsResult = await fetch("/api/v1/settings/values");
 
-        // Load settings separately from YouTube auth status and redirect URI
         if (handleApiError(settingsResult, "Unable to load settings")) {
             loading.value = false;
             isFirstLoad.value = false;
             return;
         } else {
-            settings.value = await settingsResult.json();
+            const settingsJson = await settingsResult.json();
+            rawSettings.value = Object.entries(settingsJson).reduce((acc, [key, value]) => {
+                acc[key] = {
+                    currentValue: value,
+                    proposedValue: value,
+                };
+                return acc;
+            }, {} as ISettingsClient);
         }
 
         const secretsResult = await fetch("/api/v1/settings/secrets");
@@ -90,12 +108,10 @@ export const useSettingsStore = defineStore("settings", () => {
         isFirstLoad.value = false;
     }
 
-    async function saveSetting(settingName: keyof ISettings, value: string | boolean, settingType: SettingType) {
-        if (!settings.value) {
-            await getSettings();
-        }
+    async function saveSetting(settingName: keyof ISettings, value: string | boolean | undefined, settingType: SettingType): Promise<SaveSettingResult> {
+      let error: string | undefined = undefined;
 
-        const submitResult = await fetch(`/api/v1/settings/values/${settingName}`, {
+      const submitResult = await fetch(`/api/v1/settings/values/${settingName}`, {
             method: "POST",
             body: JSON.stringify({
                 value,
@@ -104,19 +120,38 @@ export const useSettingsStore = defineStore("settings", () => {
             headers: {
                 "Content-Type": "application/json",
             },
+        }).catch((e: unknown) => {
+            error = `Error saving setting: ${e}`;
         });
 
-        if (!submitResult.ok) {
-            return `Save error: ${submitResult.status} ${submitResult.statusText}`;
+        if (!submitResult) {
+          return {
+            success: false,
+            error,
+          }
         }
 
-        if (settings.value) {
-            settings.value[settingName] = value;
-        } else {
-            console.warn("saveSetting: settings.value was null while trying to update stored settings in Pinia. "
-                + `Setting name: ${settingName}`);
+        if (!submitResult.ok) {
+            return {
+              success: false,
+              error: `Error saving setting: ${submitResult.status} ${submitResult.statusText}`,
+            }
         }
-        return submitResult.ok;
+
+        if (rawSettings.value) {
+          rawSettings.value[settingName].currentValue = value;
+        } else {
+          console.error("rawSettings.value is null");
+          return {
+            success: false,
+            error: "Cannot save setting before settings have been loaded",
+          }
+        }
+
+        return {
+          success: submitResult.ok,
+          error,
+        };
     }
 
     async function saveDescriptionTemplate(value: string) {
@@ -144,6 +179,7 @@ export const useSettingsStore = defineStore("settings", () => {
         getSettings,
         isFirstLoad,
         loading,
+        rawSettings,
         saveDescriptionTemplate,
         saveSetting,
         settings,

@@ -14,18 +14,12 @@
       </VAlert>
       <div v-else>
         <h2>General</h2>
-        <AutosavingTextInput
-          :key="`eventName-${dataRefreshKey}`"
-          :on-submit="submitEventName"
-          :initial-value="settingsStore.settings?.eventName"
-          name="eventName"
-          label="Event name"
-          input-type="text"
-          setting-type="setting"
-          class="mt-4"
+        <SettingsTextInput v-if="!settingsStore.isFirstLoad && settingsStore.settings?.eventName"
+          setting-name="eventName" label="Event name"
+                           setting-type="setting"
+                           v-model="settingsStore.rawSettings.eventName.proposedValue"
+                           :on-save="settingsStore.saveSetting"
         />
-
-        <SettingsTextInput setting-name="tbaEventCode" label="test" />
 
         <VAlert
           v-if="matchStore.selectedMatchKey"
@@ -34,15 +28,8 @@
         >
           Changing the event code will clear the current selected match.
         </VAlert>
-        <AutosavingTextInput
-          :key="`eventTbaCode-${dataRefreshKey}`"
-          :on-submit="submitEventCode"
-          :initial-value="settingsStore.settings?.eventTbaCode"
-          name="eventTbaCode"
-          label="Event TBA code"
-          input-type="text"
-          setting-type="setting"
-        />
+<!--        FIXME: figure out how to reimplement post-actions on tba code change-->
+<!--        <SettingsTextInput setting-name="eventTbaCode" label="Event TBA code" />-->
 
         <p class="mb-1">
           Playoffs type
@@ -470,7 +457,7 @@ import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import { useEventMediaStore } from "@/stores/eventMedia";
 import AutosavingTextInputV2 from "@/components/form/AutosavingTextInputV2.vue";
-import { useTestSettingsStore } from "@/stores/settingsTest";
+import { useSettingsStoreV2 } from "@/stores/settingsV2";
 import { VTextarea, VTextField } from "vuetify/components";
 import BaseDynamicTextInput from "@/components/form/BaseDynamicTextInput.vue";
 import SettingsTextInput from "@/components/form/SettingsTextInput.vue";
@@ -490,7 +477,7 @@ const autoRenameStore = useAutoRenameStore();
 const eventMediaStore = useEventMediaStore();
 
 
-const testSettingsStore = useTestSettingsStore();
+const testSettingsStore = useSettingsStoreV2();
 
 
 const dataRefreshKey = ref(1);

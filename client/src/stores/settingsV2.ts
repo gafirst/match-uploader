@@ -1,19 +1,19 @@
 import { acceptHMRUpdate, defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
-export const useTestSettingsStore = defineStore("settingsTest", () => {
+export const useSettingsStoreV2 = defineStore("settingsTest", () => {
   const error = ref("");
   const settings = ref<{
     [name: string]: {
-      actualValue: string;
-      proposedValue: string;
-      error: string;
+      actualValue: string | null;
+      proposedValue: string | null;
+      error?: string;
+      isSecret?: boolean;
     }
   }>({
     tbaEventCode: {
       actualValue: "2024gadal",
       proposedValue: "2024gadal",
-      error: "",
     }
   })
 
@@ -31,6 +31,7 @@ export const useTestSettingsStore = defineStore("settingsTest", () => {
       settings.value[name].error = "Unable to save"
     }
   }
+
   return {
     settings,
     saveSetting,
@@ -39,5 +40,5 @@ export const useTestSettingsStore = defineStore("settingsTest", () => {
 
 // Enable Pinia's hot module replacement feature
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useTestSettingsStore, import.meta.hot));
+  import.meta.hot.accept(acceptHMRUpdate(useSettingsStoreV2, import.meta.hot));
 }
