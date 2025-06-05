@@ -14,6 +14,12 @@
       </VAlert>
       <div v-else>
         <h2>General</h2>
+        <strong>TBA event code</strong><br />
+        {{ settingsStore.settings?.eventTbaCode }} <VBtn size="small" @click="showEventCodeWizardDialog = true">Change</VBtn>
+
+        <UpdateEventKeyDialog v-model="showEventCodeWizardDialog"
+        />
+
         <AutosavingTextInput
           :key="`eventName-${dataRefreshKey}`"
           :on-submit="submitEventName"
@@ -467,6 +473,11 @@ import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNa
 import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import { useEventMediaStore } from "@/stores/eventMedia";
+import AutoRenameReviewDialogContents from "@/components/autoRename/AutoRenameReviewDialogContents.vue";
+import UpdateEventKeyDialogContents from "@/components/settings/UpdateEventKeyDialogContents.vue";
+import UpdateEventKeyDialog from "@/components/settings/UpdateEventKeyDialog.vue";
+
+const showEventCodeWizardDialog = ref(false);
 
 const loading = computed(() => {
   return settingsStore.loading;

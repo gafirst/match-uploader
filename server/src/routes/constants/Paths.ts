@@ -68,6 +68,10 @@ const Paths = {
       List: "/",
     },
   },
+  Events: {
+    Base: "/events",
+    Autocomplete: "/autocomplete",
+  }
 };
 
 export type TPaths = Immutable<typeof Paths>;
