@@ -1,8 +1,8 @@
 import { DateTime } from "luxon";
 
-export type TbaEventsSimpleApiResponse = TbaEventSimple[];
+export type TbaEventsSimpleApiResponse = TbaEventSimpleApiResponse[];
 
-export interface TbaEventSimple {
+export interface TbaEventSimpleApiResponse {
   key: string;
   name: string;
   event_code: string;
@@ -11,9 +11,15 @@ export interface TbaEventSimple {
   city: string | null;
   state_prov: string | null;
   country: string | null;
+  start_date: string;
+  end_date: string;
+  year: number;
+}
+
+// Omit: https://stackoverflow.com/a/69277054
+export interface TbaEventSimple extends Omit<TbaEventSimpleApiResponse, "start_date" | "end_date"> {
   start_date: DateTime;
   end_date: DateTime;
-  year: number;
 }
 
 interface TbaDistrict {
@@ -23,15 +29,15 @@ interface TbaDistrict {
     year: number;
 }
 
-export function isTbaEventSimple(obj: object): obj is TbaEventSimple {
-  return !!(obj as TbaEventSimple).key &&
-    !!(obj as TbaEventSimple).name &&
-    !!(obj as TbaEventSimple).event_code &&
-    typeof (obj as TbaEventSimple).event_type === "number" &&
-    isTbaDistrict((obj as TbaEventSimple).district) &&
-    !!(obj as TbaEventSimple).start_date &&
-    !!(obj as TbaEventSimple).end_date &&
-    typeof (obj as TbaEventSimple).year === "number";
+export function isTbaEventSimple(obj: object): obj is TbaEventSimpleApiResponse {
+  return !!(obj as TbaEventSimpleApiResponse).key &&
+    !!(obj as TbaEventSimpleApiResponse).name &&
+    !!(obj as TbaEventSimpleApiResponse).event_code &&
+    typeof (obj as TbaEventSimpleApiResponse).event_type === "number" &&
+    isTbaDistrict((obj as TbaEventSimpleApiResponse).district) &&
+    !!(obj as TbaEventSimpleApiResponse).start_date &&
+    !!(obj as TbaEventSimpleApiResponse).end_date &&
+    typeof (obj as TbaEventSimpleApiResponse).year === "number";
 }
 
 export function isTbaDistrict(obj: object | null): obj is TbaDistrict {
@@ -43,4 +49,12 @@ export function isTbaDistrict(obj: object | null): obj is TbaDistrict {
     !!(obj as TbaDistrict).display_name &&
     !!(obj as TbaDistrict).key &&
     typeof (obj as TbaDistrict).year === "number";
+}
+
+export function augmentTbaEventDates(event: TbaEventSimpleApiResponse): TbaEventSimple {
+  return {
+    ...event,
+    start_date: DateTime.fromISO(event.start_date).startOf("day"),
+    end_date: DateTime.fromISO(event.end_date).endOf("day"),
+  };
 }
