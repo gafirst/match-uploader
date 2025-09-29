@@ -43,6 +43,7 @@ const Paths = {
     Upload: "/upload",
     Playlists: "/playlists",
     SavePlaylistMapping: "/playlistMapping/:videoLabel",
+    GetSampleVideoTitles: "/sampleVideoTitles",
   },
   Worker: {
     Base: "/worker",
@@ -71,7 +72,7 @@ const Paths = {
   Events: {
     Base: "/events",
     Autocomplete: "/autocomplete",
-  }
+  },
 };
 
 export type TPaths = Immutable<typeof Paths>;

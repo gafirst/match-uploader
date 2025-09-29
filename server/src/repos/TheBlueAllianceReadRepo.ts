@@ -13,7 +13,6 @@ import {
     TbaEventSimpleApiResponse,
     TbaEventsSimpleApiResponse,
 } from "@src/models/theBlueAlliance/tbaEvent";
-import { DateTime } from "luxon";
 
 export class TheBlueAllianceReadRepo {
     private readonly apiKey: string;

@@ -14,11 +14,11 @@ import {
   cachePlaylistNames,
   getAuthenticatedYouTubeChannels,
   getGoogleOAuth2RedirectUri,
-  getOAuth2AuthUrl,
+  getOAuth2AuthUrl, getSampleVideoTitles,
   oauth2AuthCodeExchange, queueYouTubeVideoUpload,
 } from "@src/services/YouTubeService";
 import logger from "jet-logger";
-import { body, matchedData, param, validationResult } from "express-validator";
+import { body, matchedData, param, query, validationResult } from "express-validator";
 import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
 import MatchKey from "@src/models/MatchKey";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
@@ -305,5 +305,30 @@ async function deletePlaylistMapping(req: IReq<{ value: string }>, res: IRes): P
 
   res.json({
     ok: true,
+  });
+}
+
+youTubeRouter.get(
+  Paths.YouTube.GetSampleVideoTitles,
+  query("eventName").isString().trim(),
+  getSampleYouTubeVideoTitles,
+);
+
+async function getSampleYouTubeVideoTitles(req: IReq, res: IRes): Promise<void> {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    res.status(400)
+      .json({
+        errors: errors.array(),
+      });
+    return;
+  }
+
+  const { eventName } = matchedData(req);
+
+  res.json({
+    ok: true,
+    data: await getSampleVideoTitles(eventName as string),
   });
 }

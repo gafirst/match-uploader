@@ -20,16 +20,19 @@ export default {
     nodeEnv: process.env.NODE_ENV ?? "",
     host: process.env.HOST,
     port: Number.parseInt(process.env.PORT ?? "0", 10),
+    spellCheck: {
+      dictBasePath: (process.env.SPELLCHECK_DICT_BASE_PATH) ?? "./node_modules/typo-js/dictionaries",
+    },
     settingsLocations: {
-        youTubeDescriptionFile: (process.env.DESCRIPTIONS_FILE_LOCATION) ?? "./settings/description.txt",
-        youTubeDescriptionTemplateFile: (process.env.DESCRIPTIONS_TEMPLATE_FILE_LOCATION) ??
+        youTubeDescriptionFile: process.env.DESCRIPTIONS_FILE_LOCATION ?? "./settings/description.txt",
+        youTubeDescriptionTemplateFile: process.env.DESCRIPTIONS_TEMPLATE_FILE_LOCATION ??
           "./settings/description.example.txt",
-        settingsFile: (process.env.SETTINGS_FILE_LOCATION) ?? "./settings/settings.json",
-        settingsTemplateFile: (process.env.SETTINGS_TEMPLATE_FILE_LOCATION) ?? "./settings/settings.example.json",
-        secretsFile: (process.env.SECRETS_FILE_LOCATION) ?? "./settings/secrets.json",
-        secretsTemplateFile: (process.env.SECRETS_TEMPLATE_FILE_LOCATION) ?? "./settings/secrets.example.json",
-        youTubePlaylistsFile: (process.env.YOUTUBE_PLAYLISTS_FILE_LOCATION) ?? "./settings/playlists.json",
-        youTubePlaylistsTemplateFile: (process.env.YOUTUBE_PLAYLISTS_TEMPLATE_FILE_LOCATION) ??
+        settingsFile: process.env.SETTINGS_FILE_LOCATION ?? "./settings/settings.json",
+        settingsTemplateFile: process.env.SETTINGS_TEMPLATE_FILE_LOCATION ?? "./settings/settings.example.json",
+        secretsFile: process.env.SECRETS_FILE_LOCATION ?? "./settings/secrets.json",
+        secretsTemplateFile: process.env.SECRETS_TEMPLATE_FILE_LOCATION ?? "./settings/secrets.example.json",
+        youTubePlaylistsFile: process.env.YOUTUBE_PLAYLISTS_FILE_LOCATION ?? "./settings/playlists.json",
+        youTubePlaylistsTemplateFile: process.env.YOUTUBE_PLAYLISTS_TEMPLATE_FILE_LOCATION ??
             "./settings/playlists.example.json",
     },
     db: {

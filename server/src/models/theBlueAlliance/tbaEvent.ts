@@ -22,6 +22,15 @@ export interface TbaEventSimple extends Omit<TbaEventSimpleApiResponse, "start_d
   end_date: DateTime;
 }
 
+export interface TbaEventSimpleWithReason extends TbaEventSimple {
+  reason: string;
+  icon?: string;
+}
+
+export interface EventAutocompleteApiResponse {
+  sortedEvents: TbaEventSimpleWithReason[];
+}
+
 interface TbaDistrict {
   abbreviation: string;
     display_name: string;

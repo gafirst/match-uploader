@@ -9,7 +9,7 @@ export const eventsRouter = Router();
 eventsRouter.get(
     Paths.Events.Autocomplete,
     getEventsAutocomplete,
-)
+);
 
 async function getEventsAutocomplete(req: IReq, res: IRes): Promise<void> {
     res.json({

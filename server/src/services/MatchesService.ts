@@ -22,11 +22,21 @@ import { type PrismaClient } from "@prisma/client";
 import { type WorkerPrismaClient } from "@src/worker";
 import { matchUploaderAttribution } from "@src/util/videoDescription";
 
+export function generateMatchVideoTitle(match: Match, eventName: string, videoLabel: string | null = null): string {
+    const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
+
+    if (videoLabel) {
+        const videoLabelCapitalized = capitalizeFirstLetter(videoLabel);
+        return `${matchTitleName} - ${videoLabelCapitalized} - ${eventName}`;
+    }
+
+    return `${matchTitleName} - ${eventName}`;
+}
+
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: boolean): Promise<VideoInfo[]> {
     const { eventName, videoSearchDirectory } = await getSettings();
     const match = new Match(matchKey, isReplay);
     const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);
-    const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
 
     const files = await getFilesMatchingPattern(
       videoSearchDirectory,
@@ -49,18 +59,13 @@ export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: b
         // Video label is the first part of the file path
         const proposedVideoLabel = filePath.split("/")[0];
         let videoLabel: string | null = null;
-        let videoTitle: string;
 
         // Don't set a video label if the proposed label name is "unlabeled" (case-insensitive)
         if (proposedVideoLabel.toLowerCase() !== "unlabeled") {
             videoLabel = proposedVideoLabel;
         }
 
-        if (!videoLabel) {
-            videoTitle = `${matchTitleName} - ${eventName}`;
-        } else {
-            videoTitle = `${matchTitleName} - ${videoLabel} - ${eventName}`;
-        }
+        const videoTitle = generateMatchVideoTitle(match, eventName, videoLabel);
 
         const isUploaded = filePath.includes("uploaded");
 

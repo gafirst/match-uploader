@@ -13,41 +13,47 @@
         {{ error }}
       </VAlert>
       <div v-else>
-        <h2>General</h2>
-        <strong>TBA event code</strong><br />
-        {{ settingsStore.settings?.eventTbaCode }} <VBtn size="small" @click="showEventCodeWizardDialog = true">Change</VBtn>
-
-        <UpdateEventKeyDialog v-model="showEventCodeWizardDialog"
-        />
-
-        <AutosavingTextInput
-          :key="`eventName-${dataRefreshKey}`"
-          :on-submit="submitEventName"
-          :initial-value="settingsStore.settings?.eventName"
-          name="eventName"
-          label="Event name"
-          input-type="text"
-          setting-type="setting"
-          class="mt-4"
-        />
+        <VAlert
+          v-if="changeEventStore.saveChangesSuccess"
+          class="mt-2 mb-4"
+          variant="tonal"
+          color="success"
+          icon="mdi-check-circle"
+        >
+          New event information saved successfully
+        </VAlert>
 
         <VAlert
           v-if="matchStore.selectedMatchKey"
           class="mb-4"
           color="warning"
         >
-          Changing the event code will clear the current selected match.
+          Switching events will clear the current selected match
         </VAlert>
-        <AutosavingTextInput
-          :key="`eventTbaCode-${dataRefreshKey}`"
-          :on-submit="submitEventCode"
-          :initial-value="settingsStore.settings?.eventTbaCode"
-          name="eventTbaCode"
-          label="Event TBA code"
-          input-type="text"
-          setting-type="setting"
-        />
 
+        <h2>
+          Event <VBtn
+            size="small"
+            @click="showEventCodeWizardDialog = true"
+          >
+            Change
+          </VBtn>
+        </h2>
+        <p class="mt-1 mb-1 font-weight-bold">
+          Event code
+        </p>
+        {{ settingsStore.settings?.eventTbaCode }}
+
+        <p class="mt-1 mb-1 font-weight-bold">
+          Event name
+        </p>
+        {{ settingsStore.settings?.eventName }}
+
+        <UpdateEventKeyDialog v-model="showEventCodeWizardDialog" />
+
+        <h2 class="mt-2">
+          General
+        </h2>
         <p class="mb-1">
           Playoffs type
         </p>
@@ -164,7 +170,7 @@
           </p>
         </VAlert>
         <AutosavingTextInput
-          :key="`descriptionTemplate-${dataRefreshKey}`"
+          :key="`descriptionTemplate-${settingsStore.dataRefreshKey}`"
           :on-submit="saveDescriptionTemplate"
           :initial-value="settingsStore.descriptionTemplate ?? undefined"
           name="descriptionTemplate"
@@ -179,7 +185,7 @@
         </h2>
         <h3>Read API</h3>
         <AutosavingTextInput
-          :key="`theBlueAllianceReadApiKey-${dataRefreshKey}`"
+          :key="`theBlueAllianceReadApiKey-${settingsStore.dataRefreshKey}`"
           :on-submit="submit"
           initial-value=""
           name="theBlueAllianceReadApiKey"
@@ -212,7 +218,7 @@
 
         <AutosavingTextInput
           v-if="settingsStore.settings?.linkVideosOnTheBlueAlliance"
-          :key="`theBlueAllianceTrustedApiAuthId-${dataRefreshKey}`"
+          :key="`theBlueAllianceTrustedApiAuthId-${settingsStore.dataRefreshKey}`"
           :on-submit="submit"
           initial-value=""
           name="theBlueAllianceTrustedApiAuthId"
@@ -226,7 +232,7 @@
 
         <AutosavingTextInput
           v-if="settingsStore.settings?.linkVideosOnTheBlueAlliance"
-          :key="`theBlueAllianceTrustedApiAuthSecret-${dataRefreshKey}`"
+          :key="`theBlueAllianceTrustedApiAuthSecret-${settingsStore.dataRefreshKey}`"
           :on-submit="submit"
           initial-value=""
           name="theBlueAllianceTrustedApiAuthSecret"
@@ -275,7 +281,7 @@
 
         <AutosavingTextInput
           v-if="settingsStore.settings?.useFrcEventsApi"
-          :key="`frcEventsApiKey-${dataRefreshKey}`"
+          :key="`frcEventsApiKey-${settingsStore.dataRefreshKey}`"
           :on-submit="submit"
           initial-value=""
           name="frcEventsApiKey"
@@ -341,7 +347,7 @@
           :disabled="settingsStore.youTubeAuthState?.accessTokenStored"
           input-type="text"
           setting-type="setting"
-          @saved-value-updated="() => refreshData(false)"
+          @saved-value-updated="() => settingsStore.refreshData(false)"
         />
 
         <AutosavingTextInput
@@ -356,13 +362,27 @@
           setting-type="secret"
           :disabled="settingsStore.youTubeAuthState?.accessTokenStored"
           class="mb-3"
-          @saved-value-updated="() => refreshData(false)"
+          @saved-value-updated="() => settingsStore.refreshData(false)"
         />
         <YouTubeConnectionInfo
           :google-auth-status="settingsStore.settings?.googleAuthStatus"
           :you-tube-auth-state="settingsStore.youTubeAuthState"
-          @trigger-refresh="refreshData"
+          @trigger-refresh="settingsStore.refreshData"
         />
+        <h2 class="mt-4 mb-2">
+          Event name spellcheck
+        </h2>
+        <AutosavingTextInput
+          :on-submit="submit"
+          class="mb-2"
+          :initial-value="settingsStore.settings?.spellCheckCustomDictionary"
+          name="spellCheckCustomDictionary"
+          label="Custom dictionary"
+          input-type="text"
+          help-text="Additional accepted words for event name spellcheck (case-sensitive, comma-separated)"
+          setting-type="setting"
+        />
+
         <h2 class="mt-4 mb-2">
           Auto rename <VChip color="purple">
             Beta
@@ -473,10 +493,10 @@ import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNa
 import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import { useEventMediaStore } from "@/stores/eventMedia";
-import AutoRenameReviewDialogContents from "@/components/autoRename/AutoRenameReviewDialogContents.vue";
-import UpdateEventKeyDialogContents from "@/components/settings/UpdateEventKeyDialogContents.vue";
 import UpdateEventKeyDialog from "@/components/settings/UpdateEventKeyDialog.vue";
+import { useChangeEventStore } from "@/stores/changeEventStore";
 
+const changeEventStore = useChangeEventStore();
 const showEventCodeWizardDialog = ref(false);
 
 const loading = computed(() => {
@@ -493,7 +513,7 @@ const uploadedVideosStore = useUploadedVideosStore();
 const autoRenameStore = useAutoRenameStore();
 const eventMediaStore = useEventMediaStore();
 
-const dataRefreshKey = ref(1);
+
 const youTubeOAuth2RedirectUriCopied = ref(false);
 const savingPlayoffMatchType = ref(false);
 
@@ -520,19 +540,15 @@ function copyYouTubeOAuth2RedirectUri() {
   }
 }
 
-async function refreshData(showLoading: boolean = true) {
-  await settingsStore.getSettings(showLoading);
-  dataRefreshKey.value++;
-}
-
 onMounted(async () => {
-  await refreshData();
+  await settingsStore.refreshData();
 });
 
 async function submit(settingName: string, value: string | boolean, settingType: SettingType) {
   return await settingsStore.saveSetting(settingName, value, settingType);
 }
 
+// FIXME: Move this to changeEventStore
 async function submitEventName(settingName: string, value: string | boolean, settingType: SettingType) {
   // TODO(#114): Ideally we could alert other client instances that the event name has changed
   const submitResult = await submit(settingName, value, settingType);
@@ -540,6 +556,7 @@ async function submitEventName(settingName: string, value: string | boolean, set
   return submitResult;
 }
 
+// FIXME: Move this to changeEventStore
 async function submitEventCode(settingName: string, value: string | boolean, settingType: SettingType) {
   // TODO(#114): Ideally we could alert other client instances that the event code has changed
   const submitResult = await submit(settingName, value, settingType);
@@ -558,7 +575,7 @@ async function saveDescriptionTemplate(settingName: string, value: string, setti
 async function savePlayoffMatchType(value: string): Promise<void> {
   savingPlayoffMatchType.value = true;
   await submit("playoffsType", value, "setting");
-  await refreshData(false);
+  await settingsStore.refreshData(false);
   savingPlayoffMatchType.value = false;
   await matchListStore.getMatchList(true);
 }
@@ -569,7 +586,7 @@ const savingSandboxMode = ref(false);
 async function saveSandboxMode(value: string): Promise<void> {
   savingSandboxMode.value = true;
   await submit("sandboxModeEnabled", value === "On", "setting");
-  await refreshData(false);
+  await settingsStore.refreshData(false);
   savingSandboxMode.value = false;
 }
 
@@ -579,7 +596,7 @@ const savingUploadPrivacy = ref(false);
 async function saveUploadPrivacy(value: string): Promise<void> {
   savingUploadPrivacy.value = true;
   await submit("youTubeVideoPrivacy", value.toLowerCase(), "setting");
-  await refreshData(false);
+  await settingsStore.refreshData(false);
   savingUploadPrivacy.value = false;
 }
 
@@ -589,7 +606,7 @@ const savingTbaLinkVideos = ref(false);
 async function saveTbaLinkVideos(value: string): Promise<void> {
   savingTbaLinkVideos.value = true;
   await submit("linkVideosOnTheBlueAlliance", value === "On", "setting");
-  await refreshData(false);
+  await settingsStore.refreshData(false);
   savingTbaLinkVideos.value = false;
 }
 
@@ -609,7 +626,7 @@ const savingFrcEventsEnabled = ref(false);
 async function saveFrcEventsEnabled(value: string): Promise<void> {
   savingFrcEventsEnabled.value = true;
   await submit("useFrcEventsApi", value === "On", "setting");
-  await refreshData(false);
+  await settingsStore.refreshData(false);
   savingFrcEventsEnabled.value = false;
   matchStore.descriptionLoading = true;
   eventMediaStore.descriptionLoading = true;
