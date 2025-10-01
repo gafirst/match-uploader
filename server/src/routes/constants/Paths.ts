@@ -43,6 +43,7 @@ const Paths = {
     Upload: "/upload",
     Playlists: "/playlists",
     SavePlaylistMapping: "/playlistMapping/:videoLabel",
+    GetSampleVideoTitles: "/sampleVideoTitles",
   },
   Worker: {
     Base: "/worker",
@@ -67,6 +68,10 @@ const Paths = {
       UndoRename: "/undoRename",
       List: "/",
     },
+  },
+  Events: {
+    Base: "/events",
+    Autocomplete: "/autocomplete",
   },
 };
 

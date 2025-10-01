@@ -14,7 +14,7 @@ import { toFrcEventsUrlTournamentLevel } from "@src/models/CompLevel";
 import Mustache from "mustache";
 
 import {
-    getEventUploadStatusByMatch,
+  getEventUploadStatusByMatch,
 } from "@src/repos/UploadedVideosRepo";
 
 import { EventUploadStatusByMatch } from "@src/models/UploadedVideo";
@@ -22,109 +22,117 @@ import { type PrismaClient } from "@prisma/client";
 import { type WorkerPrismaClient } from "@src/worker";
 import { matchUploaderAttribution } from "@src/util/videoDescription";
 
+export function generateMatchVideoTitle(match: Match, eventName: string, videoLabel: string | null = null): string {
+  const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
+
+  if (videoLabel) {
+    const videoLabelCapitalized = capitalizeFirstLetter(videoLabel);
+    return `${matchTitleName} - ${videoLabelCapitalized} - ${eventName}`;
+  }
+
+  return `${matchTitleName} - ${eventName}`;
+}
+
 export async function getLocalVideoFilesForMatch(matchKey: MatchKey, isReplay: boolean): Promise<VideoInfo[]> {
-    const { eventName, videoSearchDirectory } = await getSettings();
-    const match = new Match(matchKey, isReplay);
-    const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);
-    const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
+  const {
+    eventName,
+    videoSearchDirectory,
+  } = await getSettings();
+  const match = new Match(matchKey, isReplay);
+  const videoFileMatchingName = capitalizeFirstLetter(match.videoFileMatchingName);
 
-    const files = await getFilesMatchingPattern(
-      videoSearchDirectory,
-      `**/${videoFileMatchingName}.*`,
-      2,
-      false,
-    );
-    const uploadedFiles = await getFilesMatchingPattern(
-      videoSearchDirectory,
-      `**/uploaded/${videoFileMatchingName}.*`,
-      3,
-      false,
-    );
+  const files = await getFilesMatchingPattern(
+    videoSearchDirectory,
+    `**/${videoFileMatchingName}.*`,
+    2,
+    false,
+  );
+  const uploadedFiles = await getFilesMatchingPattern(
+    videoSearchDirectory,
+    `**/uploaded/${videoFileMatchingName}.*`,
+    3,
+    false,
+  );
 
-    files.push(...uploadedFiles);
-    // TODO: Use VideoInfo.getVideoLabelFromPath(path) here
-    return files
-      .filter(filePath => filePath.includes("/")) // Files must be within a subdirectory
-      .map(filePath => {
-        // Video label is the first part of the file path
-        const proposedVideoLabel = filePath.split("/")[0];
-        let videoLabel: string | null = null;
-        let videoTitle: string;
+  files.push(...uploadedFiles);
+  // TODO: Use VideoInfo.getVideoLabelFromPath(path) here
+  return files
+    .filter(filePath => filePath.includes("/")) // Files must be within a subdirectory
+    .map(filePath => {
+      // Video label is the first part of the file path
+      const proposedVideoLabel = filePath.split("/")[0];
+      let videoLabel: string | null = null;
 
-        // Don't set a video label if the proposed label name is "unlabeled" (case-insensitive)
-        if (proposedVideoLabel.toLowerCase() !== "unlabeled") {
-            videoLabel = proposedVideoLabel;
-        }
+      // Don't set a video label if the proposed label name is "unlabeled" (case-insensitive)
+      if (proposedVideoLabel.toLowerCase() !== "unlabeled") {
+        videoLabel = proposedVideoLabel;
+      }
 
-        if (!videoLabel) {
-            videoTitle = `${matchTitleName} - ${eventName}`;
-        } else {
-            videoTitle = `${matchTitleName} - ${videoLabel} - ${eventName}`;
-        }
+      const videoTitle = generateMatchVideoTitle(match, eventName, videoLabel);
 
-        const isUploaded = filePath.includes("uploaded");
+      const isUploaded = filePath.includes("uploaded");
 
-        return new VideoInfo(filePath, videoLabel, videoTitle, isUploaded);
+      return new VideoInfo(filePath, videoLabel, videoTitle, isUploaded);
     });
 }
 
 export async function getTbaMatchList(): Promise<TbaMatchSimple[]> {
-    const { eventTbaCode } = await getSettings();
-    const { theBlueAllianceReadApiKey } = await getSecrets();
-    const tba = new TheBlueAllianceReadRepo(theBlueAllianceReadApiKey);
+  const { eventTbaCode } = await getSettings();
+  const { theBlueAllianceReadApiKey } = await getSecrets();
+  const tba = new TheBlueAllianceReadRepo(theBlueAllianceReadApiKey);
 
-    return await tba.getEventMatches(eventTbaCode);
+  return await tba.getEventMatches(eventTbaCode);
 }
 
 export async function getFrcEventsMatchList(): Promise<TbaMatchSimple[]> {
-    const { eventTbaCode } = await getSettings();
+  const { eventTbaCode } = await getSettings();
 
-    const year = eventTbaCode.substring(0, 4);
-    const eventCode = eventTbaCode.substring(4);
+  const year = eventTbaCode.substring(0, 4);
+  const eventCode = eventTbaCode.substring(4);
 
-    const { frcEventsApiKey } = await getSecrets();
-    const frc = new FrcEventsRepo(frcEventsApiKey);
+  const { frcEventsApiKey } = await getSecrets();
+  const frc = new FrcEventsRepo(frcEventsApiKey);
 
-    return await frc.getScoredMatches(year, eventCode);
+  return await frc.getScoredMatches(year, eventCode);
 }
 
 export async function getMatchList(): Promise<TbaMatchSimple[]> {
-    const { useFrcEventsApi } = await getSettings();
+  const { useFrcEventsApi } = await getSettings();
 
-    if (useFrcEventsApi) {
-        return await getFrcEventsMatchList();
-    }
+  if (useFrcEventsApi) {
+    return await getFrcEventsMatchList();
+  }
 
-    return await getTbaMatchList();
+  return await getTbaMatchList();
 }
 
 export async function getTbaMatch(matchKey: MatchKey): Promise<TbaMatchSimple> {
-    const { theBlueAllianceReadApiKey } = await getSecrets();
-    const tba = new TheBlueAllianceReadRepo(theBlueAllianceReadApiKey);
+  const { theBlueAllianceReadApiKey } = await getSecrets();
+  const tba = new TheBlueAllianceReadRepo(theBlueAllianceReadApiKey);
 
-    return await tba.getMatchResults(matchKey);
+  return await tba.getMatchResults(matchKey);
 }
 
 export async function getFrcEventsMatch(matchKey: MatchKey): Promise<TbaMatchSimple> {
-    const { eventTbaCode } = await getSettings();
+  const { eventTbaCode } = await getSettings();
 
-    const year = eventTbaCode.substring(0, 4);
-    const eventCode = eventTbaCode.substring(4);
+  const year = eventTbaCode.substring(0, 4);
+  const eventCode = eventTbaCode.substring(4);
 
-    const { frcEventsApiKey } = await getSecrets();
-    const frc = new FrcEventsRepo(frcEventsApiKey);
+  const { frcEventsApiKey } = await getSecrets();
+  const frc = new FrcEventsRepo(frcEventsApiKey);
 
-    return await frc.getScoredMatch(year, eventCode, matchKey);
+  return await frc.getScoredMatch(year, eventCode, matchKey);
 }
 
 export async function getMatch(matchKey: MatchKey): Promise<TbaMatchSimple> {
-    const { useFrcEventsApi } = await getSettings();
+  const { useFrcEventsApi } = await getSettings();
 
-    if (useFrcEventsApi) {
-        return await getFrcEventsMatch(matchKey);
-    }
+  if (useFrcEventsApi) {
+    return await getFrcEventsMatch(matchKey);
+  }
 
-    return await getTbaMatch(matchKey);
+  return await getTbaMatch(matchKey);
 }
 
 /**
@@ -133,7 +141,7 @@ export async function getMatch(matchKey: MatchKey): Promise<TbaMatchSimple> {
  * @returns boolean True if the match has been scored, false otherwise.
  */
 function matchIsScored(match: TbaMatchSimple): boolean {
-    return (match.alliances.red.score ?? -1) >= 0 && (match.alliances.blue.score ?? -1) >= 0;
+  return (match.alliances.red.score ?? -1) >= 0 && (match.alliances.blue.score ?? -1) >= 0;
 }
 
 /**
@@ -143,94 +151,103 @@ function matchIsScored(match: TbaMatchSimple): boolean {
  * @returns string A string of team numbers, joined by the joinWith string.
  */
 function getTeamsInMatch(teamKeys: TbaFrcTeam[], joinWith = ", "): string {
-    // Remove "frc" from "frc1234" to get "1234"
-    return teamKeys.map((teamKey) => teamKey.substring(3)).join(joinWith);
+  // Remove "frc" from "frc1234" to get "1234"
+  return teamKeys.map((teamKey) => teamKey.substring(3)).join(joinWith);
 }
 
 async function generateMatchDetailsUrl(matchKey: MatchKey): Promise<{
-    url: string,
-    site: "The Blue Alliance" | "FRC Events",
+  url: string,
+  site: "The Blue Alliance" | "FRC Events",
 }> {
-    const { eventTbaCode, useFrcEventsApi } = await getSettings();
-    const year = eventTbaCode.substring(0, 4);
-    const eventCode = eventTbaCode.substring(4);
+  const {
+    eventTbaCode,
+    useFrcEventsApi,
+  } = await getSettings();
+  const year = eventTbaCode.substring(0, 4);
+  const eventCode = eventTbaCode.substring(4);
 
-    if (useFrcEventsApi) {
-        if (matchKey.playoffsType !== PlayoffsType.DoubleElimination) {
-            throw new Error(`When using FRC Events as a data source, best of 3 matches are not supported.`);
-        }
-
-        const matchNumber = getFrcApiMatchNumber(matchKey.compLevel, matchKey.setNumber, matchKey.matchNumber);
-        const tournamentLevel = toFrcEventsUrlTournamentLevel(matchKey.compLevel);
-        return {
-            url: `https://frc-events.firstinspires.org/${year}/${eventCode}/${tournamentLevel}/${matchNumber}`,
-            site: "FRC Events",
-        };
+  if (useFrcEventsApi) {
+    if (matchKey.playoffsType !== PlayoffsType.DoubleElimination) {
+      throw new Error(`When using FRC Events as a data source, best of 3 matches are not supported.`);
     }
 
+    const matchNumber = getFrcApiMatchNumber(matchKey.compLevel, matchKey.setNumber, matchKey.matchNumber);
+    const tournamentLevel = toFrcEventsUrlTournamentLevel(matchKey.compLevel);
     return {
-        url: `https://thebluealliance.com/match/${matchKey.matchKey}`,
-        site: "The Blue Alliance",
+      url: `https://frc-events.firstinspires.org/${year}/${eventCode}/${tournamentLevel}/${matchNumber}`,
+      site: "FRC Events",
     };
+  }
+
+  return {
+    url: `https://thebluealliance.com/match/${matchKey.matchKey}`,
+    site: "The Blue Alliance",
+  };
 }
 
 export async function generateMatchVideoDescription(match: Match, eventName: string): Promise<string> {
-    const templateString = await getDescriptionTemplate();
+  const templateString = await getDescriptionTemplate();
 
-    const matchKey = match.key;
-    const matchInfo = await getMatch(matchKey);
+  const matchKey = match.key;
+  const matchInfo = await getMatch(matchKey);
 
-    if (!matchIsScored(matchInfo)) {
-        throw new Error(`Match ${matchKey.matchKey} has not been scored yet.`);
-    }
+  if (!matchIsScored(matchInfo)) {
+    throw new Error(`Match ${matchKey.matchKey} has not been scored yet.`);
+  }
 
-    const { site: eventDetailsSite, url: detailsUrl } = await generateMatchDetailsUrl(matchKey);
+  const {
+    site: eventDetailsSite,
+    url: detailsUrl,
+  } = await generateMatchDetailsUrl(matchKey);
 
-    const redScore = matchInfo.alliances.red.score;
-    const blueScore = matchInfo.alliances.blue.score;
+  const redScore = matchInfo.alliances.red.score;
+  const blueScore = matchInfo.alliances.blue.score;
 
-    if (redScore === null) {
-        throw new Error(
-          `Match ${matchKey.matchKey} alliances.red.score property is null: ${JSON.stringify(matchInfo)}`,
-        );
-    }
+  if (redScore === null) {
+    throw new Error(
+      `Match ${matchKey.matchKey} alliances.red.score property is null: ${JSON.stringify(matchInfo)}`,
+    );
+  }
 
-    if (blueScore === null) {
-        throw new Error(
-          `Match ${matchKey.matchKey} alliances.blue.score property is null: ${JSON.stringify(matchInfo)}`,
-        );
-    }
+  if (blueScore === null) {
+    throw new Error(
+      `Match ${matchKey.matchKey} alliances.blue.score property is null: ${JSON.stringify(matchInfo)}`,
+    );
+  }
 
-    const redTeams = getTeamsInMatch(matchInfo.alliances.red.team_keys);
-    const blueTeams = getTeamsInMatch(matchInfo.alliances.blue.team_keys);
+  const redTeams = getTeamsInMatch(matchInfo.alliances.red.team_keys);
+  const blueTeams = getTeamsInMatch(matchInfo.alliances.blue.team_keys);
 
-    const view = {
-        isMatch: true,
-        eventName,
-        mediaTitle: capitalizeFirstLetter(match.verboseMatchName),
-        redTeams,
-        blueTeams,
-        redScore,
-        blueScore,
-        eventDetailsSite,
-        detailsUrl,
-        matchUploaderAttribution,
-    };
+  const view = {
+    isMatch: true,
+    eventName,
+    mediaTitle: capitalizeFirstLetter(match.verboseMatchName),
+    redTeams,
+    blueTeams,
+    redScore,
+    blueScore,
+    eventDetailsSite,
+    detailsUrl,
+    matchUploaderAttribution,
+  };
 
-    return Mustache.render(templateString, view);
+  return Mustache.render(templateString, view);
 }
 
 export async function getMatchUploadStatuses(
   prisma: PrismaClient | WorkerPrismaClient,
 ): Promise<EventUploadStatusByMatch> {
-    const { eventTbaCode, playoffsType } = await getSettings();
-    const playlists = await getYouTubePlaylists();
+  const {
+    eventTbaCode,
+    playoffsType,
+  } = await getSettings();
+  const playlists = await getYouTubePlaylists();
 
-    return await getEventUploadStatusByMatch(
-      prisma,
-      eventTbaCode,
-      new Set(Object.keys(playlists)),
-      playoffsType as PlayoffsType,
-      await getMatchList(),
-    );
+  return await getEventUploadStatusByMatch(
+    prisma,
+    eventTbaCode,
+    new Set(Object.keys(playlists)),
+    playoffsType as PlayoffsType,
+    await getMatchList(),
+  );
 }

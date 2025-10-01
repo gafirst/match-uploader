@@ -6,7 +6,7 @@ import EnvVars from "@src/constants/EnvVars";
 import FullPaths from "@src/routes/constants/FullPaths";
 import { type YouTubeChannelList } from "@src/models/YouTubeChannel";
 import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
-import type MatchKey from "@src/models/MatchKey";
+import MatchKey from "@src/models/MatchKey";
 import { UPLOAD_VIDEO } from "@src/tasks/types/tasks";
 import { type WorkerJob } from "@prisma/client";
 import { getYouTubeApiClient } from "@src/repos/YouTubeRepo";
@@ -14,6 +14,10 @@ import { graphileWorkerUtils, prisma } from "@src/server";
 import { queueJob } from "@src/util/queueJob";
 import { io } from "@src/index";
 import { VideoType } from "@src/models/VideoType";
+import { PlayoffsType } from "@src/models/PlayoffsType";
+import { Match } from "@src/models/Match";
+import { generateMatchVideoTitle } from "@src/services/MatchesService";
+import Typo from "typo-js";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
   const port = EnvVars.port;
@@ -160,4 +164,71 @@ export async function cachePlaylistNames(forceUpdate = false): Promise<boolean> 
   }
 
   return true;
+}
+
+export async function getSampleVideoTitles(eventName: string) {
+  const spellChecker = new Typo("en_US", null, null, { dictionaryPath: EnvVars.spellCheck.dictBasePath });
+
+  const { spellCheckCustomDictionary: spellCheckCustomDictString } = await getSettings();
+  const spellCheckCustomWords = new Set(spellCheckCustomDictString.split(","));
+
+  const videoLabels = new Set(Object.keys(await getYouTubePlaylists())).add("unlabeled");
+  const { playoffsType } = await getSettings();
+  const sampleMatchKeys = [
+    "2023test_qm1",
+    "2023test_qm10",
+    "2023test_qm100",
+    "2023test_sf1m1",
+    (playoffsType as PlayoffsType) === PlayoffsType.BestOf3 ? "2023test_qf1m1" : "2023test_sf10m1",
+    "2023test_f1m1",
+  ];
+
+  const replayVariants = [false, true];
+
+  const matchTitles: {
+    matchTitle: string
+    cutOffTitle: string;
+    remainder: string;
+    length: number;
+    lengthOk: boolean;
+  }[] = [];
+
+  for (const matchKey of sampleMatchKeys) {
+    for (const videoLabel of videoLabels) {
+      for (const isReplay of replayVariants) {
+        const match = new Match(MatchKey.fromString(matchKey, playoffsType as PlayoffsType), isReplay);
+        const matchTitle = generateMatchVideoTitle(match, eventName, videoLabel === "unlabeled" ? null : videoLabel);
+
+        matchTitles.push({
+          matchTitle,
+          cutOffTitle: matchTitle.substring(0, 100),
+          remainder: matchTitle.substring(100),
+          length: matchTitle.length,
+          lengthOk: matchTitle.length <= 100,
+        });
+      }
+    }
+  }
+
+  const eventNameSpellCheck = eventName.split(" ").map((word) => {
+    return {
+      word,
+      ok: word.match(/^(\d+|[+&-])$/) || spellChecker.check(word.replace(/[()]/g, ""))
+        || spellCheckCustomWords.has(word),
+    };
+  });
+
+  const spellCheckPassed = eventNameSpellCheck.every((word) => word.ok);
+  const matchTitleChecksPassed = matchTitles.every((check) => check.lengthOk);
+  return {
+    matchTitlesCheck: {
+      titles: matchTitles,
+      passed: matchTitleChecksPassed,
+    },
+    eventNameChecks: {
+      spellCheck: eventNameSpellCheck,
+      passed: spellCheckPassed,
+    },
+    passed: matchTitleChecksPassed && spellCheckPassed,
+  };
 }

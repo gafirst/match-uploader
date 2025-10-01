@@ -6,6 +6,13 @@ import {
 } from "@src/models/theBlueAlliance/tbaMatchesSimpleApiResponse";
 import { isObject } from "@src/util/isObject";
 import fetch from "node-fetch";
+import {
+    augmentTbaEventDates,
+    isTbaEventSimple,
+    TbaEventSimple,
+    TbaEventSimpleApiResponse,
+    TbaEventsSimpleApiResponse,
+} from "@src/models/theBlueAlliance/tbaEvent";
 
 export class TheBlueAllianceReadRepo {
     private readonly apiKey: string;
@@ -60,6 +67,32 @@ export class TheBlueAllianceReadRepo {
         } catch (error) {
             throw new Error("Error fetching simple match results from The Blue Alliance for " +
                 `${matchKey.matchKey}: ${error}`);
+        }
+    }
+
+    async getEvent(eventKey: string): Promise<TbaEventSimple> {
+        try {
+            const response = await this.get(
+              `event/${eventKey}/simple`,
+              (elem): elem is TbaEventSimpleApiResponse => isObject(elem) && isTbaEventSimple(elem),
+            );
+            return augmentTbaEventDates(response);
+        } catch (error) {
+            throw new Error(`Error fetching event ${eventKey} from The Blue Alliance: ${error}`);
+        }
+    }
+
+    async getEvents(year: number): Promise<TbaEventSimple[]> {
+        try {
+            return (await this.get(
+                `events/${year}/simple`,
+                (elem): elem is TbaEventsSimpleApiResponse =>
+                  Array.isArray(elem) &&
+                  elem.every(isObject) &&
+                  elem.every(isTbaEventSimple),
+            )).map((event: TbaEventSimpleApiResponse): TbaEventSimple => augmentTbaEventDates(event));
+        } catch (error) {
+            throw new Error(`Error fetching events from The Blue Alliance for ${year}: ${error}`);
         }
     }
 }
