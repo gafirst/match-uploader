@@ -3,6 +3,10 @@ import { computed, ref, watch } from "vue";
 import { isTbaEventsArray, TbaEvent } from "@/types/tbaEvent";
 import { isSampleVideoTitlesApiResponse, SampleVideoTitlesData } from "@/types/SampleVideoTitlesApiResponse";
 import { useSettingsStore } from "@/stores/settings";
+import { useMatchStore } from "@/stores/match";
+import { useMatchListStore } from "@/stores/matchList";
+import { useAutoRenameStore } from "@/stores/autoRename";
+import { useUploadedVideosStore } from "@/stores/uploadedVideos";
 
 export enum ChangeEventWizardSteps {
   CONFIRM_EVENT = 1,
@@ -17,7 +21,11 @@ export const changeEventsWizardSteps = [
 ];
 
 export const useChangeEventStore = defineStore("changeEvent", () => {
+  const autoRenameStore = useAutoRenameStore();
+  const matchListStore = useMatchListStore();
+  const matchStore = useMatchStore();
   const settingsStore = useSettingsStore();
+  const uploadedVideosStore = useUploadedVideosStore();
 
   const eventsAutocompleteLoading = ref(false);
   const eventsAutocompleteError = ref("");
@@ -184,6 +192,10 @@ export const useChangeEventStore = defineStore("changeEvent", () => {
     }
 
     await settingsStore.refreshData(false);
+    await matchListStore.getMatchList(true);
+    matchStore.clearSelectedMatch();
+    await uploadedVideosStore.getMatchUploadStatuses();
+    await autoRenameStore.getAssociations(true);
     saveChangesSuccess.value = true;
     return true;
   }

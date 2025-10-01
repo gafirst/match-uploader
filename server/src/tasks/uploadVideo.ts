@@ -44,7 +44,7 @@ function assertIsUploadVideoTaskPayload(payload: unknown): asserts payload is Up
         !(payload as unknown as UploadVideoTaskPayload).playoffsType
       )) ||
     ((payload as UploadVideoTaskPayload).videoType === VideoType.EventMedia &&
-        !(payload as unknown as UploadVideoTaskPayload).eventKey)
+      !(payload as unknown as UploadVideoTaskPayload).eventKey)
   ) {
     throw new Error(`Invalid payload (missing required prop): ${JSON.stringify(payload)}`);
   }
@@ -91,6 +91,11 @@ export async function uploadVideo(payload: unknown, {
   job,
 }: JobHelpers): Promise<void> {
   assertIsUploadVideoTaskPayload(payload);
+
+  if (payload.title.length > 100) {
+    throw new Error(`Video title "${payload.title}" is too long (${payload.title.length} chars), cannot ` +
+      "be longer than 100 chars");
+  }
 
   if (!isAllowedUploadPath(payload.videoPath)) {
     throw new Error(`Video path ${payload.videoPath} may not be uploaded`);
@@ -160,7 +165,7 @@ export async function uploadVideo(payload: unknown, {
         uploadResult.videoId,
         payload.label,
         matchKeyObject,
-        payload.eventKey
+        payload.eventKey,
       );
 
     try {

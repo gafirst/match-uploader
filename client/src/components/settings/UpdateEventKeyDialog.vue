@@ -35,7 +35,15 @@
               :value="changeEventsWizardSteps[0]"
             >
               <VAlert
-                v-if="!settingsStore.isFirstLoad && settingsStore.settings?.useFrcEventsApi"
+                v-if="missingTbaApiKey"
+                variant="tonal"
+                color="warning"
+                icon="mdi-alert-circle-outline"
+              >
+                Exit this dialog and set a TBA read API key to enable event data autocompletion
+              </VAlert>
+              <VAlert
+                v-else-if="!settingsStore.isFirstLoad && settingsStore.settings?.useFrcEventsApi"
                 variant="tonal"
                 color="warning"
                 icon="mdi-alert-circle-outline"
@@ -221,15 +229,21 @@ watch(() => show.value, (newVal) => {
   }
 });
 
+const missingTbaApiKey = computed(() => {
+  if (settingsStore.isFirstLoad || settingsStore.settings?.useFrcEventsApi) {
+    return false;
+  }
+
+  return !settingsStore.obfuscatedSecrets?.theBlueAllianceReadApiKey;
+});
+
 async function saveChanges() {
   if (await changeEventStore.saveChanges()) {
-    console.log("save result true");
     show.value = false;
     emit("close");
     return;
   }
 
-  console.log("save result false");
   show.value = false;
   emit("close");
 }

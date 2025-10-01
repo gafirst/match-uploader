@@ -490,8 +490,6 @@ import YouTubePlaylistMapping from "@/components/youtube/YouTubePlaylistMapping.
 import { useMatchStore } from "@/stores/match";
 import { useMatchListStore } from "@/stores/matchList";
 import AutoRenameFileNamePatterns from "@/components/autoRename/AutoRenameFileNamePatterns.vue";
-import { useUploadedVideosStore } from "@/stores/uploadedVideos";
-import { useAutoRenameStore } from "@/stores/autoRename";
 import { useEventMediaStore } from "@/stores/eventMedia";
 import UpdateEventKeyDialog from "@/components/settings/UpdateEventKeyDialog.vue";
 import { useChangeEventStore } from "@/stores/changeEventStore";
@@ -509,8 +507,6 @@ const error = computed(() => {
 const matchStore = useMatchStore();
 const matchListStore = useMatchListStore();
 const settingsStore = useSettingsStore();
-const uploadedVideosStore = useUploadedVideosStore();
-const autoRenameStore = useAutoRenameStore();
 const eventMediaStore = useEventMediaStore();
 
 
@@ -546,25 +542,6 @@ onMounted(async () => {
 
 async function submit(settingName: string, value: string | boolean, settingType: SettingType) {
   return await settingsStore.saveSetting(settingName, value, settingType);
-}
-
-// FIXME: Move this to changeEventStore
-async function submitEventName(settingName: string, value: string | boolean, settingType: SettingType) {
-  // TODO(#114): Ideally we could alert other client instances that the event name has changed
-  const submitResult = await submit(settingName, value, settingType);
-  await matchStore.getMatchVideos();
-  return submitResult;
-}
-
-// FIXME: Move this to changeEventStore
-async function submitEventCode(settingName: string, value: string | boolean, settingType: SettingType) {
-  // TODO(#114): Ideally we could alert other client instances that the event code has changed
-  const submitResult = await submit(settingName, value, settingType);
-  await matchListStore.getMatchList(true);
-  matchStore.clearSelectedMatch();
-  await uploadedVideosStore.getMatchUploadStatuses();
-  await autoRenameStore.getAssociations(true);
-  return submitResult;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

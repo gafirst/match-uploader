@@ -169,7 +169,8 @@ export async function cachePlaylistNames(forceUpdate = false): Promise<boolean> 
 export async function getSampleVideoTitles(eventName: string) {
   const spellChecker = new Typo("en_US", null, null, { dictionaryPath: EnvVars.spellCheck.dictBasePath });
 
-  const { spellCheckCustomDictionary } = await getSettings();
+  const { spellCheckCustomDictionary: spellCheckCustomDictString } = await getSettings();
+  const spellCheckCustomWords = new Set(spellCheckCustomDictString.split(","));
 
   const videoLabels = new Set(Object.keys(await getYouTubePlaylists())).add("unlabeled");
   const { playoffsType } = await getSettings();
@@ -213,7 +214,7 @@ export async function getSampleVideoTitles(eventName: string) {
     return {
       word,
       ok: word.match(/^(\d+|[+&-])$/) || spellChecker.check(word.replace(/[()]/g, ""))
-        || spellCheckCustomDictionary.split(",").includes(word),
+        || spellCheckCustomWords.has(word),
     };
   });
 
