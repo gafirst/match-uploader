@@ -18,13 +18,12 @@ module.exports = {
           packageName: "match-uploader-backend",
           uploadSourceMaps: true,
           sources: "server/dist",
-          sentryProject: "match-uploader-backend"
         }],
-        ["@droidsolutions-oss/semantic-release-sentry", {
-          packageName: "match-uploader-frontend",
-          uploadSourceMaps: true,
-          sources: "client/dist",
-          sentryProject: "match-uploader-backend"
-        }]
+        // ["@droidsolutions-oss/semantic-release-sentry", {
+        //   packageName: "match-uploader-frontend",
+        //   uploadSourceMaps: true,
+        //   sources: "client/dist",
+        //   sentryProject: "match-uploader-backend"
+        // }]
     ]
 };
