@@ -1,8 +1,11 @@
+require("@src/instrument"); // This must be the first import
+
 import morgan from "morgan";
 import path from "path";
 import helmet from "helmet";
 import express, { type Request, type Response, type NextFunction } from "express";
 import logger from "jet-logger";
+import Sentry from "@sentry/node";
 
 import apiRouter from "@src/routes/api";
 import Paths from "@src/routes/constants/Paths";
@@ -51,6 +54,10 @@ export const appPromise = makeWorkerUtils({
     }));
   }
 
+  app.get("/debug-sentry", function mainHandler(req, res) {
+    throw new Error("My first Sentry error!");
+  });
+
   // Add APIs, must be after middleware
   app.use(Paths.Base, apiRouter);
 
@@ -64,7 +71,8 @@ export const appPromise = makeWorkerUtils({
     response.sendFile(path.join(__dirname, "../../client/dist", "index.html"));
   });
 
-  // Add error handler
+  Sentry.setupExpressErrorHandler(app);
+
   app.use((
     err: Error,
     _: Request,

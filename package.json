@@ -7,6 +7,7 @@
   "author": "gafirst",
   "license": "GPL-3.0",
   "devDependencies": {
+    "@droidsolutions-oss/semantic-release-sentry": "^1.0.87",
     "@semantic-release-plus/docker": "^3.1.2",
     "semantic-release-major-tag": "^0.3.2"
   }
