@@ -17,12 +17,14 @@ module.exports = {
         ["@droidsolutions-oss/semantic-release-sentry", {
           packageName: "match-uploader-backend",
           uploadSourceMaps: true,
-          sources: "server/dist"
+          sources: "server/dist",
+          sentryProject: "match-uploader-backend"
         }],
         ["@droidsolutions-oss/semantic-release-sentry", {
           packageName: "match-uploader-frontend",
           uploadSourceMaps: true,
-          sources: "client/dist"
+          sources: "client/dist",
+          sentryProject: "match-uploader-backend"
         }]
     ]
 };
