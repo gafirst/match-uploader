@@ -48,7 +48,7 @@ jobs:
         run: npx semantic-release --dry-run
       - name: Print next release data
         run: |
-          echo ${{ steps.release.outputs.new-release-version }}
+          echo ${{ steps.next-release-data.outputs.new-release-version }}
 #      - name: Build Docker image
 #        run: docker build --tag gafirst/match-uploader:sentry-test -f Dockerfile .
 #      - name: Release
