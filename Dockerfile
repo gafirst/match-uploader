@@ -1,7 +1,10 @@
-FROM node:22-bookworm-slim as base
+FROM node:22-bookworm-slim AS base
 # References:
 # - https://www.digitalocean.com/community/tutorials/how-to-build-a-node-js-application-with-docker
 # - https://snyk.io/blog/choosing-the-best-node-js-docker-image/
+
+ARG RELEASE_VERSION
+ENV RELEASE_VERSION=${RELEASE_VERSION}
 
 RUN apt-get update -y &&  \
     apt-get install -y curl openssl &&  \
@@ -9,7 +12,7 @@ RUN apt-get update -y &&  \
     mkdir -p /home/node/app/server/node_modules && \
     chown -R node:node /home/node/app
 
-FROM base as build_client_prod
+FROM base AS build_client_prod
 
 WORKDIR /home/node/app/client
 
@@ -27,7 +30,7 @@ COPY client/vite.config.mts .
 
 RUN yarn run build
 
-FROM base as build_server_prod
+FROM base AS build_server_prod
 
 WORKDIR /home/node/app/server
 
@@ -49,7 +52,7 @@ RUN yarn run build
 
 COPY server/src/crontab.txt ./dist/crontab.txt
 
-FROM base as run_server_prod
+FROM base AS run_server_prod
 
 WORKDIR /home/node/app/server
 
@@ -62,7 +65,7 @@ COPY server/prisma ./prisma
 USER node
 RUN yarn install --frozen-lockfile --prod
 
-FROM base as prod
+FROM base AS prod
 
 WORKDIR /home/node/app
 

@@ -54,10 +54,6 @@ export const appPromise = makeWorkerUtils({
     }));
   }
 
-  app.get("/debug-sentry", function mainHandler(req, res) {
-    throw new Error("My first Sentry error!");
-  });
-
   // Add APIs, must be after middleware
   app.use(Paths.Base, apiRouter);
 

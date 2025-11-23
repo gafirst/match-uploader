@@ -4,8 +4,11 @@ import childProcess from "child_process";
 
 (async () => {
   try {
+    const tsconfigEnv = process.argv[2];
+    const tsconfigPath = tsconfigEnv === "prod" ? "tsconfig.prod.json" : "tsconfig.json";
+
     await remove("./dist/");
-    await exec("tsc --build tsconfig.prod.json", "./");
+    await exec(`tsc --build ${tsconfigPath}`, "./");
   } catch (err) {
     logger.err(err);
     throw new Error("Build failed with errors, see above");

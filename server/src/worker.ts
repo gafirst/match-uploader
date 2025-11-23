@@ -1,3 +1,7 @@
+import Sentry from "@sentry/node";
+
+require("@src/instrument"); // This must be the first import
+
 import { uploadVideo } from "@src/tasks/uploadVideo";
 import { type Runner, run } from "graphile-worker";
 import logger from "jet-logger";
@@ -118,5 +122,6 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
     logger.err(err);
+    Sentry.captureException(err);
     throw Error("Worker exiting because an error was encountered");
 });
