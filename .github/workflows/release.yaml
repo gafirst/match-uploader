@@ -28,28 +28,38 @@ jobs:
           node-version: 22.x
           cache: 'yarn'
           cache-dependency-path: '**/yarn.lock'
-      - name: yarn install
+      - name: Install dependencies (release)
         uses: borales/actions-yarn@v4
         with:
           cmd: install --frozen-lockfile
       - name: Audit npm signatures
         run: npm audit signatures
-      - name: Generate sourcemaps
+      - name: Preview next release
+        id: next-release-data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_USERNAME: ${{ github.actor }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --dry-run
+      - name: Build sourcemaps (server)
+        if: steps.next-release-data.outputs.new-release-published == 'true'
         run: |
           cd server
           yarn install --frozen-lockfile
-          yarn run build
+          yarn run build:sourcemaps
       - name: Build Docker image
-        run: docker build --tag gafirst/match-uploader:latest -f Dockerfile .
+        if: steps.next-release-data.outputs.new-release-published == 'true'
+        run: docker build --tag gafirst/match-uploader:latest --build-arg RELEASE_VERSION=${{ steps.next-release-data.outputs.new-release-version }} -f Dockerfile .
       - name: Release
         id: release
+        if: steps.next-release-data.outputs.new-release-published == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_USERNAME: ${{ github.actor }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
       - name: Create Sentry release (server)
-        if : steps.release.outputs.new-release-published == 'true'
+        if: steps.next-release-data.outputs.new-release-published == 'true'
         uses: getsentry/action-release@v3
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -59,6 +69,5 @@ jobs:
           environment: production
           sourcemaps: "./server/dist/"
           release: ${{ steps.release.outputs.new-release-version }}
-          release_prefix: "v"
           dist: "${{ github.workflow }}-${{ github.run_number }}-${{ github.run_attempt }}-server"
           disable_telemetry: true
