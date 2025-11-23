@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read # for checkout
-# test
+
 jobs:
   build_release:
     name: Release
@@ -34,11 +34,6 @@ jobs:
           cmd: install --frozen-lockfile
       - name: Audit npm signatures
         run: npm audit signatures
-      - name: Build sourcemaps (server)
-        run: |
-          cd server
-          yarn install --frozen-lockfile
-          yarn run build:sourcemaps
       - name: Preview next release
         id: next-release-data
         env:
@@ -46,7 +41,14 @@ jobs:
           DOCKER_USERNAME: ${{ github.actor }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release --dry-run
+      - name: Build sourcemaps (server)
+        if: steps.next-release-data.outputs.new-release-published == 'true'
+        run: |
+          cd server
+          yarn install --frozen-lockfile
+          yarn run build:sourcemaps
       - name: Build Docker image
+        if: steps.next-release-data.outputs.new-release-published == 'true'
         run: docker build --tag gafirst/match-uploader:latest --build-arg RELEASE_VERSION=${{ steps.next-release-data.outputs.new-release-version }} -f Dockerfile .
       - name: Release
         id: release
