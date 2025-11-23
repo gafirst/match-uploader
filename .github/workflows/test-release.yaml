@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read # for checkout
-
+# test
 jobs:
   build_release:
     name: Release
