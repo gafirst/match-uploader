@@ -37,6 +37,7 @@ jobs:
       - name: Generate sourcemaps
         run: |
           cd server
+          yarn install --frozen-lockfile
           yarn run build
 #      - name: Build Docker image
 #        run: docker build --tag gafirst/match-uploader:sentry-test -f Dockerfile .
