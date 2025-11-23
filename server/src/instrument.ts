@@ -8,9 +8,9 @@ import EnvVars from "@src/constants/EnvVars";
 if (EnvVars.sentry.enabled) {
   Sentry.init({
     dsn: EnvVars.sentry.dsn,
+    release: EnvVars.version,
     sendDefaultPii: false,
     integrations: [
-      Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
       Sentry.prismaIntegration(),
     ],
     beforeSendTransaction: (event) => {
