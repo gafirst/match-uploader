@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read # for checkout
-# test
+
 jobs:
   build_release:
     name: Release
@@ -39,15 +39,22 @@ jobs:
           cd server
           yarn install --frozen-lockfile
           yarn run build
+      - name: Preview next release
+        id: next-release-data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_USERNAME: ${{ github.actor }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --dry-run
+      - name: Print next release data
+        run: |
+          echo ${{ steps.release.outputs.new-release-version }}
 #      - name: Build Docker image
 #        run: docker build --tag gafirst/match-uploader:sentry-test -f Dockerfile .
       - name: Release
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SENTRY_ORG: "gafirst"
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_PROJECT: "match-uploader-backend"
           DOCKER_USERNAME: ${{ github.actor }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
