@@ -52,6 +52,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
       - name: Create Sentry release (server)
+        if : steps.release.outputs.new-release-published == 'true'
         uses: getsentry/action-release@v3
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
