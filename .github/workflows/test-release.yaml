@@ -35,7 +35,9 @@ jobs:
       - name: Audit npm signatures
         run: npm audit signatures
       - name: Generate sourcemaps
-        run: yarn run build
+        run: |
+          cd server
+          yarn run build
 #      - name: Build Docker image
 #        run: docker build --tag gafirst/match-uploader:sentry-test -f Dockerfile .
       - name: Release
