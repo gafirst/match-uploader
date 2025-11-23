@@ -2,25 +2,40 @@ import type { TracesSamplerSamplingContext } from "@sentry/core/build/types/type
 
 import Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
+import EnvVars from "@src/constants/EnvVars";
 
 
-Sentry.init({
-  dsn: "https://cf009b53d1bb39648373305ce6cb26e6@o4506760277131264.ingest.us.sentry.io/4510292373078016", // FIXME: Read from env var
-  sendDefaultPii: false,
-  integrations: [
-    nodeProfilingIntegration(),
-    Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
-    Sentry.prismaIntegration(),
-  ],
-  tracesSampler: (samplingContext: TracesSamplerSamplingContext) => {
-    const { attributes } = samplingContext;
+if (EnvVars.sentry.enabled) {
+  Sentry.init({
+    dsn: EnvVars.sentry.dsn,
+    sendDefaultPii: false,
+    integrations: [
+      Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
+      Sentry.prismaIntegration(),
+    ],
+    beforeSendTransaction: (event) => {
+      event.spans = event.spans?.filter((span) => {
+        return span.description !== "jsonParser" && span.description !== "urlencodedParser" && span.description !== "logger";
+      }) ?? undefined;
 
-    if (attributes && attributes["http.target"] && attributes["http.target"].toString().startsWith("/socket.io")) {
+      delete event.request?.headers?.cookie;
+      delete event.request?.cookies;
+
+      return event;
+    },
+    tracesSampler: (samplingContext: TracesSamplerSamplingContext) => {
+      const { attributes } = samplingContext;
+      console.log(samplingContext);
+      if (process.env.NODE_ENV !== "production") {
         return 0;
-    }
+      }
 
-    return 1;
-  },
-  profilesSampleRate: 1.0,
-  enableLogs: true,
-});
+      if (attributes && attributes["http.target"] && attributes["http.target"].toString().startsWith("/socket.io")) {
+          return 0;
+      }
+
+      return .05;
+    },
+    enableLogs: true,
+  });
+}

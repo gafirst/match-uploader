@@ -38,6 +38,10 @@ export default {
     db: {
         connectionString: process.env.DB_CONNECTION_STRING,
     },
+    sentry: {
+      enabled: (process.env.SENTRY_ENABLED || "").toLowerCase() === "true",
+      dsn: process.env.SENTRY_DSN ?? undefined,
+    },
     worker: {
         webServerUrl: process.env.WORKER_WEB_SERVER_URL ?? "",
         crontabFilePath: process.env.CRONTAB_FILE_PATH ?? "./dist/crontab.txt",

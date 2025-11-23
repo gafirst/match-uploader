@@ -34,9 +34,12 @@ jobs:
           cmd: install --frozen-lockfile
       - name: Audit npm signatures
         run: npm audit signatures
+      - name: Generate sourcemaps
+        run: yarn run build
 #      - name: Build Docker image
 #        run: docker build --tag gafirst/match-uploader:sentry-test -f Dockerfile .
       - name: Release
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SENTRY_ORG: "gafirst"
@@ -45,3 +48,16 @@ jobs:
           DOCKER_USERNAME: ${{ github.actor }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+      - name: Create Sentry release (server)
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ env.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ env.SENTRY_PROJECT_BACKEND }}
+        with:
+          environment: production
+          sourcemaps: "./server/dist/"
+          release: ${{ steps.release.outputs.new-release-version }}
+          release_prefix: "v"
+          dist: "${{ github.workflow }}-${{ github.run_number }}-${{ github.run_attempt }}-server"
+          disable_telemetry: true

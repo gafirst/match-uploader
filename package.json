@@ -9,6 +9,7 @@
   "devDependencies": {
     "@droidsolutions-oss/semantic-release-sentry": "^1.0.87",
     "@semantic-release-plus/docker": "^3.1.2",
+    "semantic-release-export-data": "^1.2.0",
     "semantic-release-major-tag": "^0.3.2"
   }
 }

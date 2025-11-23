@@ -214,6 +214,11 @@ proxy-from-env@^1.1.0:
   resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-1.1.0.tgz#e102f16ca355424865755d2c9e8ea4f24d58c3e2"
   integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
 
+semantic-release-export-data@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/semantic-release-export-data/-/semantic-release-export-data-1.2.0.tgz#9d1ba6c3c6b8ad9702661efa3b1505b74a868329"
+  integrity sha512-/9+yQWFieiN0KB7YA0TTCXHml7d2tlNLkprLjUOKf8XDQlJ6ZK9gkw0dJJ/8/kBzeuUPq8aZR2n0rYmuYCz7Xg==
+
 semantic-release-major-tag@^0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/semantic-release-major-tag/-/semantic-release-major-tag-0.3.2.tgz#9ea6b7139721fa58e8a76382adafe165d56a4b90"
