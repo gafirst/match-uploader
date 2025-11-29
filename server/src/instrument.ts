@@ -1,7 +1,6 @@
 import type { TracesSamplerSamplingContext } from "@sentry/core/build/types/types-hoist/samplingcontext";
 
 import Sentry from "@sentry/node";
-import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import EnvVars from "@src/constants/EnvVars";
 
 
@@ -15,27 +14,34 @@ if (EnvVars.sentry.enabled) {
     ],
     beforeSendTransaction: (event) => {
       event.spans = event.spans?.filter((span) => {
-        return span.description !== "jsonParser" && span.description !== "urlencodedParser" && span.description !== "logger";
-      }) ?? undefined;
+        return ![
+          "jsonParser",
+          "urlencodedParser",
+          "logger",
+          "pg.connect",
+          "pg-pool.connect",
+        ].includes(span.description ?? "");
+      });
 
       delete event.request?.headers?.cookie;
       delete event.request?.cookies;
+      delete event.request?.data;
 
       return event;
     },
     tracesSampler: (samplingContext: TracesSamplerSamplingContext) => {
-      const { attributes } = samplingContext;
-      console.log(samplingContext);
+      const url = samplingContext.normalizedRequest?.url;
+
       if (process.env.NODE_ENV !== "production") {
         return 0;
       }
 
-      if (attributes && attributes["http.target"] && attributes["http.target"].toString().startsWith("/socket.io")) {
-          return 0;
+      if (url?.endsWith("/api/v1/youtube/upload")) {
+        return 1;
       }
 
-      return .05;
+      return 0;
     },
-    enableLogs: true,
+    enableLogs: false,
   });
 }

@@ -1,7 +1,6 @@
-import Sentry from "@sentry/node";
-
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require("@src/instrument"); // This must be the first import
-
+import Sentry from "@sentry/node";
 import { uploadVideo } from "@src/tasks/uploadVideo";
 import { type Runner, run } from "graphile-worker";
 import logger from "jet-logger";

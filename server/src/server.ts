@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require("@src/instrument"); // This must be the first import
 
 import morgan from "morgan";
