@@ -71,3 +71,4 @@ jobs:
           release: ${{ steps.release.outputs.new-release-version }}
           dist: "${{ github.workflow }}-${{ github.run_number }}-${{ github.run_attempt }}-server"
           disable_telemetry: true
+          ignore_missing: true
