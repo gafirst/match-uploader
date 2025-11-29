@@ -45,13 +45,12 @@ export async function getYouTubeApiClient(): Promise<youtube_v3.Youtube> {
     oauth2Client.on("tokens", async (tokens) => {
         logger.info("Received new tokens from YouTube API");
         if (tokens.access_token) {
-            logger.info("Storing updated access token");
+            logger.info(`Storing updated access token (length ${tokens.access_token.length})`);
             await setSecret("googleAccessToken", tokens.access_token);
         }
 
         if (tokens.refresh_token) {
-            logger.info("Storing updated refresh token");
-            logger.info(tokens.refresh_token.substring(0, 10));
+            logger.info(`Storing updated refresh token (length: ${tokens.refresh_token.length})`);
             await setSecret("googleRefreshToken", tokens.refresh_token);
         }
 

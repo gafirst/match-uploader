@@ -18,6 +18,7 @@ if (missingEnvVars.length > 0) {
 
 export default {
     nodeEnv: process.env.NODE_ENV ?? "",
+    version: process.env.RELEASE_VERSION,
     host: process.env.HOST,
     port: Number.parseInt(process.env.PORT ?? "0", 10),
     spellCheck: {
@@ -37,6 +38,10 @@ export default {
     },
     db: {
         connectionString: process.env.DB_CONNECTION_STRING,
+    },
+    sentry: {
+      enabled: (process.env.SENTRY_ENABLED || "").toLowerCase() === "true",
+      dsn: process.env.SENTRY_DSN,
     },
     worker: {
         webServerUrl: process.env.WORKER_WEB_SERVER_URL ?? "",

@@ -2,7 +2,8 @@
   "name": "server",
   "version": "0.0.0",
   "scripts": {
-    "build": "npx ts-node build.ts",
+    "build": "npx ts-node build.ts prod",
+    "build:sourcemaps": "npx ts-node build.ts",
     "lint": "npx eslint src/ spec/",
     "lint:fix": "npx eslint --fix  src/ spec/",
     "lint:ci": "npx eslint --max-warnings=0 --output-file eslint_report.json --format json src/ spec/",
@@ -33,6 +34,8 @@
     "@googleapis/youtube": "^8.0.2",
     "@numairawan/video-duration": "^1.0.0",
     "@prisma/client": "^6.0.0",
+    "@sentry/node": "^10.25.0",
+    "@sentry/profiling-node": "^10.25.0",
     "cookie-parser": "^1.4.7",
     "dedent": "^1.5.3",
     "dotenv": "^16.4.5",
