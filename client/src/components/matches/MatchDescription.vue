@@ -34,14 +34,14 @@
   </div>
   <VAlert
     v-else
+    density="compact"
     variant="tonal"
     class="mb-4"
   >
     <p>
       A custom description is generated for each match's videos using the template defined in
-      <RouterLink to="/settings">
-        Settings
-      </RouterLink>. You'll see a preview here after you select a match above.
+      <RouterLink to="/settings">Settings</RouterLink>.
+      You'll see a preview here after you select a match above.
     </p>
   </VAlert>
 </template>

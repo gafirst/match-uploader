@@ -8,7 +8,6 @@ import http from "http";
 import { configureSocketIoEventForwarding } from "@src/util/ws";
 import { type ClientToServerEvents, type ServerToClientEvents } from "./tasks/types/events";
 
-const SERVER_START_MSG = `Express server started on port: ${EnvVars.port}`;
 export let io: SocketIOServer;
 
 appPromise.then(app => {
@@ -27,7 +26,10 @@ appPromise.then(app => {
        configureSocketIoEventForwarding(socket);
     });
 
-    server.listen(EnvVars.port, () => logger.info(SERVER_START_MSG));
+    server.listen(EnvVars.port, () => {
+      logger.info(`Express server started on port: ${EnvVars.port}`);
+      logger.info(`match-uploader-backend version ${EnvVars.version}`);
+    });
 }).catch(error => {
     throw error;
 });

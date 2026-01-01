@@ -54,4 +54,6 @@ pnpm build
 
 ### Customize configuration
 
+To include a version number in the UI, set the `VITE_RELEASE_VERSION` environment variable when building the client. To test locally, create a .env file within the `client/` directory.
+
 See [Configuration Reference](https://vitejs.dev/config/).

@@ -231,7 +231,8 @@ export async function handleMatchVideoPostUploadSteps(videoType: VideoType,
   videoId: string,
   videoLabel: string,
   matchKey: MatchKey | null,
-  eventKey: string | null):
+  eventKey: string | null,
+  forceAddToAllPlaylists: boolean):
   Promise<YouTubePostUploadSteps> {
     if (videoType === VideoType.EventMedia && !eventKey) {
         throw new Error("Event key is required when video type is event media");
@@ -246,7 +247,17 @@ export async function handleMatchVideoPostUploadSteps(videoType: VideoType,
     const playlistId = await getPlaylistIdForVideoLabel(lowercasedVideoLabel);
     let addToPlaylistSuccess = false;
 
-    if (playlistId) {
+    if (forceAddToAllPlaylists) {
+        const playlistIds = Object.values((await getYouTubePlaylists())).map((playlist) => playlist.id);
+        const uploadResults: boolean[] = [];
+        for (const id of playlistIds) {
+            uploadResults.push(await addVideoToPlaylist(videoId, id));
+        }
+        addToPlaylistSuccess = uploadResults.every((result) => result);
+        if (!addToPlaylistSuccess) {
+            logger.err(`Failed to add video ${videoId} to all playlists`);
+        }
+    } else if (playlistId) {
         addToPlaylistSuccess = await addVideoToPlaylist(videoId, playlistId);
 
         if (!addToPlaylistSuccess) {

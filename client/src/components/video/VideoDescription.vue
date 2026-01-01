@@ -35,14 +35,14 @@
   </div>
   <VAlert
     v-else
+    density="compact"
     variant="tonal"
     class="mb-4"
   >
     <p>
       Descriptions are generated using the template defined in
-      <RouterLink to="/settings">
-        Settings
-      </RouterLink>. After the description is generated for the current set of
+      <RouterLink to="/settings">Settings</RouterLink>.
+      After the description is generated for the current set of
       videos, you'll see a preview here.
     </p>
   </VAlert>

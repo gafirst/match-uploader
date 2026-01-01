@@ -90,7 +90,9 @@ export async function getAuthenticatedYouTubeChannels(): Promise<YouTubeChannelL
  * @param videoPath
  * @param privacy
  * @param matchKey
+ * @param eventKey
  * @param label
+ * @param forceAddToAllPlaylists
  */
 export async function queueYouTubeVideoUpload(
   videoType: VideoType,
@@ -101,6 +103,7 @@ export async function queueYouTubeVideoUpload(
   matchKey: MatchKey | null,
   eventKey: string | null,
   label: string,
+  forceAddToAllPlaylists: boolean,
 ): Promise<WorkerJob> {
   return await queueJob(prisma, graphileWorkerUtils.addJob, io, title, UPLOAD_VIDEO, {
     videoType,
@@ -112,6 +115,7 @@ export async function queueYouTubeVideoUpload(
     matchKey: matchKey?.matchKey,
     playoffsType: matchKey?.playoffsType,
     eventKey,
+    forceAddToAllPlaylists,
   }, {
     queueName: UPLOAD_VIDEO,
     maxAttempts: 2,

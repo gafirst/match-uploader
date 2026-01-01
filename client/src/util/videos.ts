@@ -4,7 +4,8 @@ import { YouTubeVideoPrivacy } from "@/types/youtube/YouTubeVideoPrivacy";
 export async function uploadVideo(video: VideoInfo,
   description: string,
   videoPrivacy: YouTubeVideoPrivacy,
-  matchKey: string | null = null): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+  matchKey: string | null = null,
+  forceAddToAllPlaylists: boolean | null = null): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
   video.isRequestingJob = true;
   video.jobCreationError = null;
 
@@ -14,6 +15,7 @@ export async function uploadVideo(video: VideoInfo,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
+      forceAddToAllPlaylists,
       matchKey,
       videoPath: video.path,
       videoTitle: video.videoTitle,

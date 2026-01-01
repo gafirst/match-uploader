@@ -11,6 +11,8 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
 
   const mediaTitle = ref<string|null>(null);
 
+  const forceAddToAllPlaylists = ref(true);
+
   const videoFilePaths = ref<string[]>([]);
   const videoFilesLoading = ref(false);
 
@@ -56,7 +58,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     videoFilesLoading.value = false;
 
     if (!videoFilePaths.value.length) {
-      error.value = "There are no event media files to upload right now. File names including the word" +
+      error.value = "There are no event media files to upload right now. File names including the word " +
         "\"qualification\" or \"playoff\" (case-insensitive) are not shown here.";
     }
   }
@@ -198,6 +200,8 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
       selectedVideoFile.value,
       description.value,
       settingsStore.settings.youTubeVideoPrivacy as YouTubeVideoPrivacy,
+      null,
+      forceAddToAllPlaylists.value,
     );
     selectedVideoFile.value.isRequestingJob = false;
   }
@@ -207,6 +211,7 @@ export const useEventMediaStore = defineStore("eventMedia", () => {
     descriptionFetchError,
     descriptionLoading,
     error,
+    forceAddToAllPlaylists,
     getSuggestedDescription,
     getVideoFiles,
     getVideoMetadata,
