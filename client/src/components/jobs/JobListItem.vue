@@ -145,7 +145,7 @@ const icon = computed(() => {
     return {
       icon: "mdi-cloud-cancel",
       color: "",
-    }
+    };
   }
 
   // Pending

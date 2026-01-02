@@ -5,7 +5,8 @@ export async function uploadVideo(video: VideoInfo,
   description: string,
   videoPrivacy: YouTubeVideoPrivacy,
   matchKey: string | null = null,
-  forceAddToAllPlaylists: boolean | null = null): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+  forceAddToAllPlaylists: boolean | null = null,
+): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
   video.isRequestingJob = true;
   video.jobCreationError = null;
 

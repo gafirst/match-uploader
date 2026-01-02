@@ -1,5 +1,10 @@
 <template>
-  <VChip v-if="releaseVersion" class="ml-2">{{ releaseVersion }}</VChip>
+  <VChip
+    v-if="releaseVersion"
+    class="ml-2"
+  >
+    {{ releaseVersion }}
+  </VChip>
 </template>
 
 <script setup lang="ts">

@@ -172,7 +172,9 @@ youTubeRouter.post(
       "private",
     ])
     .trim(),
-  body("forceAddToAllPlaylists", "forceAddToAllPlaylists must be a boolean value").default(false).isBoolean().toBoolean(),
+  body("forceAddToAllPlaylists", "forceAddToAllPlaylists must be a boolean value")
+    .default(false)
+    .isBoolean().toBoolean(),
   uploadToYouTube,
 );
 

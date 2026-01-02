@@ -83,23 +83,40 @@
         density="compact"
       />
 
-      <NoPlaylistMappings v-if="!settingsStore.isFirstLoad && playlistStore.playlists && !playlistStore.playlists.length" class="mb-4" :rounded="4" />
-      <VAlert v-else-if="eventMediaStore.forceAddToAllPlaylists" density="compact" class="mb-4">
+      <NoPlaylistMappings
+        v-if="!settingsStore.isFirstLoad && playlistStore.playlists && !playlistStore.playlists.length"
+        class="mb-4"
+        :rounded="4"
+      />
+      <VAlert
+        v-else-if="eventMediaStore.forceAddToAllPlaylists"
+        density="compact"
+        class="mb-4"
+      >
         This video will be added to <strong>all</strong> defined playlist mappings:
         <ul class="ml-4">
-          <li v-for="playlist in playlistStore.playlists" :key="playlist.playlist_id">
+          <li
+            v-for="playlist in playlistStore.playlists"
+            :key="playlist.playlist_id"
+          >
             <a
               :href="youtubePlaylistUrl(playlist.playlist_id)"
               target="_blank"
             >{{
-                playlist.name ?? "Unknown playlist"
-              }}</a>
+              playlist.name ?? "Unknown playlist"
+            }}</a>
           </li>
         </ul>
       </VAlert>
-      <VAlert v-else density="compact" class="mb-4">
+      <VAlert
+        v-else
+        density="compact"
+        class="mb-4"
+      >
         This video may still be added to a playlist via the normal playlist mapping rules.
-        See <RouterLink to="/settings">Settings</RouterLink> to change this.
+        See <RouterLink to="/settings">
+          Settings
+        </RouterLink> to change this.
       </VAlert>
 
       <h3 class="mb-4">
