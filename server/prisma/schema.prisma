@@ -47,8 +47,10 @@ enum JobStatus {
   FAILED_RETRYABLE
   // Job has permanently failed and will not be retried
   FAILED
-  // Job completed successfully.
+  // Job completed successfully
   COMPLETED
+  // Job was cancelled by human; to Graphile this is identical to permanently failing a job
+  CANCELLED
 }
 
 model AutoRenameAssociation {

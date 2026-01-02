@@ -80,7 +80,7 @@ async function cancelJob() {
 
 const subtitle = computed(() => {
   const baseSubtitle = capitalizeFirstLetter(workerJobStatusToUiString(props.job.status));
-  if (props.job.error) {
+  if (props.job.error && props.job.status !== WorkerJobStatus.CANCELLED) {
     return `${baseSubtitle} | ${props.job.error}`;
   }
 
@@ -141,6 +141,11 @@ const icon = computed(() => {
       icon: "mdi-loading mdi-spin",
       color: "",
     };
+  } else if (props.job.status === WorkerJobStatus.CANCELLED) {
+    return {
+      icon: "mdi-cloud-cancel",
+      color: "",
+    }
   }
 
   // Pending

@@ -4,6 +4,7 @@ FROM node:22-bookworm-slim AS base
 # - https://snyk.io/blog/choosing-the-best-node-js-docker-image/
 
 ARG RELEASE_VERSION
+ENV VITE_RELEASE_VERSION=${RELEASE_VERSION}
 ENV RELEASE_VERSION=${RELEASE_VERSION}
 
 RUN apt-get update -y &&  \

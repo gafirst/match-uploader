@@ -262,6 +262,10 @@ function isVideoMissingPlaylistMapping(video: VideoInfo) {
 }
 
 const disableUploadButton = computed(() => {
+  if (eventMediaStore.selectedVideoFile?.workerJobId) {
+    return workerStore.jobHasStatus(eventMediaStore.selectedVideoFile.workerJobId, WorkerJobStatus.COMPLETED);
+  }
+
   if (eventMediaStore.videoFilesLoading
     || eventMediaStore.descriptionLoading
     || eventMediaStore.videoToUploadLoading
@@ -269,10 +273,6 @@ const disableUploadButton = computed(() => {
     || eventMediaStore.selectedVideoFile?.isRequestingJob
     || eventMediaStore.selectedVideoFile?.isUploaded) {
     return true;
-  }
-
-  if (eventMediaStore.selectedVideoFile?.workerJobId) {
-    return workerStore.jobHasStatus(eventMediaStore.selectedVideoFile.workerJobId, WorkerJobStatus.COMPLETED);
   }
 
   return false;
@@ -286,7 +286,7 @@ const uploadInProgress = computed(() => {
   if (eventMediaStore.selectedVideoFile?.workerJobId) {
     return !workerStore.jobHasStatus(
       eventMediaStore.selectedVideoFile.workerJobId,
-      [WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED],
+      [WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED, WorkerJobStatus.CANCELLED],
     );
   }
 

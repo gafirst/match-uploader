@@ -191,6 +191,13 @@ const icon = computed((): {
       };
     }
 
+    if (workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.CANCELLED)) {
+      return {
+        icon: "mdi-cloud-cancel",
+        color: "",
+      };
+    }
+
     if (workerStore.jobHasStatus(props.video.workerJobId, WorkerJobStatus.PENDING)) {
       return {
         icon: "mdi-tray-full",

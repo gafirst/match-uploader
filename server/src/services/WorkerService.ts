@@ -20,7 +20,7 @@ export async function cancelJob(jobId: string, reason: string): Promise<void> {
         jobId,
       },
       data: {
-        status: "FAILED",
+        status: "CANCELLED",
         error: reason,
       },
     }),
@@ -33,7 +33,7 @@ export async function cancelJob(jobId: string, reason: string): Promise<void> {
     throw new Error("Graphile permanent fail request was unsuccessful (check the logs for more details)");
   }
 
-  // Manually send the WebSocket event since the job was cancelled because Graphile won't send an event in this case
+  // Manually send the WebSocket event since the job was canceled because Graphile won't send an event in this case
   io.emit("worker", {
     event: WORKER_JOB_COMPLETE,
     workerJob,
