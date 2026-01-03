@@ -167,6 +167,49 @@ With the worker, a video upload will now create a new job. Here are the possible
 
 A normal job lifecycle is to go from Pending to Started to Completed.
 
+### Database
+
+Match Uploader requires a Postgres database to run. The included Docker Compose setup automatically sets up a Postgres 16
+database.
+
+#### Create a database dump
+
+Match Uploader can generate on-demand database dumps for you. To create one, go to `${MATCH_UPLOADER_URL}/api/v1/worker/debug/backupDb` in your web browser.
+Shortly after visiting this page, a database dump should be written to the top-level of your videos directory (named like `dump_timestamp.sql`).
+
+If you don't see the file, check the worker logs for an error. File permissions may prevent writing files to the root of your `videos` directory;
+you can fix this by adjusting your filesystem permissions to match that of the subdirectories in your `videos` directory.
+
+#### Start Match Uploader with a restored database
+
+Follow this procedure to start Match Uploader with a restored database from a dump file:
+
+1. If Match Uploader is running, run `docker compose down`.
+2. From the root of this repository, create a directory called `db_backup`.
+3. Move `videos/dump_$TIMESTAMP.sql` to the `db_backup` directory.
+4. **IMPORTANT:** Ensure the dump file you move is the **ONLY** file in the `db_backup` directory.
+5. Edit `docker-compose.yaml` as follows:
+   1. Under `db.volumes`, map your `db_backup` directory to `/docker-entrypoint-initdb.d`. (The Postgres container image will automatically apply the contents of any `.sql` scripts in this directory when it starts, if there is no data in the data directory.)
+   2. Switch to a new/clean data volume `db_data_restored`
+   3. Add `db_data_restored` to the `volumes` property at the bottom of the file
+```yaml
+# docker-compose.yaml
+services:
+  ...
+  db:
+    ...
+    volumes:
+      - ./db_backup:/docker-entrypoint-initdb.d # Add this so the database restores from the dump when it starts
+      - db_data_restored:/var/lib/postgresql/data # Change the `db_data` in this line to `db_data_restored`
+
+volumes:
+  db_data:
+  db_data_restored: # Add this new volume to use as the restore target
+```
+6. Run `docker compose up`. Ideally, during the database startup, you will see a log line like `db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/dump-2026-01-03T15_00_46.127-05_00.sql` followed by several lines like `SET`, `CREATE TABLE`, etc., showing the restore script running.
+7. Once Match Uploader starts, it should be using your restored database!
+
+
 ## Local development
 
 Project organization:

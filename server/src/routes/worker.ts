@@ -4,7 +4,7 @@ import { type IReq, type IRes } from "@src/routes/types/types";
 import { graphileWorkerUtils, prisma } from "@src/server";
 import { body, matchedData, param, validationResult } from "express-validator";
 import { JobStatus } from "@prisma/client";
-import { cancelJob } from "@src/services/WorkerService";
+import { cancelJob, triggerBackupDbJob } from "@src/services/WorkerService";
 import { triggerAutoRenameJob } from "@src/services/AutoRenameService";
 
 export const workerRouter = Router();
@@ -165,5 +165,14 @@ async function triggerAutoRename(req: IReq, res: IRes): Promise<IRes> {
     return res.json({
         success: true,
         workerJob: await triggerAutoRenameJob(),
+    });
+}
+
+workerDebugRouter.get(Paths.Worker.Debug.BackupDb, triggerBackupDb);
+
+async function triggerBackupDb(req: IReq, res: IRes): Promise<IRes> {
+    return res.json({
+        success: true,
+        workerJob: await triggerBackupDbJob(),
     });
 }
