@@ -174,8 +174,8 @@ database.
 
 #### Create a database dump
 
-Match Uploader can generate on-demand database dumps for you. To create one, open `${MATCH_UPLOADER_URL}/api/v1/worker/debug/backupDb`.
-Shortly after running this command, a database dump should be written to the top-level of your videos directory (named like `dump_timestamp.sql`).
+Match Uploader can generate on-demand database dumps for you. To create one, go to `${MATCH_UPLOADER_URL}/api/v1/worker/debug/backupDb` in your web browser.
+Shortly after visiting this page, a database dump should be written to the top-level of your videos directory (named like `dump_timestamp.sql`).
 
 If you don't see the file, check the worker logs for an error. File permissions may prevent writing files to the root of your `videos` directory;
 you can fix this by adjusting your filesystem permissions to match that of the subdirectories in your `videos` directory.
