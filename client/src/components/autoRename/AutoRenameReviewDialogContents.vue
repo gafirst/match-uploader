@@ -62,7 +62,7 @@
 
           <VAlert
             v-if="association.renameJobId &&
-              workerStore.jobHasStatus(association.renameJobId, WorkerJobStatus.FAILED)"
+              workerStore.jobHasStatus(association.renameJobId, [WorkerJobStatus.FAILED, WorkerJobStatus.CANCELLED])"
             variant="tonal"
             color="error"
             icon="mdi-alert-circle"

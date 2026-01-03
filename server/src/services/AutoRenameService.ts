@@ -21,6 +21,7 @@ import { Match } from "@src/models/Match";
 import fs from "fs-extra";
 import { cancelJob } from "@src/services/WorkerService";
 import { queueJob } from "@src/util/queueJob";
+import fsPromises from "fs/promises";
 
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
@@ -195,6 +196,15 @@ export async function markAssociationIgnored(videoLabel: string, filePath: strin
   });
 }
 
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    const stats = await fsPromises.stat(filePath);
+    return stats.isFile();
+  } catch (e: unknown) {
+    return false;
+  }
+}
+
 export async function undoRename(association: AutoRenameAssociation): Promise<string | undefined> {
   if (!association.renameJobId) {
     logger.info(`undoRename: Nothing to do because association ${association.filePath} has not been renamed`);
@@ -223,15 +233,14 @@ export async function undoRename(association: AutoRenameAssociation): Promise<st
     const renameFromUploaded = `${directory}/uploaded/${association.newFileName}`;
 
     logger.info(`undoRename: Request to rename ${renameFrom} to ${renameTo}`);
-    if (!await fs.exists(renameFrom) && await fs.exists(renameFromUploaded)) {
+    if (!await fileExists(renameFrom) && await fileExists(renameFromUploaded)) {
       return `File ${renameFrom} can't be renamed because it was already uploaded`;
     }
 
-    if (!await fs.exists(renameTo)) {
+    if (!await fileExists(renameTo)) {
       await fs.rename(`${directory}/${association.newFileName}`, `${directory}/${association.videoFile}`);
     } else {
       logger.warn(`undoRename: File ${renameTo} already exists, not renaming ${renameFrom}`);
-      return `File ${renameTo} already exists, not renaming ${renameFrom}`;
     }
   } catch (error) {
     logger.info(`undoRename: Failed to rename file: ${error} (Note: this is expected if the file was never renamed`);

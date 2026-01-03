@@ -9,6 +9,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: prod
+      args:
+        RELEASE_VERSION: dev
     pull_policy: build
   worker:
     extends:
