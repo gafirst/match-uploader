@@ -172,6 +172,9 @@ youTubeRouter.post(
       "private",
     ])
     .trim(),
+  body("forceAddToAllPlaylists", "forceAddToAllPlaylists must be a boolean value")
+    .default(false)
+    .isBoolean().toBoolean(),
   uploadToYouTube,
 );
 
@@ -194,6 +197,7 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
     description,
     videoPrivacy,
     label,
+    forceAddToAllPlaylists,
   } = matchedData(req);
 
   const { eventTbaCode, playoffsType: playoffsTypeRaw } = await getSettings();
@@ -213,6 +217,7 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
     matchKeyObject,
     eventTbaCode,
     label as string,
+    forceAddToAllPlaylists as boolean,
   );
 
   res.json({

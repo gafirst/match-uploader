@@ -3,7 +3,6 @@ import { computed, ref, watch } from "vue";
 import { VideoInfo } from "@/types/VideoInfo";
 import { useSettingsStore } from "@/stores/settings";
 import { useWorkerStore } from "@/stores/worker";
-import { WorkerJobStatus } from "@/types/WorkerJob";
 import { useMatchListStore } from "@/stores/matchList";
 import { PossibleNextMatches } from "@/types/PossibleNextMatches";
 
@@ -181,11 +180,11 @@ export const useMatchStore = defineStore("match", () => {
 
   const allMatchVideosQueued = computed(() => {
     return matchVideos.value.length > 0 &&
-      matchVideos.value.every(video => video.isUploaded || !!video.workerJobId);
+      matchVideos.value.every(video => videoIsUploaded(video) || workerStore.jobInProgress(video.workerJobId));
   });
 
   function videoIsUploaded(video: VideoInfo): boolean {
-    return video.isUploaded || workerStore.jobHasStatus(video.workerJobId, [WorkerJobStatus.COMPLETED]);
+    return video.isUploaded || workerStore.jobSucceeded(video.workerJobId);
   }
 
   const allMatchVideosUploaded = computed(() => {
@@ -195,8 +194,18 @@ export const useMatchStore = defineStore("match", () => {
 
   const someMatchVideosUploaded = computed(() => {
     return matchVideos.value.length > 0 &&
-      matchVideos.value.some(video => videoIsUploaded(video));
+      matchVideos.value.some(video =>
+        videoIsUploaded(video),
+      );
   });
+
+  const allUploadJobsInProgress = computed(() =>
+    matchVideos.value.length > 0 && matchVideos.value.every(video => workerStore.jobInProgress(video.workerJobId)),
+  );
+
+  const someUploadJobsInProgress = computed(() =>
+     matchVideos.value.length > 0 && matchVideos.value.some(video => workerStore.jobInProgress(video.workerJobId)),
+  );
 
   // TODO: Add types for this function
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -276,7 +285,7 @@ export const useMatchStore = defineStore("match", () => {
 
     uploadInProgress.value = true;
     for (const video of matchVideos.value) {
-      if (!video.isUploaded) {
+      if (!videoIsUploaded(video) && !workerStore.jobInProgress(video.workerJobId)) {
         await uploadVideo(video);
       }
     }
@@ -331,8 +340,9 @@ export const useMatchStore = defineStore("match", () => {
     return !uploadInProgress.value
       && matchVideos.value.length
       && !descriptionLoading.value
-      && description.value
-      && matchVideos.value.every(video => !video.workerJobId)
+      && !!description.value
+      && !allMatchVideosQueued.value
+      && !allUploadJobsInProgress.value
       && !allMatchVideosUploaded.value;
   });
 
@@ -359,6 +369,7 @@ export const useMatchStore = defineStore("match", () => {
     advanceMatch,
     allMatchVideosQueued,
     allMatchVideosUploaded,
+    allUploadJobsInProgress,
     allowMatchUpload,
     clearSelectedMatch,
     description,
@@ -377,6 +388,7 @@ export const useMatchStore = defineStore("match", () => {
     selectMatch,
     selectedMatchKey,
     someMatchVideosUploaded,
+    someUploadJobsInProgress,
     uploadInProgress,
     uploadSingleVideo,
     uploadVideos,

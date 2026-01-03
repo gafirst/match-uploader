@@ -134,7 +134,7 @@ const queueAllBtnText = computed(() => {
   if (matchStore.uploadInProgress) {
     return "Uploading...";
   }
-  if (matchStore.someMatchVideosUploaded) {
+  if (matchStore.someMatchVideosUploaded || matchStore.someUploadJobsInProgress) {
     return "Queue all remaining";
   }
   return "Queue all";

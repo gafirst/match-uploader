@@ -68,14 +68,6 @@ export const useWorkerStore = defineStore("worker", () => {
     return jobsList.value.filter((job) => tasks.includes(job.task));
   }
 
-  function jobsInStatus(statuses: WorkerJobStatus | WorkerJobStatus[]) {
-    if (!Array.isArray(statuses)) {
-      statuses = [statuses];
-    }
-
-    return jobsList.value.filter((job) => statuses.includes(job.status));
-  }
-
   const jobCountsByStatus = computed(() => {
     const statsMap = new Map<WorkerJobStatus, number>([
       [WorkerJobStatus.PENDING, 0],
@@ -83,6 +75,7 @@ export const useWorkerStore = defineStore("worker", () => {
       [WorkerJobStatus.COMPLETED, 0],
       [WorkerJobStatus.FAILED, 0],
       [WorkerJobStatus.FAILED_RETRYABLE, 0],
+      [WorkerJobStatus.CANCELLED, 0],
     ]);
 
     jobsList.value.forEach((job) => {
@@ -117,6 +110,22 @@ export const useWorkerStore = defineStore("worker", () => {
     }
 
     return status.includes(job.status);
+  }
+
+  function jobSucceeded(jobId: string | null): boolean {
+    return jobHasStatus(jobId, WorkerJobStatus.COMPLETED);
+  }
+
+  function jobFailed(jobId: string | null): boolean {
+    return jobHasStatus(jobId, WorkerJobStatus.FAILED);
+  }
+
+  function jobInTerminalState(jobId: string | null): boolean {
+    return jobHasStatus(jobId, [WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED, WorkerJobStatus.CANCELLED]);
+  }
+
+  function jobInProgress(jobId: string | null): boolean {
+    return jobHasStatus(jobId, [WorkerJobStatus.PENDING, WorkerJobStatus.STARTED, WorkerJobStatus.FAILED_RETRYABLE]);
   }
 
   async function loadJobs() {
@@ -174,8 +183,24 @@ export const useWorkerStore = defineStore("worker", () => {
       return;
     }
 
+    if (storedJob && storedJob.status === WorkerJobStatus.CANCELLED && workerJob.status === WorkerJobStatus.STARTED) {
+      console.warn(`Ignoring ${event} event because of invalid status transition: cancelled -> started`, {
+        storedJob,
+        workerJob,
+      });
+      return;
+    }
+
     if (storedJob && storedJob.status === WorkerJobStatus.COMPLETED && workerJob.status === WorkerJobStatus.FAILED) {
       console.warn(`Ignoring ${event} event because of invalid status transition: completed -> failed`, {
+        storedJob,
+        workerJob,
+      });
+      return;
+    }
+
+    if (storedJob && storedJob.status === WorkerJobStatus.COMPLETED && workerJob.status === WorkerJobStatus.CANCELLED) {
+      console.warn(`Ignoring ${event} event because of invalid status transition: completed -> cancelled`, {
         storedJob,
         workerJob,
       });
@@ -249,14 +274,17 @@ export const useWorkerStore = defineStore("worker", () => {
     isConnected,
     jobCancellationError,
     jobCountsByStatus,
+    jobFailed,
     jobHasStatus,
+    jobInProgress,
+    jobInTerminalState,
+    jobSucceeded,
     jobs,
     jobsError,
     jobsForTask,
     jobsList,
     jobsListAsQueue,
     jobsLoading,
-    jobsInStatus,
     loadJobs,
     numFailedJobs,
   };

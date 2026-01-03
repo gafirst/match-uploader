@@ -139,9 +139,10 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {usePlaylistsStore} from "@/stores/playlists";
-import {ref} from "vue";
-import {useSettingsStore} from "@/stores/settings";
+import { usePlaylistsStore } from "@/stores/playlists";
+import { ref } from "vue";
+import { useSettingsStore } from "@/stores/settings";
+import { youtubePlaylistUrl } from "@/util/playlists";
 
 const settingsStore = useSettingsStore();
 const playlistsStore = usePlaylistsStore();
@@ -149,10 +150,6 @@ playlistsStore.getPlaylists();
 
 const newMappingLabel = ref("");
 const newMappingPlaylistUrl = ref("");
-
-function youtubePlaylistUrl(playlistId: string): string {
-  return `https://www.youtube.com/playlist?list=${playlistId}`;
-}
 
 async function saveNewMapping() {
   const success = await playlistsStore.savePlaylistMapping(newMappingLabel.value, newMappingPlaylistUrl.value);

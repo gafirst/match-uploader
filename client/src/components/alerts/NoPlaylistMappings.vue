@@ -11,7 +11,8 @@
       <strong>No playlist mappings defined.</strong> Define playlist mappings in
       <RouterLink to="/settings">
         Settings
-      </RouterLink> if you want your videos added to YouTube playlists after being
+      </RouterLink>
+      if you want your videos added to YouTube playlists after being
       uploaded and to use the Match Upload Status report.
     </template>
   </VAlert>

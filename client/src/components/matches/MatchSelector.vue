@@ -36,6 +36,7 @@
         item-title="verboseName"
         item-value="key"
         :disabled="matchStore.uploadInProgress || !!matchListStore.error"
+        autocomplete="off"
         @update:model-value="matchSelected"
       />
       <VBtn

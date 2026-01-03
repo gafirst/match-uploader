@@ -16,6 +16,7 @@
     item-title="verboseName"
     item-value="key"
     :disabled="!!matchListStore.error || disabled"
+    autocomplete="off"
     @update:model-value="matchSelected"
   />
 </template>

@@ -5,23 +5,8 @@
       md="5"
     >
       <h1 class="mb-2">
-        Upload event media <VChip color="purple">
-          Beta
-        </VChip>
+        Upload event media
       </h1>
-      <VAlert
-        color="purple"
-        variant="tonal"
-        class="mb-4"
-        density="compact"
-        icon="mdi-bug-outline"
-      >
-        Report bugs and send feedback
-        <a
-          target="_blank"
-          href="https://github.com/gafirst/match-uploader/issues/new/choose"
-        >on GitHub</a>.
-      </VAlert>
       <VAlert
         v-if="!!eventMediaStore.error"
         variant="tonal"
@@ -31,8 +16,12 @@
         {{ eventMediaStore.error }}
       </VAlert>
 
-      <p class="mb-2">
-        Current event code: {{ settingsStore.settings?.eventTbaCode ?? "Loading..." }}
+      <p>
+        <strong>Current event code:</strong> {{ settingsStore.settings?.eventTbaCode ?? "Loading..." }}
+      </p>
+
+      <p class="mb-4">
+        <strong>Current event name:</strong> {{ settingsStore.settings?.eventName ?? "Loading..." }}
       </p>
 
       <VAlert
@@ -55,11 +44,13 @@
         rounded
         variant="outlined"
         class="mb-4"
+        autocomplete="off"
         :disabled="jobQueueInProgress"
       />
 
       <VAutocomplete
         v-model="eventMediaStore.selectedVideoFilePath"
+        autocomplete="off"
         variant="outlined"
         rounded
         label="Video file"
@@ -80,6 +71,55 @@
       </VBtn>
 
       <h3 class="mb-2">
+        Playlists
+      </h3>
+
+      <VSwitch
+        v-model="eventMediaStore.forceAddToAllPlaylists"
+        color="primary"
+        label="Upload video to all playlists"
+        :disabled="jobQueueInProgress"
+        inset
+        density="compact"
+      />
+
+      <NoPlaylistMappings
+        v-if="!settingsStore.isFirstLoad && playlistStore.playlists && !playlistStore.playlists.length"
+        class="mb-4"
+        :rounded="4"
+      />
+      <VAlert
+        v-else-if="eventMediaStore.forceAddToAllPlaylists"
+        density="compact"
+        class="mb-4"
+      >
+        This video will be added to <strong>all</strong> defined playlist mappings:
+        <ul class="ml-4">
+          <li
+            v-for="playlist in playlistStore.playlists"
+            :key="playlist.playlist_id"
+          >
+            <a
+              :href="youtubePlaylistUrl(playlist.playlist_id)"
+              target="_blank"
+            >{{
+              playlist.name ?? "Unknown playlist"
+            }}</a>
+          </li>
+        </ul>
+      </VAlert>
+      <VAlert
+        v-else
+        density="compact"
+        class="mb-4"
+      >
+        This video may still be added to a playlist via the normal playlist mapping rules.
+        See <RouterLink to="/settings">
+          Settings
+        </RouterLink> to change this.
+      </VAlert>
+
+      <h3 class="mb-4">
         Description
       </h3>
       <VideoDescription
@@ -204,10 +244,13 @@ import LoadingSpinner from "@/components/util/LoadingSpinner.vue";
 import PrivateUploads from "@/components/alerts/PrivateUploads.vue";
 import SandboxModeAlert from "@/components/alerts/SandboxModeAlert.vue";
 import VideoDescription from "@/components/video/VideoDescription.vue";
+import { youtubePlaylistUrl } from "@/util/playlists";
+import NoPlaylistMappings from "@/components/alerts/NoPlaylistMappings.vue";
 
 const eventMediaStore = useEventMediaStore();
 eventMediaStore.getVideoFiles();
 const playlistStore = usePlaylistsStore();
+playlistStore.getPlaylists();
 const workerStore = useWorkerStore();
 workerStore.loadJobs();
 const settingsStore = useSettingsStore();
@@ -236,6 +279,10 @@ function isVideoMissingPlaylistMapping(video: VideoInfo) {
 }
 
 const disableUploadButton = computed(() => {
+  if (eventMediaStore.selectedVideoFile?.workerJobId) {
+    return workerStore.jobHasStatus(eventMediaStore.selectedVideoFile.workerJobId, WorkerJobStatus.COMPLETED);
+  }
+
   if (eventMediaStore.videoFilesLoading
     || eventMediaStore.descriptionLoading
     || eventMediaStore.videoToUploadLoading
@@ -243,10 +290,6 @@ const disableUploadButton = computed(() => {
     || eventMediaStore.selectedVideoFile?.isRequestingJob
     || eventMediaStore.selectedVideoFile?.isUploaded) {
     return true;
-  }
-
-  if (eventMediaStore.selectedVideoFile?.workerJobId) {
-    return workerStore.jobHasStatus(eventMediaStore.selectedVideoFile.workerJobId, WorkerJobStatus.COMPLETED);
   }
 
   return false;
@@ -260,7 +303,7 @@ const uploadInProgress = computed(() => {
   if (eventMediaStore.selectedVideoFile?.workerJobId) {
     return !workerStore.jobHasStatus(
       eventMediaStore.selectedVideoFile.workerJobId,
-      [WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED],
+      [WorkerJobStatus.COMPLETED, WorkerJobStatus.FAILED, WorkerJobStatus.CANCELLED],
     );
   }
 

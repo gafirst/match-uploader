@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed} from "vue";
+import { computed } from "vue";
 import {useWorkerStore} from "@/stores/worker";
 import { useAutoRenameStore } from "@/stores/autoRename";
 import { AutoRenameAssociationStatus } from "@/types/autoRename/AutoRenameAssociationStatus";

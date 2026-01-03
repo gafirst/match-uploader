@@ -27,6 +27,7 @@ export interface UploadVideoTaskPayload {
   matchKey: string;
   playoffsType: string;
   eventKey: string;
+  forceAddToAllPlaylists: boolean;
 }
 
 function assertIsUploadVideoTaskPayload(payload: unknown): asserts payload is UploadVideoTaskPayload {
@@ -44,7 +45,8 @@ function assertIsUploadVideoTaskPayload(payload: unknown): asserts payload is Up
         !(payload as unknown as UploadVideoTaskPayload).playoffsType
       )) ||
     ((payload as UploadVideoTaskPayload).videoType === VideoType.EventMedia &&
-      !(payload as unknown as UploadVideoTaskPayload).eventKey)
+      !(payload as unknown as UploadVideoTaskPayload).eventKey) ||
+    typeof (payload as unknown as UploadVideoTaskPayload).forceAddToAllPlaylists === "undefined"
   ) {
     throw new Error(`Invalid payload (missing required prop): ${JSON.stringify(payload)}`);
   }
@@ -166,6 +168,7 @@ export async function uploadVideo(payload: unknown, {
         payload.label,
         matchKeyObject,
         payload.eventKey,
+        payload.forceAddToAllPlaylists,
       );
 
     try {

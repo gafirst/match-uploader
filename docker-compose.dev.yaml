@@ -4,20 +4,20 @@ services:
     extends:
       file: docker-compose.yaml
       service: web
-    image: !reset null
+    image: match-uploader-server-dev
     build:
       context: .
       dockerfile: Dockerfile
       target: prod
+      args:
+        RELEASE_VERSION: dev
+    pull_policy: build
   worker:
     extends:
       file: docker-compose.yaml
       service: worker
-    image: !reset null
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: prod
+    image: match-uploader-server-dev
+    pull_policy: never
   db:
     extends:
       file: docker-compose.yaml

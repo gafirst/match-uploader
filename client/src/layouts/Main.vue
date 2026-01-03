@@ -1,7 +1,7 @@
 <template>
   <VApp>
     <VAppBar color="primary">
-      <VAppBarTitle>Match Uploader</VAppBarTitle>
+      <VAppBarTitle>Match Uploader <AppVersion /></VAppBarTitle>
       <VSpacer />
       <VChip class="mr-4">
         Worker
@@ -31,6 +31,7 @@ import NavDrawer from "@/components/nav/NavDrawer.vue";
 import GlobalAlerts from "@/components/alerts/GlobalAlerts.vue";
 import {useWorkerStore} from "@/stores/worker";
 import {computed} from "vue";
+import AppVersion from "@/components/util/AppVersion.vue";
 
 const workerStore = useWorkerStore();
 

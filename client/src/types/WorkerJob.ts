@@ -16,6 +16,7 @@ export enum WorkerJobStatus {
   COMPLETED = "COMPLETED",
   FAILED = "FAILED",
   FAILED_RETRYABLE = "FAILED_RETRYABLE",
+  CANCELLED = "CANCELLED",
 }
 
 /**
@@ -30,6 +31,7 @@ export function workerJobStatusAsNumber(status: WorkerJobStatus) {
     [WorkerJobStatus.PENDING]: 2,
     [WorkerJobStatus.FAILED]: 3,
     [WorkerJobStatus.COMPLETED]: 4,
+    [WorkerJobStatus.CANCELLED]: 5,
   };
 
   return outputMap[status];
@@ -46,6 +48,7 @@ export function workerJobStatusToUiString(status: WorkerJobStatus) {
     [WorkerJobStatus.COMPLETED]: "completed",
     [WorkerJobStatus.FAILED]: "failed",
     [WorkerJobStatus.FAILED_RETRYABLE]: "failed (retryable)",
+    [WorkerJobStatus.CANCELLED]: "cancelled",
   };
 
   return outputMap[status];
