@@ -8,6 +8,7 @@ import { type Socket, io } from "socket.io-client";
 import EnvVars from "@src/constants/EnvVars";
 import { PrismaClient } from "@prisma/client";
 import { autoRename } from "@src/tasks/autoRename";
+import { backupDb } from "@src/tasks/backupDb";
 import { renameFile } from "@src/tasks/renameFile";
 import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
 
@@ -94,6 +95,7 @@ async function main(): Promise<void> {
         pollInterval: 1000,
         taskList: {
             autoRename,
+            backupDb,
             renameFile,
             uploadVideo,
         },

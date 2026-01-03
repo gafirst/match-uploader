@@ -8,7 +8,13 @@ ENV VITE_RELEASE_VERSION=${RELEASE_VERSION}
 ENV RELEASE_VERSION=${RELEASE_VERSION}
 
 RUN apt-get update -y &&  \
-    apt-get install -y curl openssl &&  \
+    apt-get install -y ca-certificates curl openssl &&  \
+    install -d /usr/share/postgresql-common/pgdg && \
+    curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc && \
+    . /etc/os-release && \
+    sh -c "echo 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $VERSION_CODENAME-pgdg main' > /etc/apt/sources.list.d/pgdg.list" && \
+    apt-get update -y && \
+    apt-get install -y postgresql-client-16 && \
     mkdir -p /home/node/app/client/node_modules && \
     mkdir -p /home/node/app/server/node_modules && \
     chown -R node:node /home/node/app

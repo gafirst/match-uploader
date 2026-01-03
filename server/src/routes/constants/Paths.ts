@@ -57,6 +57,7 @@ const Paths = {
     Debug: {
       Base: "/debug",
       AutoRename: "/autoRename",
+      BackupDb: "/backupDb",
     },
   },
   AutoRename: {
