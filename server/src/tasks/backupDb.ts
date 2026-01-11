@@ -2,9 +2,7 @@ import type { JobHelpers } from "graphile-worker";
 import EnvVars from "@src/constants/EnvVars";
 import { parse } from "pg-connection-string";
 import { DateTime } from "luxon";
-import { FormatEnum } from "pg-dump-restore";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pgDumpRestore = require("pg-dump-restore");
+import { pgDump, FormatEnum } from "pg-dump-restore";
 
 export async function backupDb(payload: unknown, {
   logger,
@@ -13,11 +11,16 @@ export async function backupDb(payload: unknown, {
     throw new Error("DB connection string is not defined");
   }
 
-  const config = parse(EnvVars.db.connectionString)
+  const config = parse(EnvVars.db.connectionString);
 
-  const { stdout, stderr } = await pgDumpRestore.pgDump(
+  if (!config.host || !config.port || !config.database || !config.user || !config.password) {
+    throw new Error("DB connection string is missing required fields");
+  }
+
+
+  const { stdout, stderr } = await pgDump(
     {
-      port: config.port,
+      port: parseInt(config.port, 10),
       host: config.host,
       database: config.database,
       username: config.user,
