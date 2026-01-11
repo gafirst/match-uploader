@@ -17,6 +17,7 @@ import {
 import { videoDuration } from "@numairawan/video-duration";
 import { Match } from "@src/models/Match";
 import fs from "fs-extra";
+import { fileExists } from "@src/util/file";
 
 export interface AutoRenameCronPayload {
   _cron: CronPayload;
@@ -171,6 +172,11 @@ export async function autoRename(payload: unknown, {
     const videoLabel = file.split("/")[0];
     const videoFile = file.split("/")[1];
 
+    if (!videoFile) {
+      logger.info(`Skipping ${file} because it is located in the top-level of the videos directory`);
+      continue;
+    }
+
     const existingAssoc = await prisma.autoRenameAssociation.findUnique({
       where: {
         id: {
@@ -258,7 +264,7 @@ export async function autoRename(payload: unknown, {
   const matches = await getMatchList();
 
   for (const association of toProcess) {
-    if (!(await fs.exists(`${videoSearchDirectory}/${association.filePath}`))) {
+    if (!(await fileExists(`${videoSearchDirectory}/${association.filePath}`))) {
       await prisma.autoRenameAssociation.update({
         where: {
           id: {

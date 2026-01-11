@@ -121,3 +121,6 @@ eslint_report.json
 
 # Videos directory
 /server/videos/
+
+# /db_backup directory
+/db_backup/

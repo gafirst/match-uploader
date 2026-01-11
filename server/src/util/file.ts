@@ -1,4 +1,5 @@
 import { getSystemErrorName } from "util";
+import fsPromises from "fs/promises";
 
 interface IErrorObj {
   errno: number;
@@ -14,4 +15,13 @@ export function isFileDoesNotExistError(error: unknown): boolean {
   }
 
   return false;
+}
+
+export async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    const stats = await fsPromises.stat(filePath);
+    return stats.isFile();
+  } catch (e: unknown) { // eslint-disable-line @typescript-eslint/no-unused-vars
+    return false;
+  }
 }
