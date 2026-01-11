@@ -11,6 +11,7 @@ import {
 } from "@src/tasks/types/events";
 import { type Socket } from "socket.io";
 import { isPrismaClientKnownRequestError } from "@src/util/prisma";
+import { queueJob } from "@src/util/queueJob";
 
 export async function cancelJob(jobId: string, reason: string): Promise<void> {
   const [graphileResult, workerJob] = await Promise.all([
@@ -172,4 +173,23 @@ export async function processWorkerEvent(
   } catch (e) {
     logger.err(`Error handling ${event} event: ${e}`);
   }
+}
+
+/**
+ * Trigger a job to run a database dump.
+ */
+export async function triggerBackupDbJob() {
+  return await queueJob(
+    prisma,
+    graphileWorkerUtils.addJob,
+    io,
+    "Manual trigger",
+    "backupDb",
+    {
+    },
+    {
+      maxAttempts: 1,
+      jobKey: "database-dump-manual-trigger",
+    },
+  );
 }

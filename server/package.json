@@ -54,6 +54,8 @@
     "mustache": "^4.2.0",
     "mv": "^2.1.1",
     "node-fetch": "2",
+    "pg-connection-string": "^2.9.1",
+    "pg-dump-restore": "^1.0.15",
     "prisma": "^6.2.1",
     "sanitize-filename": "^1.6.3",
     "socket.io": "^4.8.1",

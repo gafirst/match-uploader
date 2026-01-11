@@ -21,7 +21,7 @@ import { Match } from "@src/models/Match";
 import fs from "fs-extra";
 import { cancelJob } from "@src/services/WorkerService";
 import { queueJob } from "@src/util/queueJob";
-import fsPromises from "fs/promises";
+import { fileExists } from "@src/util/file";
 
 export async function updateAssociationData(
   videoLabel: string, filePath: string, matchKey: string | null = null,
@@ -194,15 +194,6 @@ export async function markAssociationIgnored(videoLabel: string, filePath: strin
     event: AUTO_RENAME_ASSOCIATION_UPDATE,
     association,
   });
-}
-
-async function fileExists(filePath: string): Promise<boolean> {
-  try {
-    const stats = await fsPromises.stat(filePath);
-    return stats.isFile();
-  } catch (e: unknown) { // eslint-disable-line @typescript-eslint/no-unused-vars
-    return false;
-  }
 }
 
 export async function undoRename(association: AutoRenameAssociation): Promise<string | undefined> {
