@@ -21,6 +21,7 @@ import { EventUploadStatusByMatch } from "@src/models/UploadedVideo";
 import { type PrismaClient } from "@prisma/client";
 import { type WorkerPrismaClient } from "@src/worker";
 import { matchUploaderAttribution } from "@src/util/videoDescription";
+import { getExpectedVideoLabels } from "@src/models/YouTubePlaylists";
 
 export function generateMatchVideoTitle(match: Match, eventName: string, videoLabel: string | null = null): string {
   const matchTitleName = capitalizeFirstLetter(match.verboseMatchName);
@@ -140,7 +141,7 @@ export async function getMatch(matchKey: MatchKey): Promise<TbaMatchSimple> {
  * @param match The match object resulting from calling the TBA API using TheBlueAllianceReadRepo
  * @returns boolean True if the match has been scored, false otherwise.
  */
-function matchIsScored(match: TbaMatchSimple): boolean {
+export function matchIsScored(match: TbaMatchSimple): boolean {
   return (match.alliances.red.score ?? -1) >= 0 && (match.alliances.blue.score ?? -1) >= 0;
 }
 
@@ -246,7 +247,7 @@ export async function getMatchUploadStatuses(
   return await getEventUploadStatusByMatch(
     prisma,
     eventTbaCode,
-    new Set(Object.keys(playlists)),
+    getExpectedVideoLabels(playlists),
     playoffsType as PlayoffsType,
     await getMatchList(),
   );

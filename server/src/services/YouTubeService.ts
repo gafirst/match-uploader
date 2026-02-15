@@ -8,16 +8,18 @@ import { type YouTubeChannelList } from "@src/models/YouTubeChannel";
 import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
 import MatchKey from "@src/models/MatchKey";
 import { UPLOAD_VIDEO } from "@src/tasks/types/tasks";
-import { type WorkerJob } from "@prisma/client";
+import type { PrismaClient, WorkerJob } from "@prisma/client";
 import { getYouTubeApiClient } from "@src/repos/YouTubeRepo";
-import { graphileWorkerUtils, prisma } from "@src/server";
 import { queueJob } from "@src/util/queueJob";
-import { io } from "@src/index";
 import { VideoType } from "@src/models/VideoType";
 import { PlayoffsType } from "@src/models/PlayoffsType";
 import { Match } from "@src/models/Match";
 import { generateMatchVideoTitle } from "@src/services/MatchesService";
 import Typo from "typo-js";
+import type { WorkerPrismaClient } from "@src/worker";
+import type { AddJobFunction } from "graphile-worker";
+import type { Server as SocketIOServer } from "socket.io";
+import type { Socket } from "socket.io-client";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
   const port = EnvVars.port;
@@ -93,6 +95,9 @@ export async function getAuthenticatedYouTubeChannels(): Promise<YouTubeChannelL
  * @param eventKey
  * @param label
  * @param forceAddToAllPlaylists
+ * @param prisma
+ * @param addJob
+ * @param io
  */
 export async function queueYouTubeVideoUpload(
   videoType: VideoType,
@@ -104,8 +109,11 @@ export async function queueYouTubeVideoUpload(
   eventKey: string | null,
   label: string,
   forceAddToAllPlaylists: boolean,
+  prisma: PrismaClient | WorkerPrismaClient,
+  addJob: AddJobFunction,
+  io: SocketIOServer | Socket,
 ): Promise<WorkerJob> {
-  return await queueJob(prisma, graphileWorkerUtils.addJob, io, title, UPLOAD_VIDEO, {
+  return await queueJob(prisma, addJob, io, title, UPLOAD_VIDEO, {
     videoType,
     title,
     description,

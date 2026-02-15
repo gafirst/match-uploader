@@ -1,4 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
+import { autoUpload } from "@src/tasks/autoUpload";
+
 require("@src/instrument"); // This must be the first import
 import Sentry from "@sentry/node";
 import { uploadVideo } from "@src/tasks/uploadVideo";
@@ -95,6 +97,7 @@ async function main(): Promise<void> {
         pollInterval: 1000,
         taskList: {
             autoRename,
+            autoUpload,
             backupDb,
             renameFile,
             uploadVideo,

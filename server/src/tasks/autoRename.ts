@@ -156,7 +156,7 @@ export async function autoRename(payload: unknown, {
   } = await getSettings();
 
   if (!autoRenameEnabled && !payload.manualTrigger) {
-    logger.info("Auto-rename is disabled, skipping");
+    logger.info("Auto Rename is disabled, skipping");
     return;
   }
 

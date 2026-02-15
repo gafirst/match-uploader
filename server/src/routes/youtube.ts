@@ -23,6 +23,8 @@ import { type YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
 import MatchKey from "@src/models/MatchKey";
 import { type PlayoffsType } from "@src/models/PlayoffsType";
 import { VideoType } from "@src/models/VideoType";
+import { graphileWorkerUtils, prisma } from "@src/server";
+import { io } from "@src/index";
 
 export const youTubeRouter = Router();
 export const youTubeAuthRouter = Router();
@@ -218,6 +220,9 @@ async function uploadToYouTube(req: IReq, res: IRes): Promise<void> {
     eventTbaCode,
     label as string,
     forceAddToAllPlaylists as boolean,
+    prisma,
+    graphileWorkerUtils.addJob,
+    io,
   );
 
   res.json({

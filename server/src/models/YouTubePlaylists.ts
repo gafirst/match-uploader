@@ -6,3 +6,7 @@ export interface YouTubePlaylist {
     // The cached name of the playlist
     name: string | null;
 }
+
+export function getExpectedVideoLabels(playlists: YouTubePlaylists): Set<string> {
+    return new Set(Object.keys(playlists));
+}

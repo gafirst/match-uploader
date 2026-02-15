@@ -17,6 +17,7 @@ export interface ISettings {
     autoRenameFileRenameJobDelaySecs: string;
     autoRenameFileNamePatterns: string;
     spellCheckCustomDictionary: string;
+    autoUploadEnabled?: boolean;
 }
 
 export type SettingsKey = keyof ISettings;

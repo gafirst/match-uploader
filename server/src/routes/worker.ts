@@ -6,6 +6,7 @@ import { body, matchedData, param, validationResult } from "express-validator";
 import { JobStatus } from "@prisma/client";
 import { cancelJob, triggerBackupDbJob } from "@src/services/WorkerService";
 import { triggerAutoRenameJob } from "@src/services/AutoRenameService";
+import { triggerAutoUploadJob } from "@src/services/AutoUploadService";
 
 export const workerRouter = Router();
 export const workerJobsRouter = Router();
@@ -165,6 +166,15 @@ async function triggerAutoRename(req: IReq, res: IRes): Promise<IRes> {
     return res.json({
         success: true,
         workerJob: await triggerAutoRenameJob(),
+    });
+}
+
+workerDebugRouter.get(Paths.Worker.Debug.AutoUpload, triggerAutoUpload);
+
+async function triggerAutoUpload(req: IReq, res: IRes): Promise<IRes> {
+    return res.json({
+        success: true,
+        workerJob: await triggerAutoUploadJob(),
     });
 }
 
