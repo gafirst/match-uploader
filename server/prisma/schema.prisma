@@ -36,6 +36,9 @@ model WorkerJob {
   updatedAt DateTime @updatedAt
 
   UploadedVideo UploadedVideo[]
+
+  autoUploadEventId Int?
+  autoUploadEvent   AutoUploadEvent? @relation(fields: [autoUploadEventId], references: [id])
 }
 
 enum JobStatus {
@@ -125,6 +128,12 @@ model AutoUploadMetadata {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AutoUploadEvent {
+  id Int @id @default(autoincrement())
+
+  workerJobs WorkerJob[]
 }
 
 model UploadedVideo {

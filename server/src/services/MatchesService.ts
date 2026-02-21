@@ -136,6 +136,22 @@ export async function getMatch(matchKey: MatchKey): Promise<TbaMatchSimple> {
   return await getTbaMatch(matchKey);
 }
 
+export async function getNextMatch(matchKey: MatchKey): Promise<TbaMatchSimple | null> {
+  const firstMatchNextLevel = matchKey.firstMatchInNextCompLevel;
+
+  try {
+    return await getMatch(matchKey.nextMatchInSameCompLevel);
+  } catch {}
+
+  if (firstMatchNextLevel) {
+    try {
+      return await getMatch(firstMatchNextLevel);
+    } catch {}
+  }
+
+  return null;
+}
+
 /**
  * Determine if a match is scored. A match is scored if both alliances have a score greater than or equal to 0 set.
  * @param match The match object resulting from calling the TBA API using TheBlueAllianceReadRepo

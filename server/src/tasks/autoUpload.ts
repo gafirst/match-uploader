@@ -4,10 +4,19 @@ import { assertIsCronPayload, type CronPayload } from "@src/tasks/types/cronPayl
 import { prisma, workerIo } from "@src/worker";
 import MatchKey from "@src/models/MatchKey";
 import { PlayoffsType } from "@src/models/PlayoffsType";
-import { getLocalVideoFilesForMatch, getMatch, matchIsScored } from "@src/services/MatchesService";
+import {
+  generateMatchVideoDescription,
+  getLocalVideoFilesForMatch,
+  getMatch,
+  getNextMatch,
+  matchIsScored,
+} from "@src/services/MatchesService";
 import { getExpectedVideoLabels } from "@src/models/YouTubePlaylists";
 import { queueYouTubeVideoUpload } from "@src/services/YouTubeService";
 import { VideoType } from "@src/models/VideoType";
+import { YouTubeVideoPrivacy } from "@src/models/YouTubeVideoPrivacy";
+import { Match } from "@src/models/Match";
+import { WorkerJob } from "@prisma/client";
 
 export interface AutoUploadCronPayload {
   _cron: CronPayload;
@@ -32,8 +41,10 @@ export async function autoUpload(payload: unknown, {
 
   const {
     autoUploadEnabled,
+    eventName,
     eventTbaCode,
-    playoffsType
+    playoffsType,
+    youTubeVideoPrivacy,
   } = await getSettings();
 
   if (!autoUploadEnabled && !payload.manualTrigger) {
@@ -56,6 +67,10 @@ export async function autoUpload(payload: unknown, {
   }
 
   // FIXME: Check preconditions
+  if (playoffsType !== PlayoffsType.DoubleElimination) {
+    // FIXME: Disable Auto Upload and return error
+    throw new Error(`Unsupported playoffs type: ${playoffsType}`);
+  }
 
   const matchKey = MatchKey.fromString(metadata.currentMatchKey, playoffsType as PlayoffsType);
 
@@ -64,7 +79,6 @@ export async function autoUpload(payload: unknown, {
   const hasScore = matchIsScored(match);
   const videos =  await getLocalVideoFilesForMatch(matchKey, false);
 
-  const playlists = await getYouTubePlaylists();
   const expectedLabels = getExpectedVideoLabels(await getYouTubePlaylists());
   const actualLabels = new Set(videos.map(video => video.videoLabel?.toLowerCase() ?? "unlabeled"));
   const missingLabels = expectedLabels.difference(actualLabels);
@@ -73,28 +87,42 @@ export async function autoUpload(payload: unknown, {
     logger.info(`Missing labels: ${JSON.stringify(Array.from(missingLabels))}`);
   }
 
-  // FIXME: handle partially uploaded match
-
+  const triggeredJobs: WorkerJob[] = []
   if (hasScore && !missingLabels.size) {
-    await queueYouTubeVideoUpload(
-      videos[0].videoType,
-      videos[0].videoTitle,
-      "FIXME",
-      videos[0].path,
-      "private", // FIXME
-      matchKey,
-      eventTbaCode,
-      videos[0].videoLabel ?? "unlabeled",
-      false,
-      prisma,
-      addJob,
-      workerIo,
-    )
+    const description = await generateMatchVideoDescription(new Match(matchKey), eventName);
+
+    for (const video of videos) {
+      if (video.isUploaded) {
+        logger.info(`Video ${video.path} has already been uploaded, skipping`);
+        continue;
+      }
+
+      triggeredJobs.push(await queueYouTubeVideoUpload(
+        video.videoType,
+        video.videoTitle,
+        description,
+        video.path,
+        youTubeVideoPrivacy as YouTubeVideoPrivacy,
+        matchKey,
+        eventTbaCode,
+        video.videoLabel ?? "unlabeled",
+        false,
+        prisma,
+        addJob,
+        workerIo,
+      ));
+    }
   }
+
+  const nextMatch = await getNextMatch(matchKey);
+
+  // FIXME: Create AutoUploadEvent object and associate the videos' WorkerJobs with it (i.e., update the worker jobs)
 
   const result = {
     hasScore,
     missingLabels: Array.from(missingLabels),
+    nextMatch,
+    triggeredJobs,
   }
   logger.info(`${JSON.stringify(result)}`)
 }
