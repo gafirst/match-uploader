@@ -157,6 +157,18 @@ export async function processWorkerEvent(
         where: {
           jobId: data.jobId,
         },
+        include: {
+          parentJob: {
+            select: {
+              jobId: true,
+              childJobs: {
+                select: {
+                  jobId: true,
+                }
+              }
+            },
+          }
+        }
       });
     }
 

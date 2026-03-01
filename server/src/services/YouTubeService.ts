@@ -17,7 +17,7 @@ import { Match } from "@src/models/Match";
 import { generateMatchVideoTitle } from "@src/services/MatchesService";
 import Typo from "typo-js";
 import type { WorkerPrismaClient } from "@src/worker";
-import type { AddJobFunction } from "graphile-worker";
+import type { AddJobFunction, TaskSpec } from "graphile-worker";
 import type { Server as SocketIOServer } from "socket.io";
 import type { Socket } from "socket.io-client";
 
@@ -98,6 +98,7 @@ export async function getAuthenticatedYouTubeChannels(): Promise<YouTubeChannelL
  * @param prisma
  * @param addJob
  * @param io
+ * @param parentJobId
  */
 export async function queueYouTubeVideoUpload(
   videoType: VideoType,
@@ -112,8 +113,9 @@ export async function queueYouTubeVideoUpload(
   prisma: PrismaClient | WorkerPrismaClient,
   addJob: AddJobFunction,
   io: SocketIOServer | Socket,
+  parentJobId: string | null = null,
 ): Promise<WorkerJob> {
-  return await queueJob(prisma, addJob, io, title, UPLOAD_VIDEO, {
+  const payload = {
     videoType,
     title,
     description,
@@ -124,10 +126,23 @@ export async function queueYouTubeVideoUpload(
     playoffsType: matchKey?.playoffsType,
     eventKey,
     forceAddToAllPlaylists,
-  }, {
+    parentJobId,
+  };
+
+  const taskSpec: TaskSpec = {
     queueName: UPLOAD_VIDEO,
     maxAttempts: 2,
-  });
+  }
+
+  return await queueJob(prisma,
+    addJob,
+    io,
+    title,
+    UPLOAD_VIDEO,
+    payload,
+    taskSpec,
+    parentJobId,
+    );
 }
 
 export async function cachePlaylistNames(forceUpdate = false): Promise<boolean> {

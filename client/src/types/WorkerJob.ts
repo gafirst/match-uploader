@@ -68,6 +68,12 @@ export interface WorkerJob {
   linkedOnTheBlueAlliance: boolean | null;
   createdAt: string;
   updatedAt: string;
+  parentJobId: string | null;
+  parentJob: {
+    jobId: string;
+    childJobs: { jobId: string }[];
+  } | null;
+  childJobIds?: Set<string>;
 }
 
 export interface WorkerEvents<EventName extends WorkerEvent> {

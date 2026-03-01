@@ -17,6 +17,7 @@ import { type WorkerPrismaClient } from "@src/worker";
  * @param taskName
  * @param payload
  * @param taskSpec
+ * @param parentJobId
  */
 export async function queueJob(
   prisma: PrismaClient | WorkerPrismaClient,
@@ -25,7 +26,8 @@ export async function queueJob(
   jobSummary: string,
   taskName: WorkerTask,
   payload: object,
-  taskSpec: TaskSpec = {}): Promise<WorkerJob> {
+  taskSpec: TaskSpec = {},
+  parentJobId: string | null = null): Promise<WorkerJob> {
   const job = await addJob(taskName, payload, taskSpec);
   const upsertResult = await prisma.workerJob.upsert({
     where: {
@@ -39,6 +41,9 @@ export async function queueJob(
       title: jobSummary,
       attempts: 0,
       maxAttempts: taskSpec.maxAttempts ?? 25, // 25 is the Graphile default
+      parentJob: {
+        connect: parentJobId ? { jobId: parentJobId } : undefined,
+      }
     },
     update: {
       status: JobStatus.PENDING,
@@ -47,7 +52,21 @@ export async function queueJob(
       error: null,
       attempts: 0,
       maxAttempts: taskSpec.maxAttempts ?? 25, // 25 is the Graphile default
+      parentJob: {
+        connect: parentJobId ? { jobId: parentJobId } : undefined,
+      }
     },
+    include: {
+        parentJob: {
+          include: {
+            childJobs: {
+              select: {
+                jobId: true,
+              }
+            }
+          }
+        }
+    }
   });
 
   io.emit("worker", {

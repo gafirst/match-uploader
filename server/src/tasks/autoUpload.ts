@@ -35,6 +35,7 @@ function assertIsAutoRenameCronPayload(payload: unknown): asserts payload is Aut
 export async function autoUpload(payload: unknown, {
   logger,
   addJob,
+  job,
 }: JobHelpers): Promise<void> {
   logger.info(JSON.stringify(payload));
   assertIsAutoRenameCronPayload(payload);
@@ -97,6 +98,8 @@ export async function autoUpload(payload: unknown, {
         continue;
       }
 
+      logger.info(`JOB.ID: ${job.id}`)
+
       triggeredJobs.push(await queueYouTubeVideoUpload(
         video.videoType,
         video.videoTitle,
@@ -110,14 +113,14 @@ export async function autoUpload(payload: unknown, {
         prisma,
         addJob,
         workerIo,
+        job.id,
       ));
     }
   }
 
   const nextMatch = await getNextMatch(matchKey);
 
-  // FIXME: Create AutoUploadEvent object and associate the videos' WorkerJobs with it (i.e., update the worker jobs)
-
+  // FIXME: Changing event key should disable autoupload and autorename
   const result = {
     hasScore,
     missingLabels: Array.from(missingLabels),

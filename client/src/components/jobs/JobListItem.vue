@@ -84,8 +84,19 @@ const subtitle = computed(() => {
     return `${baseSubtitle} | ${props.job.error}`;
   }
 
+  // FIXME: Jank
+  let childJobStatuses = "";
+  if (props.job.childJobIds) {
+    props.job.childJobIds.forEach(id => {
+      const job = workerStore.jobs.get(id);
+      if (job) {
+        childJobStatuses += `${job.jobId}: ${job.status} `;
+      }
+    });
+  }
+
   if (props.job.task !== UPLOAD_VIDEO_TASK) {
-    return baseSubtitle;
+    return `${baseSubtitle} | ${childJobStatuses}`;
   }
 
   let postUploadStatus = "";
@@ -110,7 +121,7 @@ const subtitle = computed(() => {
     }
   }
 
-  return `${baseSubtitle}${postUploadStatus ? " | ": ""}${postUploadStatus}`;
+  return `${baseSubtitle}${postUploadStatus ? " | ": ""}${postUploadStatus} | ${childJobStatuses}`;
 });
 
 const icon = computed(() => {

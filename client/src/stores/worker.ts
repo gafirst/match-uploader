@@ -207,12 +207,43 @@ export const useWorkerStore = defineStore("worker", () => {
       return;
     }
 
+    // When a job has a parent job set, update the stored parent job with the new child job IDs
+    if (storedJob?.parentJobId) {
+      const children = storedJob.parentJob?.childJobs.map(job => job.jobId) ?? [];
+
+      if (children) {
+        updateJobChildren(storedJob.parentJobId, new Set(children))
+      }
+    }
+
+    if (storedJob?.childJobIds) {
+      workerJob.childJobIds = storedJob.childJobIds;
+    }
+
     addEvent(event, workerJob);
     jobs.value.set(workerJob.jobId, workerJob);
   }
 
   function addJob(workerJob: WorkerJob) {
     jobs.value.set(workerJob.jobId, workerJob);
+  }
+
+  function updateJobChildren(parentJobId: string, childJobIds: Set<string>) {
+    const parentJob = jobs.value.get(parentJobId);
+
+    if (!parentJob) {
+      console.warn(`Parent job ${parentJobId} is not stored on the client, cannot update relationship`);
+      return;
+    }
+
+    // For posterity, I tried to use Set.union here but for whatever reason, it throws errors in Chrome
+    // There is very little performance penalty to iterating and using .add here instead, so I just did that.
+    const parentChildJobIds = parentJob.childJobIds ?? new Set();
+    childJobIds.forEach(id => parentChildJobIds.add(id));
+
+    parentJob.childJobIds = parentChildJobIds;
+
+    jobs.value.set(parentJobId, parentJob);
   }
 
   /**
