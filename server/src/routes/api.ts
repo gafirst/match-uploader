@@ -8,10 +8,12 @@ import { workerRouter } from "@src/routes/worker";
 import { autoRenameRouter } from "@src/routes/autoRename";
 import { eventMediaRouter } from "@src/routes/eventMedia";
 import { eventsRouter } from "@src/routes/events";
+import { autoUploadRouter } from "@src/routes/autoUpload";
 
 const apiRouter = Router();
 
 apiRouter.use(Paths.AutoRename.Base, autoRenameRouter);
+apiRouter.use(Paths.AutoUpload.Base, autoUploadRouter);
 apiRouter.use(Paths.Matches.Base, matchesRouter);
 apiRouter.use(Paths.EventMedia.Base, eventMediaRouter);
 apiRouter.use(Paths.Settings.Base, settingsRouter);

@@ -8,21 +8,11 @@
       <VIcon
         icon="mdi-clock-fast"
         class="mr-2"
-      />Live mode <VChip>Beta</VChip>
+      />Live mode <VChip color="error" prepend-icon="mdi-close-box">Deprecated</VChip>
     </VCardTitle>
     <VCardText style="color: initial">
-      <VAlert
-        color="purple"
-        variant="tonal"
-        class="mb-4"
-        density="compact"
-        icon="mdi-bug-outline"
-      >
-        Report bugs and send feedback
-        <a
-          target="_blank"
-          href="https://github.com/gafirst/match-uploader/issues/new/choose"
-        >on GitHub</a>.
+      <VAlert variant="tonal" color="error" density="compact" class="mb-2" >
+        Live Mode will be fully replaced by Auto Upload (below) in a future release.
       </VAlert>
       <template v-if="!liveMode.isActive">
         <p class="mb-2">
@@ -224,6 +214,7 @@ import { liveModeRequirementToUiString } from "@/types/liveMode/LiveModeRequirem
 import TaskListItem from "@/components/util/TaskListItem.vue";
 import dayjs from "dayjs";
 import { LiveModeStatus } from "@/types/liveMode/LiveModeStatus";
+import BetaFeedback from "@/components/util/BetaFeedback.vue";
 
 const liveMode = useLiveModeStore();
 </script>

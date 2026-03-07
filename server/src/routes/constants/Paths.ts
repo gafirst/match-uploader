@@ -75,6 +75,10 @@ const Paths = {
     Base: "/events",
     Autocomplete: "/autocomplete",
   },
+  AutoUpload: {
+    Base: "/autoUpload",
+    Enable: "/enable",
+  }
 };
 
 export type TPaths = Immutable<typeof Paths>;

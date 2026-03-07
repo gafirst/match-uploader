@@ -84,6 +84,7 @@ export async function autoUpload(payload: unknown, {
   const actualLabels = new Set(videos.map(video => video.videoLabel?.toLowerCase() ?? "unlabeled"));
   const missingLabels = expectedLabels.difference(actualLabels);
 
+  // FIXME: Bulk mode?
   if (missingLabels) {
     logger.info(`Missing labels: ${JSON.stringify(Array.from(missingLabels))}`);
   }
@@ -119,6 +120,19 @@ export async function autoUpload(payload: unknown, {
   }
 
   const nextMatch = await getNextMatch(matchKey);
+
+  if (nextMatch) {
+    const nextMatchObj = new Match(MatchKey.fromString(nextMatch.key, playoffsType));
+    await prisma.autoUploadMetadata.update({
+      where: {
+        eventKey: eventTbaCode,
+      },
+      data: {
+        currentMatchKey: nextMatch.key,
+        currentMatchName: nextMatchObj.matchName,
+      },
+    })
+  }
 
   // FIXME: Changing event key should disable autoupload and autorename
   const result = {

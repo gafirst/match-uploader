@@ -20,6 +20,7 @@ export interface ISettings {
   autoRenameFileRenameJobDelaySecs: string;
   autoRenameFileNamePatterns: string;
   spellCheckCustomDictionary: string;
+  autoUploadEnabled: boolean;
   [key: string]: string | boolean,
 }
 

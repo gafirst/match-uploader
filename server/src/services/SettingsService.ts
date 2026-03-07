@@ -16,6 +16,7 @@ export async function getSettings(): Promise<ISettings> {
   );
 }
 
+// FIXME: Add some kind of settings migration to find any missing settings keys compared to the template file and set them
 export async function setSetting(key: SettingsKey, value: string): Promise<void> {
   const currentSettings = await getSettings();
 

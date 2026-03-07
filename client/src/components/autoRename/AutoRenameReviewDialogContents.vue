@@ -156,6 +156,7 @@
             <template #item.value="{ item }">
               <span v-if="item.key.toLowerCase() === 'match'">
                 <MatchAutocompleteDropdown
+                  class="mt-6"
                   v-if="isEditable"
                   v-model="associatedMatchKey"
                 />

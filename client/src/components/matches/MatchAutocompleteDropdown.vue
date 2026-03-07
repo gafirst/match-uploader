@@ -5,14 +5,13 @@
   -->
   <v-autocomplete
     :model-value="model"
-    class="mt-6"
     :items="matchListStore.matches"
     :loading="matchListStore.loading || loading"
     rounded
     auto-select-first
     placeholder="Select a match..."
     variant="outlined"
-    label="Match"
+    :label="label || 'Match'"
     item-title="verboseName"
     item-value="key"
     :disabled="!!matchListStore.error || disabled"
@@ -26,7 +25,8 @@ import { useMatchListStore } from "@/stores/matchList";
 
 defineProps<{
   loading?: boolean;
-  disabled?: boolean
+  disabled?: boolean;
+  label?: string;
 }>();
 
 const matchListStore = useMatchListStore();

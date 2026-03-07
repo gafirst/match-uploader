@@ -7,6 +7,7 @@
       <h1>Upload match</h1>
 
       <LiveMode />
+      <AutoUpload />
       <VAlert
         v-if="!!error"
         color="error"
@@ -108,6 +109,7 @@ import MatchMetadata from "@/components/matches/MatchMetadata.vue";
 import LiveMode from "@/components/liveMode/LiveMode.vue";
 import { UPLOAD_VIDEO_TASK } from "@/types/WorkerJob";
 import { VideoInfo } from "@/types/VideoInfo";
+import AutoUpload from "@/autoUpload/AutoUpload.vue";
 
 const error = ref("");
 
