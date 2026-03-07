@@ -16,7 +16,7 @@
       <MatchAutocompleteDropdown v-if="!autoUploadStore.isEnabled" class="mt-6" label="Starting match" v-model="selectedMatch" />
 
       <VAlert color="info" variant="tonal" density="compact"
-              v-if="autoUploadStore.isEnabled">
+              v-if="!autoUploadStore.isEnabled">
         Use Auto Upload automatically upload the next match's videos once all required information and videos are available.
       </VAlert>
 
