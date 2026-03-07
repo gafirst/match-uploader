@@ -11,6 +11,7 @@ import { autoRename } from "@src/tasks/autoRename";
 import { backupDb } from "@src/tasks/backupDb";
 import { renameFile } from "@src/tasks/renameFile";
 import { AUTO_RENAME_ASSOCIATION_UPDATE } from "@src/tasks/types/events";
+import { recordJobAttemptMetric } from "@src/util/workerMetrics";
 
 export const prisma = new PrismaClient().$extends({
     query: {
@@ -47,7 +48,8 @@ export type WorkerPrismaClient = typeof prisma;
  */
 function configureWorkerEvents(socketClient: Socket, runner: Runner): void {
     runner.events.on("job:start", ({ worker, job }) => {
-        socketClient.emit("worker:job:start", {
+        const eventName = "worker:job:start";
+        socketClient.emit(eventName, {
             workerId: worker.workerId,
             jobId: job.id,
             jobName: job.task_identifier,
@@ -55,10 +57,12 @@ function configureWorkerEvents(socketClient: Socket, runner: Runner): void {
             maxAttempts: job.max_attempts,
             payload: job.payload,
         });
+
+        recordJobAttemptMetric(eventName, worker, job);
     });
 
     runner.events.on("job:complete", ({ worker, job, error }) => {
-        logger.info("Job complete");
+        const eventName = "worker:job:complete";
 
         let stringifiedError: string | null = null;
 
@@ -69,7 +73,7 @@ function configureWorkerEvents(socketClient: Socket, runner: Runner): void {
             logger.warn(error);
         }
 
-        socketClient.emit(`worker:job:complete`, {
+        socketClient.emit(eventName, {
             workerId: worker.workerId,
             jobId: job.id,
             jobName: job.task_identifier,
@@ -79,6 +83,8 @@ function configureWorkerEvents(socketClient: Socket, runner: Runner): void {
             error: stringifiedError,
             success: !error,
         });
+
+        recordJobAttemptMetric(eventName, worker, job, stringifiedError);
     });
 }
 
