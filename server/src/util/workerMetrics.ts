@@ -3,9 +3,10 @@ import { Job, Worker } from "graphile-worker";
 
 function getPropIfPresent(obj: unknown, propName: string): unknown {
   try {
-    // @ts-ignore
-    return obj[propName]
-  } catch (e) {
+    // @ts-expect-error If obj is not actually an object or doesn't have the property, this will throw an error, but
+    // it's fine because this is in a try-catch
+    return obj[propName];
+  } catch {
     return null;
   }
 }
@@ -25,7 +26,7 @@ export function recordJobAttemptMetric(eventName: string, worker: Worker, job: J
     });
 
 
-    Sentry.metrics.count(eventName, 1)
+    Sentry.metrics.count(eventName, 1);
     Sentry.metrics.distribution(`${eventName}_time_since_creation_msecs`,
       Math.max(0, new Date().getTime() - job.created_at.getTime()),
       {
