@@ -27,6 +27,9 @@ export function recordJobAttemptMetric(eventName: string, worker: Worker, job: J
 
     Sentry.metrics.count(eventName, 1)
     Sentry.metrics.distribution(`${eventName}_time_since_creation_msecs`,
-      Math.max(0, new Date().getTime() - job.created_at.getTime()));
+      Math.max(0, new Date().getTime() - job.created_at.getTime()),
+      {
+        unit: "millisecond",
+      });
   });
 }
