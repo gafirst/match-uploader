@@ -8,6 +8,7 @@ if (EnvVars.sentry.enabled) {
   Sentry.init({
     dsn: EnvVars.sentry.dsn,
     release: EnvVars.version,
+    environment: EnvVars.nodeEnv,
     sendDefaultPii: false,
     integrations: [
       Sentry.prismaIntegration(),
