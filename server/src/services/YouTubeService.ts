@@ -20,7 +20,12 @@ import { generateMatchVideoTitle } from "@src/services/MatchesService";
 import Typo from "typo-js";
 
 export function getGoogleOAuth2RedirectUri(requestProtocol: string): string {
-  const port = EnvVars.port;
+  let port = EnvVars.port;
+
+  if (EnvVars.hostPort) {
+    port = EnvVars.hostPort;
+  }
+
   const includePort = port !== 80 && port !== 443;
   const portString = includePort ? `:${port}` : "";
   return `${requestProtocol}://${EnvVars.host}${portString}${FullPaths.YouTube.Auth.Callback}`;

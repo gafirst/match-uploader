@@ -20,6 +20,7 @@ export default {
     nodeEnv: process.env.NODE_ENV ?? "",
     version: process.env.RELEASE_VERSION,
     host: process.env.HOST,
+    hostPort: process.env.HOST_PORT ? Number.parseInt(process.env.HOST_PORT, 10) : undefined,
     port: Number.parseInt(process.env.PORT ?? "0", 10),
     spellCheck: {
       dictBasePath: (process.env.SPELLCHECK_DICT_BASE_PATH) ?? "./node_modules/typo-js/dictionaries",
