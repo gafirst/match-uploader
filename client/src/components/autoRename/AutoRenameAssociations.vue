@@ -14,9 +14,9 @@
     ]"
     multi-sort
     :sort-by="[
-      { key: 'status', order: 'desc' },
+      { key: 'videoTimestamp', order: 'desc' },
       { key: 'videoLabel', order: 'asc' },
-      { key: 'videoTimestamp', order: 'asc' },
+      { key: 'status', order: 'desc' },
     ]"
   >
     <!-- eslint-disable-next-line vue/valid-v-slot -->
