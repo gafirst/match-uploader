@@ -34,7 +34,7 @@ export const appPromise = makeWorkerUtils({
   graphileWorkerUtils = workerUtils;
 
   app.set('trust proxy', (ip: string) => {
-    console.log(`Received request from IP: ${ip}`);
+    logger.info(`Received request from IP: ${ip}`);
     return ip === '::1'; // FIXME
   })
 
