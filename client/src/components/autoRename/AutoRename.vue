@@ -126,8 +126,6 @@
           AutoRenameAssociationStatus.IGNORED,
         ]"
         :sort-by="[
-          { key: 'videoTimestamp', order: 'desc' },
-          { key: 'videoLabel', order: 'asc' },
           { key: 'videoFileName', order: 'asc'},
         ]"
       />
