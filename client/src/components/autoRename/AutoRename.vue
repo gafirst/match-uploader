@@ -102,6 +102,11 @@
           AutoRenameAssociationStatus.WEAK,
           AutoRenameAssociationStatus.FAILED,
         ]"
+        :sort-by="[
+          { key: 'status', order: 'desc' },
+          { key: 'videoTimestamp', order: 'asc' },
+          { key: 'videoLabel', order: 'asc' },
+        ]"
       />
       <h2>Recently associated</h2>
       <AutoRenameAssociations
@@ -119,6 +124,9 @@
       <AutoRenameAssociations
         :included-association-statuses="[
           AutoRenameAssociationStatus.IGNORED,
+        ]"
+        :sort-by="[
+          { key: 'videoFileName', order: 'asc'},
         ]"
       />
     </VCol>
