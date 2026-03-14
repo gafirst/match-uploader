@@ -1,14 +1,14 @@
 <template>
   <VAlert
-    v-if="!settingsStore.isFirstLoad && settingsStore.settings?.autoRenameEnabled"
+    v-if="!settingsStore.isFirstLoad && settingsStore.settings?.autoUploadEnabled"
     color="success"
     variant="tonal"
     density="comfortable"
     :rounded="props.rounded ?? 0"
-    icon="mdi-auto-mode"
+    icon="mdi-clock-fast"
   >
     <template #text>
-      <strong>Auto Rename is enabled.</strong> It will trigger periodically until disabled, even if you close this window.
+      <strong>Auto Upload is enabled.</strong> It will trigger periodically until disabled, even if you close this window.
     </template>
   </VAlert>
 </template>

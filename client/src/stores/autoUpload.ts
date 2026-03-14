@@ -5,8 +5,8 @@ import { useSettingsStore } from "@/stores/settings";
 export const useAutoUploadStore = defineStore("autoUpload", () => {
   const settingsStore = useSettingsStore();
 
-  const enableLoading = ref(false);
-  const enableError = ref<string | null>(null);
+  const changeStateLoading = ref(false);
+  const changeStateError = ref<string | null>(null);
   const unmetPrereqs = ref<string[] | null>(null);
 
   const isEnabled = computed(() => settingsStore.settings?.autoUploadEnabled);
@@ -17,7 +17,7 @@ export const useAutoUploadStore = defineStore("autoUpload", () => {
       return;
     }
 
-    enableLoading.value = true;
+    changeStateLoading.value = true;
 
     const response = await fetch("/api/v1/autoUpload/enable", {
       method: "POST",
@@ -28,8 +28,8 @@ export const useAutoUploadStore = defineStore("autoUpload", () => {
         startingMatchKey,
       }),
     }).catch(error => {
-      enableError.value = `Unable to enable Auto Upload: ${error}`;
-      enableLoading.value = false;
+      changeStateError.value = `Unable to enable Auto Upload: ${error}`;
+      changeStateLoading.value = false;
       return null;
     })
 
@@ -38,16 +38,16 @@ export const useAutoUploadStore = defineStore("autoUpload", () => {
     }
 
     if (!response.ok) {
-      enableError.value = "Unable to enable Auto Upload";
-      enableLoading.value = false;
+      changeStateError.value = "Unable to enable Auto Upload";
+      changeStateLoading.value = false;
       return;
     }
 
     const data = await response.json();
 
     if (!data.ok) {
-      enableError.value = "Unable to enable Auto Upload";
-      enableLoading.value = false;
+      changeStateError.value = "Unable to enable Auto Upload";
+      changeStateLoading.value = false;
     }
 
     if ("unmetPrereqs" in data && data.unmetPrereqs.length) {
@@ -57,13 +57,25 @@ export const useAutoUploadStore = defineStore("autoUpload", () => {
     }
 
     await settingsStore.getSettings(false);
-    enableLoading.value = false;
+    changeStateLoading.value = false;
+  }
+
+  async function disable() {
+    changeStateLoading.value = true;
+    const result = await settingsStore.saveSetting("autoUploadEnabled", false, "setting");
+
+    if (typeof result === "string") {
+      changeStateError.value = `Unable to disable Auto Upload: ${result}`;
+    }
+
+    changeStateLoading.value = false;
   }
 
   return {
+    disable,
     enable,
-    enableError,
-    enableLoading,
+    changeStateError,
+    changeStateLoading,
     isEnabled,
     unmetPrereqs,
   }

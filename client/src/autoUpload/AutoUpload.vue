@@ -21,8 +21,8 @@
       </VAlert>
 
       <VAlert color="error" variant="tonal" density="compact" class="mb-4"
-              v-if="!!autoUploadStore.enableError">
-        {{ autoUploadStore.enableError }}
+              v-if="!!autoUploadStore.changeStateError">
+        {{ autoUploadStore.changeStateError }}
       </VAlert>
 
       <VAlert color="error" variant="tonal" density="compact"
@@ -41,13 +41,61 @@
 
         Click Enable Auto Upload below to try again.
       </VAlert>
+
+      <p class="mt-2 mb-2"><strong>Next match:</strong> Qualification 2</p>
+
+      <strong>Recent runs</strong>
+      <VDataTable
+        no-data-text="No recent runs"
+        :headers="[
+          {
+            title: 'Timestamp',
+            value: 'timestamp'
+          },
+          {
+            title: 'Match',
+            value: 'match'
+          },
+          {
+            title: 'Result',
+            value: 'result'
+          },
+
+        ]"
+        hide-default-footer
+        :items="data"
+        multi-sort
+        :sort-by="[
+      { key: 'timestamp', order: 'desc' },
+    ]"
+      >
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template #item.timestamp="{ item }">
+          {{ item.timestamp }}
+        </template>
+
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template #item.result="{ item }">
+          <VIcon color="success">mdi-check-circle</VIcon>
+          <VIcon color="success">mdi-check-circle</VIcon>
+        </template>
+
+
+      </VDataTable>
       <VBtn
         class="mt-4"
-        :disabled="!selectedMatch || autoUploadStore.enableLoading"
-        :loading="autoUploadStore.enableLoading"
+        :disabled="!selectedMatch"
+        :loading="autoUploadStore.changeStateLoading"
         v-if="!autoUploadStore.isEnabled"
         @click="autoUploadStore.enable(selectedMatch)"
       >Enable Auto Upload</VBtn>
+      <VBtn
+        class="mt-4"
+        :loading="autoUploadStore.changeStateLoading"
+        @click="autoUploadStore.disable()"
+        v-else>
+        Disable Auto Upload
+      </VBtn>
     </VCardText>
   </VCard>
 </template>
@@ -63,6 +111,19 @@ import { useSettingsStore } from "@/stores/settings";
 const selectedMatch = ref<string | null>(null);
 
 const autoUploadStore = useAutoUploadStore();
+
+const data = ref([
+    {
+      timestamp: "2024-01-01 12:00:00",
+      match: "Qualification 2",
+      result: "Uploaded 2 videos", // FIXME
+    },
+    {
+      timestamp: "2024-01-01 12:05:00",
+      match: "Qualification 3",
+      status: "Pending"
+    }
+  ])
 </script>
 
 

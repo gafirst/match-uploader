@@ -7,6 +7,7 @@
     <FrcEventsWarning />
     <LiveModeActivated />
     <AutoRenameEnabled />
+    <AutoUploadEnabled />
   </div>
 </template>
 
@@ -18,4 +19,5 @@ import PrivateUploads from "@/components/alerts/PrivateUploads.vue";
 import FrcEventsWarning from "@/components/alerts/FrcEventsWarning.vue";
 import AutoRenameEnabled from "@/components/alerts/AutoRenameEnabled.vue";
 import LiveModeActivated from "@/components/alerts/LiveModeActivated.vue";
+import AutoUploadEnabled from "@/components/alerts/AutoUploadEnabled.vue";
 </script>
