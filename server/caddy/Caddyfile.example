@@ -1,0 +1,4 @@
+your.domain.here {
+  tls internal
+  reverse_proxy web:8080
+}

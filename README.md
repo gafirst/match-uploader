@@ -138,6 +138,52 @@ Examples of how to provide these volumes are in [`docker-compose.yaml`](docker-c
 The Postgres container requires a volume to persist the database in. The default Docker Compose setup is set up so
 that Docker will create this volume for you.
 
+#### Reverse proxy
+
+Match Uploader can be run behind a reverse proxy if desired. The easiest way is to use the default Docker Compose setup
+with the optional [Caddy](https://caddyserver.com/) reverse proxy container enabled.
+
+> [!NOTE]
+> Support for reverse proxies is provided on a best-effort basis and is not considered a core Match Uploader feature.
+
+In your [`server/env/production.env`](server/env/production.env.example) file (example linked), comment out the existing `HOST` variable, then
+uncomment the following lines:
+```
+HOST=example.com # The domain name used to access Match Uploader via the reverse proxy
+HOST_PORT=443 # The port used to access Match Uploader via the reverse proxy
+REVERSE_PROXY_TRUSTED_IPS=auto # The reverse proxy's IP address from the server's perspective. Leave set to `auto` when using the default Docker Compose setup to configure automatically. See https://expressjs.com/en/guide/behind-proxies.html for more details (this variable can be set to any string value Express will accept for this property).
+```
+
+Remember to undo these environment changes if you later decide to not use a reverse proxy!
+
+> [!TIP]
+> The easiest reverse proxy to use with Match Uploader is Caddy, though other options should also work. The rest of these
+> instructions will assume you are using Caddy.
+
+Next, create a file named `Caddyfile` in `server/caddy` ([example](server/caddy/Caddyfile.example)). You can customize
+this as needed, but if running Match Uploader and Caddy as Docker containers, you should only need to replace `your.domain.here`
+in the Caddy file with your desired domain name.
+
+> [!WARNING]
+> The example Caddy file will create a local SSL certificate that browsers will not trust. See Caddy's docs if you want
+> it to provision an actual SSL certificate.
+
+Next, when running Match Uploader, use the following Docker Compose command:
+```
+docker compose -f docker-compose.yaml -f docker-compose.proxy.yaml up
+```
+
+Next, update your Google Cloud client for YouTube authentication to have a new redirect URI:
+```
+https://$REVERSE_PROXY_HOST/api/v1/youtube/auth/callback
+```
+
+> [!WARNING]
+> If the `REVERSE_PROXY_TRUSTED_IPS` environment variable is set incorrectly, the YouTube OAuth2 redirect URI is likely
+> to incorrectly use HTTP instead of HTTPS.
+
+Finally, add a DNS record pointing from your desired domain name to the machine running Match Uploader.
+
 ### Worker
 
 Prior to v2.0, Match Uploader uploaded videos synchronously in an HTTP client. To add flexibility, v2.0 added a worker
