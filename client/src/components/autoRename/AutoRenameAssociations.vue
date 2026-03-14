@@ -13,11 +13,7 @@
       { title: 'Actions', key: 'actions'}
     ]"
     multi-sort
-    :sort-by="[
-      { key: 'videoTimestamp', order: 'desc' },
-      { key: 'videoLabel', order: 'asc' },
-      { key: 'status', order: 'desc' },
-    ]"
+    :sort-by="sortBy"
   >
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.status="{ item }">
@@ -116,6 +112,7 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { useWorkerStore } from "@/stores/worker";
 import { WorkerJobStatus } from "@/types/WorkerJob";
+import { SortItem } from "vuetify/lib/components/VDataTable/composables/sort";
 
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
@@ -123,8 +120,16 @@ dayjs.extend(localizedFormat);
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-defineProps<{
+const {
+  includedAssociationStatuses,
+  sortBy = [
+    { key: 'videoTimestamp', order: 'desc' },
+    { key: 'videoLabel', order: 'asc' },
+    { key: 'status', order: 'desc' },
+  ],
+} = defineProps<{
   includedAssociationStatuses: AutoRenameAssociationStatus[];
+  sortBy?: SortItem[];
 }>();
 
 const autoRenameStore = useAutoRenameStore();
