@@ -173,6 +173,15 @@ Next, when running Match Uploader, use the following Docker Compose command:
 docker compose -f docker-compose.yaml -f docker-compose.proxy.yaml up
 ```
 
+Next, update your Google Cloud client for YouTube authentication to have a new redirect URI:
+```
+https://$REVERSE_PROXY_HOST/api/v1/youtube/auth/callback
+```
+
+> [!WARNING]
+> If the `REVERSE_PROXY_TRUSTED_IPS` environment variable is set incorrectly, the YouTube OAuth2 redirect URI is likely
+> to incorrectly use HTTP instead of HTTPS.
+
 Finally, add a DNS record pointing from your desired domain name to the machine running Match Uploader.
 
 ### Worker
