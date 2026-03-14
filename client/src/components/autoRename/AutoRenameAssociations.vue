@@ -123,9 +123,9 @@ dayjs.extend(utc);
 const {
   includedAssociationStatuses,
   sortBy = [
-    { key: 'videoTimestamp', order: 'desc' },
-    { key: 'videoLabel', order: 'asc' },
-    { key: 'status', order: 'desc' },
+    { key: "videoTimestamp", order: "desc" },
+    { key: "videoLabel", order: "asc" },
+    { key: "status", order: "desc" },
   ],
 } = defineProps<{
   includedAssociationStatuses: AutoRenameAssociationStatus[];
