@@ -154,6 +154,8 @@ HOST_PORT=443 # The port used to access Match Uploader via the reverse proxy
 REVERSE_PROXY_TRUSTED_IPS=auto # The reverse proxy's IP address from the server's perspective. Leave set to `auto` when using the default Docker Compose setup to configure automatically. See https://expressjs.com/en/guide/behind-proxies.html for more details (this variable can be set to any string value Express will accept for this property).
 ```
 
+Remember to undo these environment changes if you later decide to not use a reverse proxy!
+
 > [!TIP]
 > The easiest reverse proxy to use with Match Uploader is Caddy, though other options should also work. The rest of these
 > instructions will assume you are using Caddy.
