@@ -33,10 +33,9 @@ export const appPromise = makeWorkerUtils({
 }).then((workerUtils) => {
   graphileWorkerUtils = workerUtils;
 
-  app.set('trust proxy', (ip: string) => {
-    logger.info(`Received request from IP: ${ip}`);
-    return ip === '::1'; // FIXME
-  })
+  if (EnvVars.reverseProxy.trustedIps) {
+    app.set('trust proxy', EnvVars.reverseProxy.trustedIps);
+  }
 
   // Basic middleware
   app.use(express.json());
