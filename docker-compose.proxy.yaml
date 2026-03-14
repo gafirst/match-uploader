@@ -3,7 +3,7 @@ services:
   reverse-proxy:
     image: caddy:2-alpine
     restart: unless-stopped
-    cap_add: # Comment out if running on windows
+    cap_add: # Comment out if running on Windows
       - NET_ADMIN
     ports:
       - "80:80"
