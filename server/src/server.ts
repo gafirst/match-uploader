@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 require("@src/instrument"); // This must be the first import
-
+import * as dns from "node:dns";
 import morgan from "morgan";
 import path from "path";
 import helmet from "helmet";
@@ -33,8 +33,18 @@ export const appPromise = makeWorkerUtils({
 }).then((workerUtils) => {
   graphileWorkerUtils = workerUtils;
 
-  if (EnvVars.reverseProxy.trustedIps) {
-    app.set('trust proxy', EnvVars.reverseProxy.trustedIps);
+  if (EnvVars.reverseProxy.trustedIps === "auto") {
+    logger.info("Reverse proxy trusted IPs set to auto, getting IP for reverse-proxy container...");
+    dns.lookup("reverse-proxy", (err, address) => {
+      if (err) {
+        logger.err(err, true);
+      } else {
+        logger.info(`Reverse proxy IP address: ${address}`);
+        app.set("trust proxy", address);
+      }
+    });
+  } else if (EnvVars.reverseProxy.trustedIps) {
+    app.set("trust proxy", EnvVars.reverseProxy.trustedIps);
   }
 
   // Basic middleware

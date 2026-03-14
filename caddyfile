@@ -1,4 +1,0 @@
-gafirst.int {
-  tls internal
-  reverse_proxy localhost:3000
-}
